@@ -23,13 +23,23 @@
         <span class="menu-icon" aria-hidden="true"></span>
       </button>
       <div class="links">
-        <a href="../index.html#products">Shop</a>
+        <div class="dropdown">
+          <button class="drop-btn" aria-haspopup="true" aria-expanded="false">
+            Collections
+            <svg class="caret" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
+          </button>
+          <div class="drop-menu" role="menu">
+            <a href="../collections/sss.html" role="menuitem">SSS</a>
+            <a href="../collections/whispering-a.html" role="menuitem">Whispering A</a>
+            <a href="../collections/the-core.html" role="menuitem">The Core</a>
+          </div>
+        </div>
         <span class="sep">·</span>
-        <a href="../index.html#recommended">Recommended</a>
-        <span class="sep">·</span>
-        <a href="../index.html#onbody">On‑Body Gallery</a>
+        <a href="../index.html#products">All Products</a>
         <span class="sep">·</span>
         <a href="../index.html#contact">Contact</a>
+        <span class="sep">·</span>
+        <a href="../index.html#about">About</a>
       </div>
     </nav>
   </div>
@@ -37,22 +47,30 @@
 
 <main class="product-page" aria-label="Product page">
   <div class="wrap">
-    <!-- Back to catalog is INSIDE the content and sticky, so it sits above the slideshow -->
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <a href="../index.html#collections">Collections</a>
+      <a href="../collections/sss.html">SSS</a>
+      <span aria-current="page">SSS pendant — gold</span>
+    </nav>
+
     <a class="page-back" href="../index.html#products" aria-label="Back to catalog">Back to catalog</a>
 
     <div class="product">
-      <div
-              class="product-gallery"
-              data-images="../img/products/sss-gold-1.jpg,../img/products/sss-gold-2.jpg,../img/products/sss-gold-3.jpg"
-              data-variant-metal-silver="../img/products/sss-silver-1.jpg,../img/products/sss-silver-2.jpg"
-              data-variant-metal-black-rhodium="../img/products/sss-black-1.jpg,../img/products/sss-black-2.jpg"
-      >
-        <div class="slides"></div>
-        <button class="slider-btn slider-prev" aria-label="Previous">&#10094;</button>
-        <button class="slider-btn slider-next" aria-label="Next">&#10095;</button>
-        <div class="thumbs"></div>
+      <!-- LEFT: Gallery -->
+      <div>
+        <div class="product-gallery" data-images="../img/products/sss-gold-1.jpg,../img/products/sss-gold-2.jpg,../img/products/sss-gold-3.jpg">
+          <div class="slides"></div>
+          <button class="slider-btn slider-prev" aria-label="Previous">‹</button>
+          <button class="slider-btn slider-next" aria-label="Next">›</button>
+          <div class="thumbs"></div>
+        </div>
+        <!-- Thumbnail strip below gallery -->
+        <div class="thumb-strip">
+          <div class="thumb-row"></div>
+        </div>
       </div>
 
+      <!-- RIGHT: Checkout -->
       <aside class="checkout">
         <div class="title">SSS pendant — gold</div>
         <div class="price">$125</div>
@@ -61,92 +79,134 @@
           <div>
             <label for="metal">Metal</label>
             <select id="metal" name="metal">
-              <option>Gold</option>
-              <option>Silver</option>
-              <option>Black Rhodium</option>
+              <option>14K Gold</option>
+              <option>18K Gold</option>
+              <option>E-Silver</option>
             </select>
           </div>
 
           <div>
-            <label for="size">Chain Length</label>
+            <label for="stone">Stone</label>
+            <select id="stone" name="stone">
+              <option>OG (original design)</option>
+              <option>Diamond</option>
+              <option>Other gemstone</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="size">Size</label>
             <select id="size" name="size">
-              <option>40 cm</option>
-              <option>45 cm</option>
-              <option>50 cm</option>
-              <option>Custom</option>
+              <option>0</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>5</option>
+              <option>6</option>
+              <option>Custom size</option>
             </select>
           </div>
 
           <div>
             <label for="qty">Quantity</label>
             <select id="qty" name="qty">
-              <option>1</option><option>2</option><option>3</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
             </select>
           </div>
 
           <div class="actions">
+            <button type="button" class="btn add-to-cart">Add to cart</button>
             <button type="submit" class="btn primary">Order via WhatsApp</button>
-            <a class="btn ghost" href="../index.html#contact">Ask a question</a>
+
+            <a class="btn" href="https://www.instagram.com/edelhartvx/" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                <path d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm5 5a5 5 0 100 10 5 5 0 000-10zm6-1a1 1 0 100 2 1 1 0 000-2zm-6 3a3 3 0 110 6 3 3 0 010-6z"/>
+              </svg>
+              Order via Instagram
+            </a>
+
+            <a class="btn" href="https://www.facebook.com/people/Edelhart/61578850709155/" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                <path d="M22 12a10 10 0 10-11.6 9.9v-7h-2.3V12h2.3V9.7c0-2.3 1.4-3.6 3.5-3.6 1 0 2 .2 2 .2v2.2H15c-1.1 0-1.5.7-1.5 1.4V12h2.6l-.4 2.9h-2.2v7A10 10 0 0022 12z"/>
+              </svg>
+              Order via Facebook
+            </a>
           </div>
         </form>
 
-        <p class="meta">Should you desire a rendition of this design in alternative materials or hues, or seek a bespoke creation tailored exclusively for you, crafted with the finest metals and adorned with exquisite stones such as silver or 10K gold, 14K gold, 18K gold, diamonds, precious and semi-precious gems, please do not hesitate to contact us directly.</p>
+        <p class="meta">Should you desire a rendition of this design in alternative materials or hues, or seek a bespoke creation tailored exclusively for you, crafted with the finest metals and adorned with exquisite stones, please contact us directly.</p>
       </aside>
     </div>
 
-    <!-- On‑Body Gallery -->
-    <section aria-label="On‑Body Gallery" style="margin-top: 28px;">
-      <div class="section-head">
-        <h2>On‑Body Gallery</h2>
-        <p>See how it sits on body and pairs with other pieces.</p>
+    <!-- CRITICAL: Wrapper prevents overlap -->
+    <div class="product-page-content">
+      <!-- Product Description -->
+      <div class="product-description">
+        <h3>About This Piece</h3>
+        <p>
+          The SSS pendant embodies our signature aesthetic — refined minimalism with a statement edge.
+          Crafted in 14K or 18K gold, this piece features intricate detailing that catches light from
+          every angle. Each pendant is hand-finished to ensure exceptional quality and lasting beauty.
+          Pair with your preferred chain length for a look that's uniquely yours.
+        </p>
       </div>
 
-      <div class="featured-strip">
-        <div class="featured-track" data-auto="true">
-          <div class="feat-slide"><img src="../img/models/1.jpeg" alt="Model wearing SSS pendant (1)" decoding="async"></div>
-          <div class="feat-slide"><img src="../img/models/2.jpeg" alt="Model wearing SSS pendant (2)" decoding="async"></div>
-          <div class="feat-slide"><img src="../img/models/3.jpeg" alt="Model wearing SSS pendant (3)" decoding="async"></div>
-          <div class="feat-slide"><img src="../img/models/4.jpeg" alt="Model wearing SSS pendant (4)" decoding="async"></div>
+      <!-- On-Body Gallery -->
+      <section aria-label="On‑Body Gallery">
+        <div class="section-head">
+          <h2>On‑Body Gallery</h2>
+          <p>See how it sits on body and pairs with other pieces.</p>
         </div>
-      </div>
 
-      <div class="lookbook-grid">
-        <img src="../img/models/5.jpeg" alt="Model portrait with pendant" loading="lazy" decoding="async">
-        <img src="../img/models/6.jpeg" alt="Hands styling the pendant" loading="lazy" decoding="async">
-        <img src="../img/models/7.jpeg" alt="Layered pendants" loading="lazy" decoding="async">
-        <img src="../img/models/8.jpeg" alt="Neckline close-up" loading="lazy" decoding="async">
-        <img src="../img/models/9.jpeg" alt="Editorial light" loading="lazy" decoding="async">
-        <img src="../img/models/10.jpeg" alt="Backdrop detail" loading="lazy" decoding="async">
-      </div>
-    </section>
+        <div class="collage-wrapper">
+          <div class="collage-surround">
+            <img src="../img/models/5.jpeg" alt="Model portrait with ring" loading="lazy" decoding="async" class="collage-img">
+            <img src="../img/models/6.jpeg" alt="Hands with multiple rings" loading="lazy" decoding="async" class="collage-img">
+            <img src="../img/models/7.jpeg" alt="Pendant layered styling" loading="lazy" decoding="async" class="collage-img">
+            <img src="../img/models/8.jpeg" alt="Necklace in motion" loading="lazy" decoding="async" class="collage-img">
+            <img src="../img/models/9.jpeg" alt="Earring editorial" loading="lazy" decoding="async" class="collage-img">
+            <img src="../img/models/10.jpeg" alt="Bracelet detail" loading="lazy" decoding="async" class="collage-img">
+          </div>
 
-    <!-- You may also like -->
-    <section aria-label="You may also like" style="margin-top: 28px;">
-      <div class="section-head">
-        <h2>You may also like</h2>
-        <p>Pair it with complementary pieces.</p>
-      </div>
-      <div class="related-strip">
-        <div class="related-track" data-auto="true">
-          <a class="related-card" href="ee-female-ring-gold.html">
-            <div class="related-media"><img src="../img/products/EE-female-ring-gold-1.jpg" alt="EE female ring — gold"></div>
-            <div class="related-info"><div class="title">EE female ring — gold</div><div class="price">$140</div></div>
-          </a>
-          <a class="related-card" href="foto-earring.html">
-            <div class="related-media"><img src="../img/products/foto-earring-1.jpg" alt="FOTO earring"></div>
-            <div class="related-info"><div class="title">FOTO earring</div><div class="price">$310</div></div>
-          </a>
-          <a class="related-card" href="ee-male-ring-silver.html">
-            <div class="related-media"><img src="../img/products/EE-male-ring-silver-1.jpg" alt="EE male ring — silver"></div>
-            <div class="related-info"><div class="title">EE male ring — silver</div><div class="price">$200</div></div>
-          </a>
-          <a class="related-card" href="legs-pendant.html">
-            <div class="related-media"><img src="../img/products/LEGS-pendant-2.jpg" alt="LEGS pendant"></div>
-            <div class="related-info"><div class="title">LEGS pendant</div><div class="price">$375</div></div>
-          </a>
+          <div class="featured-strip collage-main">
+            <div class="featured-track">
+              <div class="feat-slide"><img src="../img/models/model-ring-sss.jpeg" alt="Model wearing pendant, close-up" decoding="async"></div>
+              <div class="feat-slide"><img src="../img/models/2.jpeg" alt="Model with ring detail, side light" decoding="async"></div>
+              <div class="feat-slide"><img src="../img/models/3.jpeg" alt="Necklace on model, collarbone" decoding="async"></div>
+              <div class="feat-slide"><img src="../img/models/4.jpeg" alt="Earring on model, profile" decoding="async"></div>
+            </div>
+
+            <button class="slider-btn slider-prev" type="button" aria-label="Previous image">‹</button>
+            <button class="slider-btn slider-next" type="button" aria-label="Next image">›</button>
+
+            <div class="dots">
+              <div class="dot active" data-index="0"></div>
+              <div class="dot" data-index="1"></div>
+              <div class="dot" data-index="2"></div>
+              <div class="dot" data-index="3"></div>
+            </div>
+
+            <div class="swipe-indicator" aria-hidden="true"><div class="thumb"></div></div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      <!-- You may also like -->
+      <section aria-label="You may also like">
+        <div class="section-head">
+          <h2>You may also like</h2>
+          <p>Pair it with complementary pieces.</p>
+        </div>
+        <div class="related-strip" id="dynamic-related">
+          <div class="related-track" data-auto="true">
+            <!-- Dynamically populated by JS -->
+          </div>
+          <div class="swipe-indicator" aria-hidden="true"><div class="thumb"></div></div>
+        </div>
+      </section>
+    </div>
   </div>
 
   <!-- Lightbox root injected by JS when opened -->

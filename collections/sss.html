@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SSS Collection · EDELHART</title>
+    <meta name="description" content="SSS collection — refined motifs with warm finishes. Explore our signature pendants in gold and silver." />
+    <link rel="icon" type="image/png" href="../img/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css" />
+</head>
+<body>
+<header id="site-header">
+    <div class="wrap nav">
+        <a href="../index.html#home" class="brand" aria-label="EDELHART Home">
+            <img src="../img/logo.png" alt="EDELHART Logo" class="navbar-logo">
+            <span class="brand-word">EDELHART</span>
+        </a>
+        <nav class="menu" aria-label="Main">
+            <button class="menu-btn" aria-label="Open menu" aria-expanded="false">
+                <span class="menu-icon" aria-hidden="true"></span>
+            </button>
+            <div class="links">
+                <div class="dropdown">
+                    <button class="drop-btn" aria-haspopup="true" aria-expanded="false">
+                        Collections
+                        <svg class="caret" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
+                    </button>
+                    <div class="drop-menu" role="menu">
+                        <a href="sss.html" role="menuitem">SSS</a>
+                        <a href="whispering-a.html" role="menuitem">Whispering A</a>
+                        <a href="the-core.html" role="menuitem">The Core</a>
+                    </div>
+                </div>
+                <span class="sep">·</span>
+                <a href="../index.html#products">All Products</a>
+                <span class="sep">·</span>
+                <a href="../index.html#contact">Contact</a>
+                <span class="sep">·</span>
+                <a href="../index.html#about">About</a>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <!-- Collection Hero -->
+    <section class="hero full-hero fit-width" id="home" aria-label="SSS Collection hero">
+        <div class="hero-bg" aria-hidden="true">
+            <picture>
+                <source media="(max-width: 480px)" srcset="../img/sss-hero.jpeg" />
+                <img src="../img/sss-hero.jpeg" alt="SSS Collection Hero" loading="eager" sizes="100vw" />
+            </picture>
+        </div>
+        <div class="overlay" aria-hidden="true"></div>
+        <div class="hero-content">
+            <h1 class="script">SSS Collection</h1>
+            <a class="scroll-indicator" href="#products" role="button" aria-label="Scroll to products" title="Scroll to products">⌄</a>
+        </div>
+    </section>
+
+    <!-- Products -->
+    <section id="products" aria-label="SSS Collection Products">
+        <div class="wrap">
+            <div class="section-head">
+                <h2>SSS Collection</h2>
+                <p>Refined motifs with warm finishes. Explore our signature pendants.</p>
+            </div>
+
+            <!-- Filters -->
+            <div class="filters-wrap">
+                <button class="filter-toggle" type="button" aria-expanded="false" aria-controls="sort-panel">
+                    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M3 5h18v2H3V5zm4 6h10v2H7v-2zm3 6h4v2h-4v-2z"/></svg>
+                    Filters
+                    <svg class="caret" viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <div class="sort-panel" id="sort-panel" hidden>
+                    <div class="sort">
+                        <label for="sort-price">Sort by price</label>
+                        <select id="sort-price" aria-label="Sort products by price">
+                            <option value="asc">Low to high</option>
+                            <option value="desc">High to low</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Collection grid -->
+            <div class="catalog" id="collection-catalog">
+                <!-- Dynamically populated by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- About -->
+    <section id="about" aria-label="About SSS">
+        <div class="wrap">
+            <div class="section-head">
+                <h2>About SSS</h2>
+                <p>The SSS collection captures the essence of minimalism with intricate detailing that catches light from every angle.</p>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <div class="wrap foot">
+        <small>© <span id="year"></span> EDELHART.</small>
+        <small><a href="../index.html#home">Back to home ↑</a></small>
+    </div>
+</footer>
+
+<script src="../js/app.js" defer></script>
+<script>
+    // Collection-specific JS
+    (function(){
+        const collection = 'sss'; // Identifier for this collection
+        const collectionGrid = document.getElementById('collection-catalog');
+
+        // Fetch and filter products
+        async function loadCollectionProducts(){
+            // Fetch from index.html all products
+            const candidates = [
+                new URL('../index.html', location.href).href,
+                new URL('../../index.html', location.href).href,
+                new URL('./index.html', location.href).href,
+                new URL('/index.html', location.origin).href
+            ];
+            let allProducts = [];
+            for (const url of candidates){
+                try {
+                    const res = await fetch(url, { cache:'no-store', mode:'same-origin' });
+                    if (res.ok){
+                        const html = await res.text();
+                        const doc = new DOMParser().parseFromString(html, 'text/html');
+                        allProducts = Array.from(doc.querySelectorAll('#all-catalog .card')).map(card => ({
+                            view: card.getAttribute('data-view') || '#',
+                            title: card.querySelector('.title')?.textContent || 'Product',
+                            price: card.querySelector('.price')?.textContent || '$0',
+                            priceNum: Number(card.getAttribute('data-price') || 0),
+                            meta: card.querySelector('.meta')?.textContent || '',
+                            images: listFromCSV(card.querySelector('.media')?.getAttribute('data-images') || '')
+                        }));
+                        break;
+                    }
+                } catch {}
+            }
+
+            // Filter for SSS: titles containing 'SSS'
+            const collectionProducts = allProducts.filter(p => p.title.toLowerCase().includes('sss'));
+            if (!collectionProducts.length){
+                // Fallback
+                collectionProducts.push(
+                    { view: '../products/sss-pendant-gold.html', title: 'SSS pendant — gold', price: '$125', priceNum: 125, meta: 'Also available in silver.', images: ['../img/products/sss-gold-1.jpg'] },
+                    { view: '../products/sss-pendant-silver.html', title: 'SSS pendant — silver', price: '$125', priceNum: 125, meta: 'Sterling silver finish.', images: ['../img/products/sss-silver-2.jpg'] }
+                );
+            }
+
+            // Sort by price asc
+            collectionProducts.sort((a,b) => a.priceNum - b.priceNum);
+
+            // Render
+            collectionGrid.innerHTML = '';
+            collectionProducts.forEach(product => {
+                const card = document.createElement('article');
+                card.className = 'card';
+                card.setAttribute('data-price', product.priceNum);
+                card.innerHTML = `
+          <div class="media" data-images="${product.images.join(',')}">
+            <div class="media-fallback">${product.title.split(' ')[0]}</div>
+          </div>
+          <div class="content">
+            <div class="title">${product.title}</div>
+            <div class="price">${product.price}</div>
+            <div class="meta">${product.meta}</div>
+          </div>
+          <div class="actions">
+            <a class="btn primary" href="${product.view}" aria-label="View ${product.title}">View</a>
+          </div>
+        `;
+                collectionGrid.appendChild(card);
+            });
+
+            // Initialize cards and sort
+            initCatalogCards();
+            const sortSel = document.getElementById('sort-price');
+            if (sortSel){
+                sortSel.addEventListener('change', () => sortGridByPrice(collectionGrid, sortSel.value));
+                sortGridByPrice(collectionGrid, sortSel.value);
+            }
+        }
+
+        loadCollectionProducts();
+    })();
+</script>
+</body>
+</html>

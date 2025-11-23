@@ -3,8 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>EDELHART — Jewelry Maison</title>
+  <title>EDELHART</title>
   <meta name="description" content="Jewelry reflecting the world — both its brilliance and its shadows. Bespoke pieces in silver, 10K/14K/18K gold, diamonds, and precious stones." />
+  <meta name="color-scheme" content="dark light">
+  <meta name="supported-color-schemes" content="dark">
   <link rel="icon" type="image/png" href="img/favicon.png"/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,17 +21,32 @@
       <span class="brand-word">EDELHART</span>
     </a>
     <nav class="menu" aria-label="Main">
-      <button class="menu-btn" aria-label="Open menu" aria-expanded="false">
+      <button class="menu-btn" aria-expanded="false">
         <span class="menu-icon" aria-hidden="true"></span>
       </button>
       <div class="links">
-        <a href="#products">Shop</a>
+        <div class="dropdown">
+          <button class="drop-btn" aria-haspopup="true" aria-expanded="false">
+            Collections
+            <svg class="caret" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
+          </button>
+          <div class="drop-menu" role="menu">
+            <a href="collections/sss.html" role="menuitem">SSS</a>
+            <a href="collections/whispering-a.html" role="menuitem">Whispering A</a>
+            <a href="collections/the-core.html" role="menuitem">The Core</a>
+          </div>
+        </div>
         <span class="sep">·</span>
-        <a href="#recommended">Recommended</a>
+        <a href="#products" data-spy="#products">All Products</a>
         <span class="sep">·</span>
-        <a href="#onbody">On‑Body Gallery</a>
+        <a href="#contact" data-spy="#contact">Contact</a>
         <span class="sep">·</span>
-        <a href="#contact">Contact</a>
+        <a href="#about" data-spy="#about">About</a>
+        <span class="sep">·</span>
+        <!-- Cart toggle -->
+        <button class="cart-toggle" type="button" aria-label="Open cart">
+          Cart <span class="cart-count" aria-hidden="true">0</span>
+        </button>
       </div>
     </nav>
   </div>
@@ -40,29 +57,75 @@
   <section class="hero full-hero fit-width" id="home" aria-label="Edelhart hero">
     <div class="hero-bg" aria-hidden="true">
       <picture>
-        <source media="(max-width: 360px), (max-height: 600px)" srcset="img/1.jpeg" />
+        <source media="(max-width: 480px)" srcset="img/1.jpeg" />
         <img src="img/1.jpeg" alt="Edelhart Hero" loading="eager" sizes="100vw" />
       </picture>
     </div>
     <div class="overlay" aria-hidden="true"></div>
     <div class="hero-content">
       <h1 class="script">Jewelry reflecting the world — both its brilliance and its shadows.</h1>
-      <!-- Arrow moved per request -->
-      <a class="scroll-indicator" href="#products" role="button" aria-label="Scroll to products" title="Scroll to products">⌄</a>
+      <a class="scroll-indicator" href="#collections" role="button" aria-label="Scroll to collections" title="Scroll to collections">⌄</a>
     </div>
   </section>
 
-  <!-- Products -->
-  <section id="products" aria-label="Products">
+  <!-- Collections -->
+  <section id="collections" aria-label="Collections">
     <div class="wrap">
-      <div class="content">
-        <h2>Our Catalog</h2>
-        <p>Should you desire a rendition of this design in alternative materials or hues, or seek a bespoke creation tailored exclusively for you, crafted with the finest metals and adorned with exquisite stones such as silver or 10K gold, 14K gold, 18K gold, diamonds, precious and semi-precious gems, please do not hesitate to contact us directly.</p>
+      <div class="section-head">
+        <h2>Collections</h2>
+        <p>Explore signature lines and motifs.</p>
       </div>
 
-      <div class="catalog">
+      <div class="collection-strip" aria-label="Collections slider">
+        <div class="collection-track">
+          <a class="collection-card" href="collections/sss.html" aria-label="Open SSS collection">
+            <div class="collection-media" data-images="img/products/sss-gold-1.jpg,img/products/sss-gold-2.jpg,img/products/sss-gold-3.jpg"></div>
+            <div class="collection-name">SSS</div>
+          </a>
+          <a class="collection-card" href="collections/whispering-a.html" aria-label="Open Whispering A collection">
+            <div class="collection-media" data-images="img/products/foto-ring-1.jpg,img/products/foto-ring-1.jpg"></div>
+            <div class="collection-name">Whispering&nbsp;A</div>
+          </a>
+          <a class="collection-card" href="collections/the-core.html" aria-label="Open The Core collection">
+            <div class="collection-media" data-images="img/products/LEGS-pendant-1.jpg,img/products/LEGS-pendant-2.jpg"></div>
+            <div class="collection-name">The Core</div>
+          </a>
+        </div>
+        <div class="swipe-indicator" aria-hidden="true"><div class="thumb"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- All Products -->
+  <section id="products" aria-label="All Products">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>All Products</h2>
+        <p>Discover the full catalog. Bespoke variations available upon request.</p>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-wrap">
+        <button class="filter-toggle" type="button" aria-expanded="false" aria-controls="sort-panel">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M3 5h18v2H3V5zm4 6h10v2H7v-2zm3 6h4v2h-4v-2z"/></svg>
+          Filters
+          <svg class="caret" viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
+        </button>
+        <div class="sort-panel" id="sort-panel" hidden>
+          <div class="sort">
+            <label for="all-sort">Sort by price</label>
+            <select id="all-sort" aria-label="Sort products by price">
+              <option value="asc">Low to high</option>
+              <option value="desc">High to low</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Full catalog grid -->
+      <div class="catalog" id="all-catalog">
         <!-- SSS gold -->
-        <article class="card" data-view="products/sss-pendant-gold.html">
+        <article class="card" data-view="products/sss-pendant-gold.html" data-price="125">
           <div class="media" data-images="img/products/sss-gold-1.jpg,img/products/sss-gold-2.jpg,img/products/sss-gold-3.jpg,img/products/sss-gold-4.jpg,img/products/sss-gold-5.jpg">
             <div class="media-fallback">SSS</div>
           </div>
@@ -77,7 +140,7 @@
         </article>
 
         <!-- SSS silver -->
-        <article class="card" data-view="products/sss-pendant-silver.html">
+        <article class="card" data-view="products/sss-pendant-silver.html" data-price="125">
           <div class="media" data-images="img/products/sss-silver-2.jpg,img/products/sss-silver-3.jpg,img/products/sss-silver-5.jpg">
             <div class="media-fallback">SSS</div>
           </div>
@@ -92,7 +155,7 @@
         </article>
 
         <!-- LEGS -->
-        <article class="card" data-view="products/legs-pendant.html">
+        <article class="card" data-view="products/legs-pendant.html" data-price="375">
           <div class="media" data-images="img/products/LEGS-pendant-1.jpg,img/products/LEGS-pendant-2.jpg,img/products/LEGS-pendant-3.jpg,img/products/LEGS-pendant-4.jpg,img/products/LEGS-pendant-5.jpg">
             <div class="media-fallback">LEGS</div>
           </div>
@@ -107,7 +170,7 @@
         </article>
 
         <!-- EE female ring - gold -->
-        <article class="card" data-view="products/ee-female-ring-gold.html">
+        <article class="card" data-view="products/ee-female-ring-gold.html" data-price="140">
           <div class="media" data-images="img/products/EE-female-ring-gold-1.jpg">
             <div class="media-fallback">EE</div>
           </div>
@@ -122,7 +185,7 @@
         </article>
 
         <!-- EE female ring - silver -->
-        <article class="card" data-view="products/ee-female-ring-silver.html">
+        <article class="card" data-view="products/ee-female-ring-silver.html" data-price="140">
           <div class="media" data-images="img/products/EE-female-ring-silver-1.jpg,img/products/EE-female-ring-silver-2.png">
             <div class="media-fallback">EE</div>
           </div>
@@ -137,7 +200,7 @@
         </article>
 
         <!-- EE female ring - black rhodium -->
-        <article class="card" data-view="products/ee-female-ring-black-rhodium.html">
+        <article class="card" data-view="products/ee-female-ring-black-rhodium.html" data-price="140">
           <div class="media" data-images="img/products/EE-female-ring-BR-1.jpg">
             <div class="media-fallback">EE</div>
           </div>
@@ -152,7 +215,7 @@
         </article>
 
         <!-- EE male ring - black rhodium (stone trapping) -->
-        <article class="card" data-view="products/ee-male-ring-black-rhodium-stone.html">
+        <article class="card" data-view="products/ee-male-ring-black-rhodium-stone.html" data-price="190">
           <div class="media" data-images="img/products/EE-male-ring-BR-trap-1.jpg">
             <div class="media-fallback">EE</div>
           </div>
@@ -167,7 +230,7 @@
         </article>
 
         <!-- EE male ring - black rhodium -->
-        <article class="card" data-view="products/ee-male-ring-black-rhodium.html">
+        <article class="card" data-view="products/ee-male-ring-black-rhodium.html" data-price="200">
           <div class="media" data-images="img/products/EE-male-ring-BR-1.jpg">
             <div class="media-fallback">EE</div>
           </div>
@@ -182,7 +245,7 @@
         </article>
 
         <!-- EE male ring - silver -->
-        <article class="card" data-view="products/ee-male-ring-silver.html">
+        <article class="card" data-view="products/ee-male-ring-silver.html" data-price="200">
           <div class="media" data-images="img/products/EE-male-ring-silver-1.jpg">
             <div class="media-fallback">EE</div>
           </div>
@@ -197,7 +260,7 @@
         </article>
 
         <!-- FOTO ring -->
-        <article class="card" data-view="products/foto-ring.html">
+        <article class="card" data-view="products/foto-ring.html" data-price="345">
           <div class="media" data-images="img/products/foto-ring-1.jpg,img/products/foto-ring-2.jpg">
             <div class="media-fallback">FOTO</div>
           </div>
@@ -212,7 +275,7 @@
         </article>
 
         <!-- FOTO earring -->
-        <article class="card" data-view="products/foto-earring.html">
+        <article class="card" data-view="products/foto-earring.html" data-price="310">
           <div class="media" data-images="img/products/foto-earring-1.jpg,img/products/foto-earring-2.jpg">
             <div class="media-fallback">FOTO</div>
           </div>
@@ -227,7 +290,7 @@
         </article>
 
         <!-- FOTO necklace -->
-        <article class="card" data-view="products/foto-necklace.html">
+        <article class="card" data-view="products/foto-necklace.html" data-price="935">
           <div class="media" data-images="img/products/foto-necklace-1.jpg,img/products/foto-necklace-2.jpg">
             <div class="media-fallback">FOTO</div>
           </div>
@@ -240,21 +303,16 @@
             <a class="btn primary" href="products/foto-necklace.html" aria-label="View FOTO necklace">View</a>
           </div>
         </article>
-
       </div>
-    </div>
-  </section>
 
-  <!-- Recommended -->
-  <section id="recommended" aria-label="Recommended for you">
-    <div class="wrap">
-      <div class="section-head">
+      <!-- Recommended -->
+      <div class="section-head" id="recommended" style="margin-top: 48px;">
         <h2>Recommended for you</h2>
         <p>Curated picks based on our best-sellers and new releases.</p>
       </div>
-      <div class="catalog recommended">
+      <div class="catalog recommended" aria-label="Recommended products (horizontal)">
         <article class="card" data-view="products/sss-pendant-gold.html">
-          <div class="media" data-images="img/products/sss-gold-1.jpg,img/products/sss-gold-2.jpg"></div>
+          <div class="media" data-images="img/products/sss-gold-1.jpg,img/products/sss-gold-2.jpg,img/products/sss-gold-3.jpg,img/products/sss-gold-4.jpg,img/products/sss-gold-5.jpg"></div>
           <div class="content">
             <div class="title">SSS pendant — gold</div>
             <div class="price">$125</div>
@@ -290,7 +348,7 @@
         </article>
 
         <article class="card" data-view="products/legs-pendant.html">
-          <div class="media" data-images="img/products/legs-pendant-1.jpg,img/products/legs-pendant-2.jpg,img/products/legs-pendant-3.jpg,img/products/legs-pendant-4.jpg,img/products/legs-pendant-5.jpg"></div>
+          <div class="media" data-images="img/products/LEGS-pendant-1.jpg,img/products/LEGS-pendant-2.jpg,img/products/LEGS-pendant-3.jpg,img/products/LEGS-pendant-4.jpg,img/products/LEGS-pendant-5.jpg"></div>
           <div class="content">
             <div class="title">LEGS pendant</div>
             <div class="price">$375</div>
@@ -301,6 +359,7 @@
           </div>
         </article>
       </div>
+      <div class="swipe-indicator" aria-hidden="true"><div class="thumb"></div></div>
     </div>
   </section>
 
@@ -309,24 +368,55 @@
     <div class="wrap">
       <div class="section-head">
         <h2>On‑Body Gallery</h2>
+        <p>See our pieces in their natural element.</p>
       </div>
 
-      <div class="featured-strip">
-        <div class="featured-track" data-auto="true">
-          <div class="feat-slide"><img src="img/models/model-ring-sss.jpeg" alt="Model wearing pendant, close-up" decoding="async"></div>
-          <div class="feat-slide"><img src="img/models/2.jpeg" alt="Model with ring detail, side light" decoding="async"></div>
-          <div class="feat-slide"><img src="img/models/3.jpeg" alt="Necklace on model, collarbone" decoding="async"></div>
-          <div class="feat-slide"><img src="img/models/4.jpeg" alt="Earring on model, profile" decoding="async"></div>
+      <div class="collage-wrapper">
+        <div class="collage-surround">
+          <!-- Top row -->
+          <img src="img/models/5.jpeg" alt="Model portrait with ring" loading="lazy" decoding="async" class="collage-img">
+          <img src="img/models/6.jpeg" alt="Hands with multiple rings" loading="lazy" decoding="async" class="collage-img">
+
+          <!-- Middle row -->
+          <img src="img/models/7.jpeg" alt="Pendant layered styling" loading="lazy" decoding="async" class="collage-img">
+          <img src="img/models/8.jpeg" alt="Necklace in motion" loading="lazy" decoding="async" class="collage-img">
+
+          <!-- Bottom row -->
+          <img src="img/models/9.jpeg" alt="Earring editorial" loading="lazy" decoding="async" class="collage-img">
+          <img src="img/models/10.jpeg" alt="Bracelet detail" loading="lazy" decoding="async" class="collage-img">
         </div>
-      </div>
 
-      <div class="lookbook-grid">
-        <img src="img/models/5.jpeg" alt="Model portrait with ring" loading="lazy" decoding="async">
-        <img src="img/models/6.jpeg" alt="Hands with multiple rings" loading="lazy" decoding="async">
-        <img src="img/models/7.jpeg" alt="Pendant layered styling" loading="lazy" decoding="async">
-        <img src="img/models/8.jpeg" alt="Necklace in motion" loading="lazy" decoding="async">
-        <img src="img/models/9.jpeg" alt="Earring editorial" loading="lazy" decoding="async">
-        <img src="img/models/10.jpeg" alt="Bracelet detail" loading="lazy" decoding="async">
+        <!-- Center slideshow with arrows and dots -->
+        <div class="featured-strip collage-main">
+          <div class="featured-track">
+            <div class="feat-slide">
+              <img src="img/models/model-ring-sss.jpeg" alt="Model wearing pendant, close-up" loading="lazy" decoding="async">
+            </div>
+            <div class="feat-slide">
+              <img src="img/models/2.jpeg" alt="Model with ring detail, side light" loading="lazy" decoding="async">
+            </div>
+            <div class="feat-slide">
+              <img src="img/models/3.jpeg" alt="Necklace on model, collarbone" loading="lazy" decoding="async">
+            </div>
+            <div class="feat-slide">
+              <img src="img/models/4.jpeg" alt="Earring on model, profile" loading="lazy" decoding="async">
+            </div>
+          </div>
+
+          <!-- Navigation arrows -->
+          <button class="slider-btn slider-prev" type="button" aria-label="Previous image">‹</button>
+          <button class="slider-btn slider-next" type="button" aria-label="Next image">›</button>
+
+          <!-- Dots navigation -->
+          <div class="dots">
+            <div class="dot active" data-index="0"></div>
+            <div class="dot" data-index="1"></div>
+            <div class="dot" data-index="2"></div>
+            <div class="dot" data-index="3"></div>
+          </div>
+
+          <div class="swipe-indicator" aria-hidden="true"><div class="thumb"></div></div>
+        </div>
       </div>
     </div>
   </section>
@@ -345,10 +435,44 @@
             <p class="meta">Prefer WhatsApp for quick responses.</p>
           </div>
           <div class="actions" style="flex-wrap: wrap;">
-            <a class="btn primary" href="https://wa.me/84944445084" target="_blank" rel="noopener" aria-label="WhatsApp">WhatsApp (+84) 94444 5084</a>
-            <a class="btn ghost" href="https://www.instagram.com/edelhartvx/" target="_blank" rel="noopener" aria-label="Instagram">Instagram</a>
-            <a class="btn ghost" href="https://www.facebook.com/people/Edelhart/61578850709155/" target="_blank" rel="noopener" aria-label="Facebook">Facebook</a>
+            <a class="btn primary" href="https://wa.me/84944445084" target="_blank" rel="noopener" aria-label="WhatsApp">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><path d="M12 2a10 10 0 00-8 16.1L3 22l3.9-1A10 10 0 1012 2zm5.2 14.2c-.2.6-1.2 1.1-1.7 1.1-.5 0-1 .2-3.3-1.1-2.8-1.6-4.5-4.6-4.6-4.8-.2-.3-1.1-1.5-1.1-2.8 0-1.2.6-1.8.9-2 .3-.2.8-.3 1-.3h.7c.2 0 .5 0 .7.6.3.7 1 2.4 1 2.5s.1.4 0 .6c-.1.2-.2.3-.4.5-.2.2-.4.5-.6.6-.2.2-.4.4-.2.7.2.3.9 1.5 2.1 2.4 1.5 1.1 2.7 1.5 3.1 1.7.3.1.6.1.8 0 .2-.1 1.3-.6 1.5-.8.2-.1.4-.2.7-.1.2.1 1.1.5 1.3.6.2.1.3.1.4.2.1 0 .1.6-.1 1.1z"/></svg>
+              WhatsApp
+            </a>
+            <a class="btn btn-outline" href="https://www.instagram.com/edelhartvx/" target="_blank" rel="noopener" aria-label="Instagram">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><path d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm5 5a5 5 0 100 10 5 5 0 000-10zm6-1a1 1 0 100 2 1 1 0 000-2zm-6 3a3 3 0 110 6 3 3 0 010-6z"/></svg>
+              Instagram
+            </a>
+            <a class="btn btn-outline" href="https://www.facebook.com/people/Edelhart/61578850709155/" target="_blank" rel="noopener" aria-label="Facebook">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><path d="M22 12a10 10 0 10-11.6 9.9v-7h-2.3V12h2.3V9.7c0-2.3 1.4-3.6 3.5-3.6 1 0 2 .2 2 .2v2.2H15c-1.1 0-1.5.7-1.5 1.4V12h2.6l-.4 2.9h-2.2v7A10 10 0 0022 12z"/></svg>
+              Facebook
+            </a>
+            <a class="btn btn-outline" href="https://maps.google.com/?q=483/11+Le+Van+Sy+Street,+Ward+Nhieu+Loc,+Ho+Chi+Minh+City,+Vietnam" target="_blank" rel="noopener" aria-label="Open in Google Maps">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><path d="M12 2a7 7 0 00-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 00-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"/></svg>
+              Open in Google Maps
+            </a>
           </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section id="about" aria-label="About">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>About</h2>
+        <p>EDELHART crafts pieces that balance light and shadow, precision and emotion.</p>
+        <div style="text-align: left; font-style: italic; margin-top: 20px;">
+          <p><strong>"EDELHART"</strong> “How does Edelhart sound?” - M</p>
+          <p>"Edel" means noble or precious—like edelstein (precious stone) or edelmetall (precious metal). "Hart" means like strong or resilient, and phonetically, "hart" also echoes the word "heart". Together, "Edelhart" evokes the image of a heart forged from rare, valuable metal—symbolizing both strength and inner beauty.</p>
+          <p>To us, "Edelhart" is more than a name. It captures the essence of jewelry that holds intrinsic worth: hand-cut gemstones paired with precious metals, shaped and refined by master artisans. With a deep appreciation for core values and refined craftsmanship, we create timeless pieces that embody the enduring art of jewelry making—where beauty, technique, and soul meet.</p>
+          <p>Thank you M, for a name that speaks to who we are.</p>
+          <hr style="border: none; border-top: 1px solid #ccc; margin: 20px 0;">
+          <p>At Edelhart, we believe that the essence of true luxury lies not only in the materials, but in the story and message that each piece conveys—meticulously brought to life through complex technical structures and exquisite craftsmanship by the hands of master artisans.</p>
+          <p>Chúng tôi tin rằng bản chất của những món trang sức xa xỉ đích thực không chỉ nằm ở chất liệu, mà còn ở câu chuyện và thông điệp truyền tải phía sau những thiết kế được hoàn thiện một cách tỉ mỉ, với những kết cấu kỹ thuật phức tạp, tinh xảo dưới bàn tay của những người thợ thủ công lành nghề.</p>
+          <hr style="border: none; border-top: 1px solid #ccc; margin: 20px 0;">
+          <p>We'd be delighted to hear from you at <a href="mailto:chvchvchv1102@edelhart.co" style="color: var(--accent);">chvchvchv1102@edelhart.co</a></p>
         </div>
       </div>
     </div>
@@ -361,6 +485,33 @@
     <small><a href="#home">Back to top ↑</a></small>
   </div>
 </footer>
+
+<!-- Cart drawer -->
+<div class="cart-drawer" aria-hidden="true">
+  <div class="cart-overlay"></div>
+  <aside class="cart-panel" role="dialog" aria-modal="true" aria-label="Cart">
+    <header class="cart-header">
+      <h2>Your Cart</h2>
+      <button type="button" class="cart-close" aria-label="Close cart">✕</button>
+    </header>
+    <div class="cart-body">
+      <div class="cart-empty">Your cart is empty.</div>
+      <ul class="cart-items"></ul>
+    </div>
+    <footer class="cart-footer">
+      <div class="cart-summary">
+        <span>Total</span>
+        <span class="cart-total">$0</span>
+      </div>
+      <a class="btn primary cart-checkout" href="https://wa.me/84944445084" target="_blank" rel="noopener">
+        Send order via WhatsApp
+      </a>
+    </footer>
+  </aside>
+</div>
+
+<!-- Back to top -->
+<button id="back-to-top" aria-label="Back to top">↑</button>
 
 <script src="js/app.js" defer></script>
 </body>

@@ -4,7 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>EE male ring — silver · EDELHART</title>
+  <meta name="description" content="EE male ring in silver — sterling silver with bright polish. Distinctive EE geometry." />
   <link rel="icon" type="image/png" href="../img/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/styles.css" />
 </head>
 <body>
@@ -19,34 +23,191 @@
         <span class="menu-icon" aria-hidden="true"></span>
       </button>
       <div class="links">
-        <a href="../index.html#products">Shop</a>
+        <div class="dropdown">
+          <button class="drop-btn" aria-haspopup="true" aria-expanded="false">
+            Collections
+            <svg class="caret" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
+          </button>
+          <div class="drop-menu" role="menu">
+            <a href="../collections/sss.html" role="menuitem">SSS</a>
+            <a href="../collections/whispering-a.html" role="menuitem">Whispering A</a>
+            <a href="../collections/the-core.html" role="menuitem">The Core</a>
+          </div>
+        </div>
         <span class="sep">·</span>
-        <a href="../index.html#about">About</a>
+        <a href="../index.html#products">All Products</a>
         <span class="sep">·</span>
         <a href="../index.html#contact">Contact</a>
+        <span class="sep">·</span>
+        <a href="../index.html#about">About</a>
       </div>
     </nav>
   </div>
 </header>
 
-<main class="product-page">
-  <div class="wrap product">
-    <div class="product-gallery" data-images="../img/products/ee-m-silver-1.jpg,../img/products/ee-m-silver-2.jpg">
-      <div class="slides"></div>
-      <button class="slider-btn slider-prev" aria-label="Previous">&#10094;</button>
-      <button class="slider-btn slider-next" aria-label="Next">&#10095;</button>
-      <div class="thumbs"></div>
-    </div>
-    <div class="product-info">
-      <div class="title">EE male ring — silver</div>
-      <div class="price">$200</div>
-      <p class="desc">Sterling silver with bright polish. Distinctive EE geometry.</p>
-      <div class="actions">
-        <a class="btn primary" href="https://wa.me/84944445084" target="_blank" rel="noopener">Order via WhatsApp</a>
-        <a class="btn ghost" href="../index.html#contact">Contact</a>
+<main class="product-page" aria-label="Product page">
+  <div class="wrap">
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <a href="../index.html#collections">Collections</a>
+      <a href="../collections/the-core.html">The Core</a>
+      <span aria-current="page">EE male ring — silver</span>
+    </nav>
+
+    <a class="page-back" href="../index.html#products" aria-label="Back to catalog">Back to catalog</a>
+
+    <div class="product">
+      <!-- LEFT: Gallery -->
+      <div>
+        <div class="product-gallery" data-images="../img/products/ee-m-silver-1.jpg,../img/products/ee-m-silver-2.jpg">
+          <div class="slides"></div>
+          <button class="slider-btn slider-prev" aria-label="Previous">‹</button>
+          <button class="slider-btn slider-next" aria-label="Next">›</button>
+          <div class="thumbs"></div>
+        </div>
+        <!-- Thumbnail strip below gallery -->
+        <div class="thumb-strip">
+          <div class="thumb-row"></div>
+        </div>
       </div>
+
+      <!-- RIGHT: Checkout -->
+      <aside class="checkout">
+        <div class="title">EE male ring — silver</div>
+        <div class="price">$200</div>
+
+        <form data-product="EE male ring">
+          <div>
+            <label for="metal">Metal</label>
+            <select id="metal" name="metal">
+              <option>E-Silver</option>
+              <option>Black Rhodium</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="stone">Stone</label>
+            <select id="stone" name="stone">
+              <option>OG (original design)</option>
+              <option>Diamond</option>
+              <option>Other gemstone</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="size">Size</label>
+            <select id="size" name="size">
+              <option>0</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>5</option>
+              <option>6</option>
+              <option>Custom size</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="qty">Quantity</label>
+            <select id="qty" name="qty">
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+            </select>
+          </div>
+
+          <div class="actions">
+            <button type="button" class="btn add-to-cart">Add to cart</button>
+            <button type="submit" class="btn primary">Order via WhatsApp</button>
+
+            <a class="btn" href="https://www.instagram.com/edelhartvx/" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                <path d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm5 5a5 5 0 100 10 5 5 0 000-10zm6-1a1 1 0 100 2 1 1 0 000-2zm-6 3a3 3 0 110 6 3 3 0 010-6z"/>
+              </svg>
+              Order via Instagram
+            </a>
+
+            <a class="btn" href="https://www.facebook.com/people/Edelhart/61578850709155/" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                <path d="M22 12a10 10 0 10-11.6 9.9v-7h-2.3V12h2.3V9.7c0-2.3 1.4-3.6 3.5-3.6 1 0 2 .2 2 .2v2.2H15c-1.1 0-1.5.7-1.5 1.4V12h2.6l-.4 2.9h-2.2v7A10 10 0 0022 12z"/>
+              </svg>
+              Order via Facebook
+            </a>
+          </div>
+        </form>
+
+        <p class="meta">Should you desire a rendition of this design in alternative materials or hues, or seek a bespoke creation tailored exclusively for you, crafted with the finest metals and adorned with exquisite stones, please contact us directly.</p>
+      </aside>
+    </div>
+
+    <!-- CRITICAL: Wrapper prevents overlap -->
+    <div class="product-page-content">
+      <!-- Product Description -->
+      <div class="product-description">
+        <h3>About This Piece</h3>
+        <p>
+          The EE male ring embodies our signature aesthetic — refined minimalism with a statement edge.
+          Crafted in sterling silver with bright polish and distinctive EE geometry.
+          Each ring is hand-finished to ensure exceptional quality and lasting beauty.
+        </p>
+      </div>
+
+      <!-- On-Body Gallery -->
+      <section aria-label="On‑Body Gallery">
+        <div class="section-head">
+          <h2>On‑Body Gallery</h2>
+          <p>See how it sits on body and pairs with other pieces.</p>
+        </div>
+
+        <div class="collage-wrapper">
+          <div class="collage-surround">
+            <img src="../img/models/5.jpeg" alt="Model portrait with ring" loading="lazy" decoding="async" class="collage-img">
+            <img src="../img/models/6.jpeg" alt="Hands with multiple rings" loading="lazy" decoding="async" class="collage-img">
+            <img src="../img/models/7.jpeg" alt="Pendant layered styling" loading="lazy" decoding="async" class="collage-img">
+            <img src="../img/models/8.jpeg" alt="Necklace in motion" loading="lazy" decoding="async" class="collage-img">
+            <img src="../img/models/9.jpeg" alt="Earring editorial" loading="lazy" decoding="async" class="collage-img">
+            <img src="../img/models/10.jpeg" alt="Bracelet detail" loading="lazy" decoding="async" class="collage-img">
+          </div>
+
+          <div class="featured-strip collage-main">
+            <div class="featured-track">
+              <div class="feat-slide"><img src="../img/models/model-ring-sss.jpeg" alt="Model wearing ring, close-up" decoding="async"></div>
+              <div class="feat-slide"><img src="../img/models/2.jpeg" alt="Model with ring detail, side light" decoding="async"></div>
+              <div class="feat-slide"><img src="../img/models/3.jpeg" alt="Necklace on model, collarbone" decoding="async"></div>
+              <div class="feat-slide"><img src="../img/models/4.jpeg" alt="Earring on model, profile" decoding="async"></div>
+            </div>
+
+            <button class="slider-btn slider-prev" type="button" aria-label="Previous image">‹</button>
+            <button class="slider-btn slider-next" type="button" aria-label="Next image">›</button>
+
+            <div class="dots">
+              <div class="dot active" data-index="0"></div>
+              <div class="dot" data-index="1"></div>
+              <div class="dot" data-index="2"></div>
+              <div class="dot" data-index="3"></div>
+            </div>
+
+            <div class="swipe-indicator" aria-hidden="true"><div class="thumb"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- You may also like -->
+      <section aria-label="You may also like">
+        <div class="section-head">
+          <h2>You may also like</h2>
+          <p>Pair it with complementary pieces.</p>
+        </div>
+        <div class="related-strip" id="dynamic-related">
+          <div class="related-track" data-auto="true">
+            <!-- Dynamically populated by JS -->
+          </div>
+          <div class="swipe-indicator" aria-hidden="true"><div class="thumb"></div></div>
+        </div>
+      </section>
     </div>
   </div>
+
+  <!-- Lightbox root injected by JS when opened -->
 </main>
 
 <footer>
