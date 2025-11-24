@@ -686,8 +686,8 @@
         addEventListener('mousemove', onMove);
         addEventListener('mouseup', onEnd);
         card.addEventListener('touchstart', onStart, { passive: true });
-        card.addEventListener('touchmove', onMove, { passive: true });
-        card.addEventListener('touchend', onEnd);
+        addEventListener('touchmove', onMove, { passive: true });
+        addEventListener('touchend', onEnd);
       }
 
       card.addEventListener('mouseenter', () => {
@@ -1165,8 +1165,8 @@
     addEventListener('mousemove', onMove);
     addEventListener('mouseup', onEnd);
     slidesWrap.addEventListener('touchstart', onStart, { passive: true });
-    slidesWrap.addEventListener('touchmove', onMove, { passive: true });
-    slidesWrap.addEventListener('touchend', onEnd);
+    addEventListener('touchmove', onMove, { passive: true });
+    addEventListener('touchend', onEnd);
     gallery.addEventListener('mouseenter', () => {
       paused = true;
       updateClockSub();
@@ -1557,8 +1557,8 @@
     addEventListener('mousemove', onMove);
     addEventListener('mouseup', onEnd);
     track.addEventListener('touchstart', onStart, { passive: true });
-    track.addEventListener('touchmove', onMove, { passive: true });
-    track.addEventListener('touchend', onEnd);
+    addEventListener('touchmove', onMove, { passive: true });
+    addEventListener('touchend', onEnd);
 
     let inView = true;
     const io =

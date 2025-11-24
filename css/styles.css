@@ -240,7 +240,7 @@ main > section{ position:relative; padding-block:var(--sectionPad); margin-botto
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
+  object-position: center;
   border-top-left-radius: inherit;
   border-top-right-radius: inherit;
 }
@@ -1463,6 +1463,7 @@ footer{ border-top:1px solid rgba(255,255,255,0.1); background: color-mix(in hsl
 
 /* ===== Cart button ===== */
 .cart-toggle {
+  margin-left: auto; /* Push to right on desktop */
   border-radius: 999px;
   border: 2px solid rgba(255, 255, 255, 0.2);
   padding: clamp(8px, 3vw, 12px) clamp(12px, 4vw, 16px);
@@ -1714,13 +1715,10 @@ footer{ border-top:1px solid rgba(255,255,255,0.1); background: color-mix(in hsl
 }
 
 /* Mobile adjustments */
-@media (max-width: 600px) {
-  .actions {
-    flex-direction: column;
-    gap: 8px;
-  }
-  .btn {
-    justify-content: center;
-    width: 100%;
+@media (max-width: 900px) {
+  .cart-toggle {
+    margin-left: 0; /* Reset margin */
+    padding: 8px 12px;
+    font-size: 14px;
   }
 }
