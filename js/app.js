@@ -1151,7 +1151,7 @@
       const x = 'touches' in e ? e.touches[0].clientX : e.clientX;
       dist = x - startX;
     }
-    function onEnd() {
+    function onEnd(e) {
       if (!dragging) return;
       dragging = false;
       if (Math.abs(dist) > 40) {
@@ -1543,7 +1543,7 @@
       const x = 'touches' in e ? e.touches[0].clientX : e.clientX;
       dist = x - startX;
     }
-    function onEnd() {
+    function onEnd(e) {
       if (!dragging) return;
       dragging = false;
       if (Math.abs(dist) > 50) {
@@ -1797,21 +1797,23 @@
     const toggleBtns = document.querySelectorAll('.cart-toggle');
 
     const checkoutBtn = footer.querySelector('.cart-checkout');
-    let igBtn = footer.querySelector('.cart-instagram');
-    let fbBtn = footer.querySelector('.cart-facebook');
+    let igBtn = footer.querySelector('.cart-copy[data-platform="Instagram"]');
+    let fbBtn = footer.querySelector('.cart-copy[data-platform="Facebook"]');
 
     if (!igBtn) {
       igBtn = document.createElement('button');
       igBtn.type = 'button';
-      igBtn.className = 'btn cart-instagram';
-      igBtn.textContent = 'Copy order text';
+      igBtn.className = 'btn outline cart-copy';
+      igBtn.dataset.platform = 'Instagram';
+      igBtn.textContent = 'Copy for Instagram';
       footer.appendChild(igBtn);
     }
     if (!fbBtn) {
       fbBtn = document.createElement('button');
       fbBtn.type = 'button';
-      fbBtn.className = 'btn cart-facebook';
-      fbBtn.textContent = 'Copy order text';
+      fbBtn.className = 'btn outline cart-copy';
+      fbBtn.dataset.platform = 'Facebook';
+      fbBtn.textContent = 'Copy for Facebook';
       footer.appendChild(fbBtn);
     }
 
@@ -1841,13 +1843,6 @@
         const msg = buildOrderMessageFromCart(cart);
         if (checkoutBtn)
           checkoutBtn.href = `https://wa.me/84944445084?text=${msg.encoded}`;
-        const copyFn = () => {
-          try {
-            navigator.clipboard?.writeText(msg.plain);
-          } catch {}
-        };
-        igBtn.onclick = copyFn;
-        fbBtn.onclick = copyFn;
         return;
       }
 
@@ -1912,13 +1907,41 @@
       const msg = buildOrderMessageFromCart(cart);
       if (checkoutBtn)
         checkoutBtn.href = `https://wa.me/84944445084?text=${msg.encoded}`;
-      const copyFn = () => {
-        try {
-          navigator.clipboard?.writeText(msg.plain);
-        } catch {}
-      };
-      igBtn.onclick = copyFn;
-      fbBtn.onclick = copyFn;
+
+      // Add event listener for cart copy buttons
+      document.addEventListener('click', handleCartCopy);
+    }
+
+    function handleCartCopy(e) {
+      if (e.target.classList.contains('cart-copy')) {
+        const button = e.target;
+        const platform = button.dataset.platform;
+        const cart = readCart();
+        const orderText = buildOrderMessageFromCart(cart).plain;
+
+        navigator.clipboard.writeText(orderText).then(() => {
+          // Temporarily change button to show success
+          const originalHTML = button.innerHTML;
+          button.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+            Copied!
+          `;
+          button.style.background = 'rgba(0, 255, 0, 0.1)';
+          button.style.borderColor = 'rgba(0, 255, 0, 0.5)';
+
+          // Revert after 3 seconds
+          setTimeout(() => {
+            button.innerHTML = originalHTML;
+            button.style.background = '';
+            button.style.borderColor = '';
+          }, 3000);
+        }).catch(err => {
+          console.error('Failed to copy: ', err);
+          alert('Failed to copy. Please try again.');
+        });
+      }
     }
 
     function open() {
@@ -1989,15 +2012,42 @@
   }
 
   /* ------------------------------------------------------------------ */
-  /*  Copy order details for social platforms                           */
+  /*  Copy order details for social platforms (product pages)           */
   /* ------------------------------------------------------------------ */
   document.addEventListener('click', e => {
     if (e.target.classList.contains('copy-order')) {
-      const platform = e.target.dataset.platform;
-      const orderText = `Hello EDELHART, I'm interested in the EE female ring — black rhodium. Please provide details and next steps. Shared from ${platform}.`;
+      const button = e.target;
+      const platform = button.dataset.platform;
+      const productTitle = document.querySelector('.checkout .title')?.textContent || 'Product';
+      const metal = document.getElementById('metal')?.value || 'N/A';
+      const stone = document.getElementById('stone')?.value || 'N/A';
+      const size = document.getElementById('size')?.value || 'N/A';
+      const qty = document.getElementById('qty')?.value || '1';
+
+      const orderText = `Hello EDELHART, I'm interested in ${productTitle}. Metal: ${metal}, Stone: ${stone}, Size: ${size}, Quantity: ${qty}. Please provide details and next steps. Shared from ${platform}.`;
+
       navigator.clipboard.writeText(orderText).then(() => {
-        console.log('Order details copied for ' + platform);
-      }).catch(err => console.error('Failed to copy: ', err));
+        // Temporarily change button to show success
+        const originalHTML = button.innerHTML;
+        button.innerHTML = `
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+          </svg>
+          Copied!
+        `;
+        button.style.background = 'rgba(0, 255, 0, 0.1)';
+        button.style.borderColor = 'rgba(0, 255, 0, 0.5)';
+
+        // Revert after 3 seconds
+        setTimeout(() => {
+          button.innerHTML = originalHTML;
+          button.style.background = '';
+          button.style.borderColor = '';
+        }, 3000);
+      }).catch(err => {
+        console.error('Failed to copy: ', err);
+        alert('Failed to copy. Please try again.');
+      });
     }
   });
 

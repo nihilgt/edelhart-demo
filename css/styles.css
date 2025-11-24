@@ -1619,8 +1619,7 @@ footer{ border-top:1px solid rgba(255,255,255,0.1); background: color-mix(in hsl
 
 /* Buttons keep pill look but not huge */
 .cart-footer .cart-checkout,
-.cart-footer .cart-instagram,
-.cart-footer .cart-facebook {
+.cart-footer .cart-copy {
   justify-content: center;
   width: 100%;
   border-radius: 999px;
@@ -1637,14 +1636,12 @@ footer{ border-top:1px solid rgba(255,255,255,0.1); background: color-mix(in hsl
   transition: background .2s ease, transform .1s ease, box-shadow .2s ease;
 }
 .cart-footer .cart-checkout:hover,
-.cart-footer .cart-instagram:hover,
-.cart-footer .cart-facebook:hover {
+.cart-footer .cart-copy:hover {
   background: rgba(255,255,255,0.94);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.35);
 }
-.cart-footer .cart-instagram svg,
-.cart-footer .cart-facebook svg {
+.cart-footer .cart-copy svg {
   width: 14px;
   height: 14px;
 }
@@ -1702,27 +1699,18 @@ footer{ border-top:1px solid rgba(255,255,255,0.1); background: color-mix(in hsl
 }
 
 /* Copy order buttons */
-.copy-order {
+.copy-order,
+.cart-copy {
   position: relative;
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
-.copy-order::after {
-  content: attr(data-platform);
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--panel);
-  color: var(--text);
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  pointer-events: none;
-  white-space: nowrap;
+.copy-order svg,
+.cart-copy svg {
+  transition: transform 0.2s ease;
 }
-.copy-order:hover::after {
-  opacity: 1;
+.copy-order.copied svg,
+.cart-copy.copied svg {
+  transform: scale(1.1);
 }
 
 /* Mobile adjustments */
