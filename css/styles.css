@@ -1718,7 +1718,12 @@ footer{ border-top:1px solid rgba(255,255,255,0.1); background: color-mix(in hsl
 @media (max-width: 900px) {
   .cart-toggle {
     margin-left: 0; /* Reset margin */
-    padding: 8px 12px;
-    font-size: 14px;
+    padding: 12px 16px;
+    font-size: 16px;
+    background: rgba(0, 0, 0, 0.8);
+    border-color: var(--gold);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    position: relative;
+    z-index: 10;
   }
 }
