@@ -702,7 +702,7 @@
         addEventListener('touchend', onEnd);
       }
 
-      // hide inner controls until interaction – for Recommended cards this keeps things clean
+      // hide inner controls until interaction (keeps Recommended cards clean)
       media.classList.remove('show-controls');
 
       card.addEventListener('mouseenter', () => {
