@@ -1,5 +1,3 @@
-// Enhanced behaviors for better scrollspy, uniform cards, working indicators,
-// collage centering, product layout, AND a working cart with prices.
 (function () {
   const header = document.getElementById('site-header');
   const hero = document.getElementById('home');
@@ -44,9 +42,10 @@
   /* ------------------------------------------------------------------ */
   (function () {
     const links = Array.from(
-        document.querySelectorAll('.menu .links a[data-spy]')
+        document.querySelectorAll('.menu .links a[data-spy], .menu .links .drop-btn[data-spy]')
     );
     if (!links.length) return;
+
     const sections = links
         .map(a => {
           const sel = a.getAttribute('data-spy');
@@ -62,7 +61,7 @@
     };
 
     document.addEventListener('click', function (e) {
-      const link = e.target.closest('.menu .links a[data-spy]');
+      const link = e.target.closest('.menu .links a[data-spy], .menu .links .drop-btn[data-spy]');
       if (!link) return;
       const sel = link.getAttribute('data-spy');
       const target = sel ? document.querySelector(sel) : null;
@@ -80,15 +79,24 @@
     const io = new IntersectionObserver(
         entries => {
           const visible = entries
-              .filter(e => e.isIntersecting && e.intersectionRatio > 0.8)
-              .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+              .filter(e => e.isIntersecting && e.intersectionRatio > 0.2)
+              .sort((a, b) => {
+                if (b.intersectionRatio !== a.intersectionRatio) {
+                  return b.intersectionRatio - a.intersectionRatio;
+                }
+                return (
+                    a.target.getBoundingClientRect().top -
+                    b.target.getBoundingClientRect().top
+                );
+              });
+
           if (visible[0]) {
             setActive('#' + visible[0].target.id);
           }
         },
         {
-          threshold: [0, 0.6, 0.8, 1],
-          rootMargin: `-${(header?.offsetHeight || 64) + 10}px 0px -80% 0px`,
+          threshold: [0.2, 0.4, 0.6, 0.8, 1],
+          rootMargin: `-${(header?.offsetHeight || 64) + 12}px 0px -40% 0px`,
         }
     );
 
@@ -103,7 +111,7 @@
     const btn = document.querySelector('.menu-btn');
     const links = document.querySelector('.menu .links');
     const dropdown = document.querySelector('.dropdown');
-    const dropBtn = document.querySelector('.drop-btn');
+    const dropBtn = document.querySelector('.dropdown .drop-btn');
 
     function closeMenu() {
       nav && nav.classList.remove('open');
@@ -460,7 +468,7 @@
   /*  Catalog cards & collection cards (index)                          */
   /* ------------------------------------------------------------------ */
   function initCatalogCards() {
-    const cards = document.querySelectorAll('.catalog .card, .collection-card');
+    const cards = document.querySelectorAll('.catalog .card, .collection-card, .slider-strip[data-slider="recommended"] .card');
     if (!cards.length) {
       SlideClock.start();
       return;
@@ -712,38 +720,90 @@
   }
 
   /* ------------------------------------------------------------------ */
+  /*  Populate Recommended from #all-catalog                           */
+  /* ------------------------------------------------------------------ */
+  function initRecommended() {
+    const grid = document.getElementById('all-catalog');
+    const track = document.querySelector('.slider-strip[data-slider="recommended"] .slider-track');
+    if (!grid || !track) return;
+
+    const cards = Array.from(grid.querySelectorAll('.card'));
+    track.innerHTML = '';
+
+    cards.forEach(card => {
+      const viewUrl = card.getAttribute('data-view') || '#';
+      const title = card.querySelector('.title')?.textContent || 'Product';
+      const price = card.querySelector('.price')?.textContent || '$0';
+      const imagesRaw = card.querySelector('.media')?.getAttribute('data-images') || '';
+
+      const cardEl = document.createElement('article');
+      cardEl.className = 'card';
+      cardEl.innerHTML = `
+        <div class="media" data-images="${imagesRaw}">
+          <div class="media-fallback">${title}</div>
+        </div>
+        <div class="content">
+          <div class="title">${title}</div>
+          <div class="price">${price}</div>
+        </div>
+        <div class="actions">
+          <a class="btn primary" href="${viewUrl}" aria-label="View ${title}">View</a>
+        </div>
+      `;
+      track.appendChild(cardEl);
+    });
+  }
+
+  /* ------------------------------------------------------------------ */
   /*  Auto-swiping strips (collections / related / recommended)         */
   /* ------------------------------------------------------------------ */
   function initAutoStrips() {
     const containers = document.querySelectorAll(
-        '.related-strip, .collection-strip'
+        '.related-strip, .collection-strip, .slider-strip[data-slider="recommended"]'
     );
 
     containers.forEach(container => {
       container.style.position = container.style.position || 'relative';
       const track = container.querySelector(
-          '.related-track, .collection-track'
+          '.related-track, .collection-track, .slider-track'
       );
       if (!track) return;
       const slides = track.children;
       if (!slides.length) return;
       let idx = 0;
 
-      let prev = container.querySelector('.col-prev');
-      let next = container.querySelector('.col-next');
+      const isCollection = track.classList.contains('collection-track');
+      const isRecommended = container.matches('.slider-strip[data-slider="recommended"]');
+      const isGenericRelated = !isCollection && !isRecommended;
+
+      // Arrows
+      let prev = isCollection
+          ? container.querySelector('.col-prev')
+          : container.querySelector('.slider-arrow-prev');
+      let next = isCollection
+          ? container.querySelector('.col-next')
+          : container.querySelector('.slider-arrow-next');
+
       if (!prev || !next) {
         prev = document.createElement('button');
-        prev.className = 'col-btn col-prev';
+        prev.className = isCollection
+            ? 'col-btn col-prev'
+            : 'slider-arrow slider-arrow-prev';
         prev.setAttribute('aria-label', 'Previous');
         prev.textContent = '‹';
+
         next = document.createElement('button');
-        next.className = 'col-btn col-next';
+        next.className = isCollection
+            ? 'col-btn col-next'
+            : 'slider-arrow slider-arrow-next';
         next.setAttribute('aria-label', 'Next');
         next.textContent = '›';
+
         container.appendChild(prev);
         container.appendChild(next);
       }
 
+      // Indicator
       let indicator = container.querySelector('.swipe-indicator');
       if (!indicator) {
         indicator = document.createElement('div');
@@ -755,12 +815,9 @@
       function cardWidth() {
         const first = slides[0];
         if (!first) return track.getBoundingClientRect().width || 0;
+        const style = getComputedStyle(track);
         const gap =
-            parseFloat(
-                getComputedStyle(track).columnGap ||
-                getComputedStyle(track).gap ||
-                '12'
-            ) || 12;
+            parseFloat(style.columnGap || style.gap || '12') || 12;
         return (
             (first.getBoundingClientRect().width ||
                 track.getBoundingClientRect().width) + gap
@@ -768,7 +825,7 @@
       }
 
       function hasOverflow() {
-        return track.scrollWidth - track.clientWidth > 2;
+        return slides.length > 1;
       }
 
       function go(n) {
@@ -791,79 +848,15 @@
         go(idx + 1);
       });
 
-      let sx = 0,
-          dist = 0,
-          dragging = false;
-      function start(e) {
-        if (!hasOverflow()) return;
-        dragging = true;
-        sx = 'touches' in e ? e.touches[0].clientX : e.clientX;
-        dist = 0;
-        container.classList.add('show-controls');
-      }
-      function move(e) {
-        if (!dragging) return;
-        const x = 'touches' in e ? e.touches[0].clientX : e.clientX;
-        dist = x - sx;
-      }
-      function end() {
-        if (!dragging) return;
-        dragging = false;
-        if (Math.abs(dist) > 40) {
-          if (dist < 0) go(idx + 1);
-          else go(idx - 1);
-        }
-      }
-      track.addEventListener('mousedown', start);
-      addEventListener('mousemove', move);
-      addEventListener('mouseup', end);
-      track.addEventListener('touchstart', start, { passive: true });
-      track.addEventListener('touchmove', move, { passive: true });
-      track.addEventListener('touchend', end);
-
-      const isCollection = track.classList.contains('collection-track');
-      if (!isCollection) {
-        const tick = () => {
-          if (!hasOverflow()) return;
-          const w = cardWidth();
-          idx = (idx + 1) % slides.length;
-          track.style.transform = `translateX(${idx * -w}px)`;
+      // COLLECTION: let initCollectionStrip handle auto-advance; only init indicator
+      if (isCollection) {
+        requestAnimationFrame(() => {
           updateTransformIndicator(track, indicator, slides.length, idx);
-        };
-        let inView = true;
-        const io =
-            'IntersectionObserver' in window
-                ? new IntersectionObserver(
-                    entries => {
-                      entries.forEach(entry => {
-                        inView =
-                            entry.isIntersecting &&
-                            entry.intersectionRatio >= 0.4;
-                      });
-                    },
-                    { threshold: [0, 0.4, 1] }
-                )
-                : null;
-        if (io) io.observe(track);
-        if (inView) SlideClock.subscribe(tick);
+        });
+        return;
       }
-    });
 
-    const rec = document.querySelector('.catalog.recommended');
-    if (rec) {
-      const ind =
-          rec.nextElementSibling &&
-          rec.nextElementSibling.classList?.contains('swipe-indicator')
-              ? rec.nextElementSibling
-              : (() => {
-                const d = document.createElement('div');
-                d.className = 'swipe-indicator';
-                d.innerHTML = '<div class="thumb"></div>';
-                rec.insertAdjacentElement('afterend', d);
-                return d;
-              })();
-      attachSwipeIndicator(rec, ind);
-
+      // RECOMMENDED + GENERIC RELATED: auto + swipe behavior like "You may also like"
       let inView = true;
       const io =
           'IntersectionObserver' in window
@@ -879,41 +872,73 @@
                   { threshold: [0, 0.4, 1] }
               )
               : null;
-      if (io) io.observe(rec);
+      if (io) io.observe(container);
 
-      function hasOverflow() {
-        return rec.scrollWidth - rec.clientWidth > 2;
-      }
-      function childWidth() {
-        const first = rec.querySelector('.card');
-        return first
-            ? first.getBoundingClientRect().width +
-            parseFloat(
-                getComputedStyle(rec).columnGap ||
-                getComputedStyle(rec).gap ||
-                '16'
-            )
-            : 240;
-      }
       const tick = () => {
-        if (!inView || !hasOverflow()) return;
-        const step = childWidth();
-        const nearEnd =
-            rec.scrollLeft + rec.clientWidth >= rec.scrollWidth - step - 1;
-        if (nearEnd) {
-          rec.scrollTo({ left: 0, behavior: 'auto' });
-        } else {
-          rec.scrollBy({ left: step, behavior: 'smooth' });
-        }
+        if (!hasOverflow() || !inView) return;
+        idx = (idx + 1) % slides.length;
+        const w = cardWidth();
+        track.style.transform = `translateX(${idx * -w}px)`;
+        updateTransformIndicator(track, indicator, slides.length, idx);
+        container.classList.add('show-controls');
       };
-      function update() {
+
+      function updateClockSubscription() {
         SlideClock.unsubscribe(tick);
         if (hasOverflow() && inView) SlideClock.subscribe(tick);
       }
-      addEventListener('resize', update);
-      rec.addEventListener('scroll', () => attachSwipeIndicator(rec, ind));
-      requestAnimationFrame(update);
-    }
+
+      // Swipe / drag support (iPad / touch / mouse)
+      let startX = 0;
+      let dist = 0;
+      let dragging = false;
+
+      function onStart(e) {
+        dragging = true;
+        startX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+        dist = 0;
+        container.classList.add('show-controls');
+        SlideClock.unsubscribe(tick);
+      }
+
+      function onMove(e) {
+        if (!dragging) return;
+        const x = 'touches' in e ? e.touches[0].clientX : e.clientX;
+        dist = x - startX;
+      }
+
+      function onEnd() {
+        if (!dragging) return;
+        dragging = false;
+        if (Math.abs(dist) > 40) {
+          if (dist < 0) go(idx + 1);
+          else go(idx - 1);
+        }
+        updateClockSubscription();
+      }
+
+      track.addEventListener('mousedown', onStart);
+      addEventListener('mousemove', onMove);
+      addEventListener('mouseup', onEnd);
+      track.addEventListener('touchstart', onStart, { passive: true });
+      addEventListener('touchmove', onMove, { passive: true });
+      addEventListener('touchend', onEnd);
+
+      // Recompute on resize
+      addEventListener('resize', () => {
+        track.style.transform = 'translateX(0px)';
+        idx = 0;
+        requestAnimationFrame(() => {
+          updateTransformIndicator(track, indicator, slides.length, idx);
+          updateClockSubscription();
+        });
+      });
+
+      requestAnimationFrame(() => {
+        updateTransformIndicator(track, indicator, slides.length, idx);
+        updateClockSubscription();
+      });
+    });
   }
 
   /* ------------------------------------------------------------------ */
@@ -1346,15 +1371,15 @@
       track.appendChild(card);
     });
 
-    let prev = relatedStrip.querySelector('.col-prev');
-    let next = relatedStrip.querySelector('.col-next');
+    let prev = relatedStrip.querySelector('.slider-arrow-prev');
+    let next = relatedStrip.querySelector('.slider-arrow-next');
     if (!prev || !next) {
       prev = document.createElement('button');
-      prev.className = 'col-btn col-prev';
+      prev.className = 'slider-arrow slider-arrow-prev';
       prev.setAttribute('aria-label', 'Previous');
       prev.textContent = '‹';
       next = document.createElement('button');
-      next.className = 'col-btn col-next';
+      next.className = 'slider-arrow slider-arrow-next';
       next.setAttribute('aria-label', 'Next');
       next.textContent = '›';
       relatedStrip.appendChild(prev);
@@ -1363,6 +1388,7 @@
 
     let idx = 0;
     const slides = track.children;
+
     function cardWidth() {
       const first = slides[0];
       if (!first) return track.getBoundingClientRect().width || 0;
@@ -1377,9 +1403,11 @@
               track.getBoundingClientRect().width) + gap
       );
     }
+
     function hasOverflow() {
       return slides.length > 1;
     }
+
     function go(n) {
       if (!hasOverflow()) return;
       idx = (n + slides.length) % slides.length;
@@ -1405,35 +1433,41 @@
       go(idx + 1);
     });
 
-    let sx = 0,
-        dist = 0,
-        dragging = false;
-    function start(e) {
-      if (!hasOverflow()) return;
+    // NEW: swipe / drag logic (like Recommended)
+    let startX = 0;
+    let dist = 0;
+    let dragging = false;
+
+    function onStart(e) {
       dragging = true;
-      sx = 'touches' in e ? e.touches[0].clientX : e.clientX;
+      startX = 'touches' in e ? e.touches[0].clientX : e.clientX;
       dist = 0;
       relatedStrip.classList.add('show-controls');
+      SlideClock.unsubscribe(tick);
     }
-    function move(e) {
+
+    function onMove(e) {
       if (!dragging) return;
       const x = 'touches' in e ? e.touches[0].clientX : e.clientX;
-      dist = x - sx;
+      dist = x - startX;
     }
-    function end() {
+
+    function onEnd() {
       if (!dragging) return;
       dragging = false;
       if (Math.abs(dist) > 40) {
         if (dist < 0) go(idx + 1);
         else go(idx - 1);
       }
+      update();
     }
-    track.addEventListener('mousedown', start);
-    addEventListener('mousemove', move);
-    addEventListener('mouseup', end);
-    track.addEventListener('touchstart', start, { passive: true });
-    track.addEventListener('touchmove', move, { passive: true });
-    track.addEventListener('touchend', end);
+
+    track.addEventListener('mousedown', onStart);
+    addEventListener('mousemove', onMove);
+    addEventListener('mouseup', onEnd);
+    track.addEventListener('touchstart', onStart, { passive: true });
+    addEventListener('touchmove', onMove, { passive: true });
+    addEventListener('touchend', onEnd);
 
     let inView = true;
     const io =
@@ -1455,12 +1489,35 @@
     const tick = () => {
       if (inView && hasOverflow()) go(idx + 1);
     };
+
     function update() {
       SlideClock.unsubscribe(tick);
       if (hasOverflow() && inView) SlideClock.subscribe(tick);
     }
-    addEventListener('resize', update);
-    requestAnimationFrame(update);
+
+    addEventListener('resize', () => {
+      track.style.transform = 'translateX(0px)';
+      idx = 0;
+      requestAnimationFrame(() => {
+        updateTransformIndicator(
+            track,
+            relatedStrip.querySelector('.swipe-indicator'),
+            slides.length,
+            idx
+        );
+        update();
+      });
+    });
+
+    requestAnimationFrame(() => {
+      updateTransformIndicator(
+          track,
+          relatedStrip.querySelector('.swipe-indicator'),
+          slides.length,
+          idx
+      );
+      update();
+    });
   }
 
   /* ------------------------------------------------------------------ */
@@ -1673,8 +1730,8 @@
     addEventListener('mousemove', move);
     addEventListener('mouseup', end);
     track.addEventListener('touchstart', start, { passive: true });
-    track.addEventListener('touchmove', move, { passive: true });
-    track.addEventListener('touchend', end);
+    addEventListener('touchmove', move, { passive: true });
+    addEventListener('touchend', end);
 
     const tick = () => go((idx + 1) % slides.length);
     let inView = true;
@@ -1776,6 +1833,11 @@
       });
       document.body.appendChild(div);
       setTimeout(() => div.remove(), 1600);
+
+      // Immediately refresh cart count so header shows updated quantity
+      if (typeof updateCartCount === 'function') {
+        updateCartCount();
+      }
     }
     if (addBtn) addBtn.addEventListener('click', addToCart);
   }
@@ -1783,6 +1845,8 @@
   /* ------------------------------------------------------------------ */
   /*  Cart drawer (index and product pages)                             */
   /* ------------------------------------------------------------------ */
+  let updateCartCount; // declared here so initCheckout can call it
+
   function initCartDrawer() {
     const drawer = document.querySelector('.cart-drawer');
     if (!drawer) return;
@@ -1821,14 +1885,14 @@
       return '$' + n.toFixed(2).replace(/\.00$/, '');
     }
 
-    function updateCount() {
+    updateCartCount = function () {
       const cart = readCart();
       const totalQty = cart.reduce(
           (sum, item) => sum + (item.qty || 1),
           0
       );
       countEls.forEach(el => (el.textContent = String(totalQty)));
-    }
+    };
 
     function render() {
       const cart = readCart();
@@ -1838,7 +1902,7 @@
         emptyEl.style.display = '';
         itemsEl.style.display = 'none';
         totalEl.textContent = '$0';
-        updateCount();
+        updateCartCount();
 
         const msg = buildOrderMessageFromCart(cart);
         if (checkoutBtn)
@@ -1902,7 +1966,7 @@
       });
 
       totalEl.textContent = formatPrice(total);
-      updateCount();
+      updateCartCount();
 
       const msg = buildOrderMessageFromCart(cart);
       if (checkoutBtn)
@@ -1920,7 +1984,6 @@
         const orderText = buildOrderMessageFromCart(cart).plain;
 
         navigator.clipboard.writeText(orderText).then(() => {
-          // Temporarily change button to show success
           const originalHTML = button.innerHTML;
           button.innerHTML = `
             <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
@@ -1931,7 +1994,6 @@
           button.style.background = 'rgba(0, 255, 0, 0.1)';
           button.style.borderColor = 'rgba(0, 255, 0, 0.5)';
 
-          // Revert after 3 seconds
           setTimeout(() => {
             button.innerHTML = originalHTML;
             button.style.background = '';
@@ -1963,7 +2025,7 @@
       if (e.key === 'Escape' && drawer.classList.contains('open')) close();
     });
 
-    updateCount();
+    updateCartCount();
   }
 
   /* ------------------------------------------------------------------ */
@@ -2027,18 +2089,16 @@
       const orderText = `Hello EDELHART, I'm interested in ${productTitle}. Metal: ${metal}, Stone: ${stone}, Size: ${size}, Quantity: ${qty}. Please provide details and next steps. Shared from ${platform}.`;
 
       navigator.clipboard.writeText(orderText).then(() => {
-        // Temporarily change button to show success
         const originalHTML = button.innerHTML;
         button.innerHTML = `
           <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
             <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-          </svg>
-          Copied!
-        `;
-        button.style.background = 'rgba(0, 255, 0, 0.1)';
-        button.style.borderColor = 'rgba(0, 255, 0, 0.5)';
+            </svg>
+            Copied!
+          `;
+        button.style.background = 'rgba(0, 0, 0, 0.1)';
+        button.style.borderColor = 'rgba(255, 255, 255, 0.5)';
 
-        // Revert after 3 seconds
         setTimeout(() => {
           button.innerHTML = originalHTML;
           button.style.background = '';
@@ -2056,9 +2116,11 @@
   /* ------------------------------------------------------------------ */
   function onReady() {
     initCatalogCards();
+    initRecommended();
+    initCatalogCards();
     initAutoStrips();
     initProductGallery();
-    initDynamicRelated();
+    initDynamicRelated();    // "You may also like" (unchanged)
     initFeaturedSlideshow();
     initCollectionStrip();
     initAllProductsSort();

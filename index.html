@@ -8,9 +8,11 @@
   <meta name="color-scheme" content="dark light">
   <meta name="supported-color-schemes" content="dark">
   <link rel="icon" type="image/png" href="img/favicon.png"/>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600&family=Signatura+Monoline+Script&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -26,9 +28,11 @@
       </button>
       <div class="links">
         <div class="dropdown">
-          <button class="drop-btn" aria-haspopup="true" aria-expanded="false">
+          <button class="drop-btn" data-spy="#collections" aria-haspopup="true" aria-expanded="false">
             Collections
-            <svg class="caret" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
+            <svg class="caret" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+              <path fill="currentColor" d="M7 10l5 5 5-5z"/>
+            </svg>
           </button>
           <div class="drop-menu" role="menu">
             <a href="collections/sss.html" role="menuitem">SSS</a>
@@ -71,10 +75,11 @@
     <div class="wrap">
       <div class="section-head">
         <h2>Collections</h2>
-        <p>Explore signature lines and motifs.</p>
       </div>
 
-      <div class="collection-strip" aria-label="Collections slider">
+      <div class="collection-strip" aria-label="Collections slider" data-slider="collection">
+        <button class="col-btn col-prev" type="button" aria-label="Previous collection">‹</button>
+        <button class="col-btn col-next" type="button" aria-label="Next collection">›</button>
         <div class="collection-track">
           <a class="collection-card" href="collections/sss.html" aria-label="Open SSS collection">
             <div class="collection-media" data-images="img/products/sss-gold-1.jpg,img/products/sss-gold-2.jpg,img/products/sss-gold-3.jpg"></div>
@@ -105,9 +110,13 @@
       <!-- Filters -->
       <div class="filters-wrap">
         <button class="filter-toggle" type="button" aria-expanded="false" aria-controls="sort-panel">
-          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M3 5h18v2H3V5zm4 6h10v2H7v-2zm3 6h4v2h-4v-2z"/></svg>
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+            <path fill="currentColor" d="M3 5h18v2H3V5zm4 6h10v2H7v-2zm3 6h4v2h-4v2z"/>
+          </svg>
           Filters
-          <svg class="caret" viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
+          <svg class="caret" viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">
+            <path fill="currentColor" d="M7 10l5 5 5-5z"/>
+          </svg>
         </button>
         <div class="sort-panel" id="sort-panel" hidden>
           <div class="sort">
@@ -308,113 +317,13 @@
         <h2>Recommended for you</h2>
         <p>Curated picks based on our best-sellers and new releases.</p>
       </div>
-      <div class="catalog recommended" aria-label="Recommended products (horizontal)">
-        <article class="card" data-view="products/sss-pendant-gold.html">
-          <div class="media" data-images="img/products/sss-gold-1.jpg,img/products/sss-gold-2.jpg,img/products/sss-gold-3.jpg,img/products/sss-gold-4.jpg,img/products/sss-gold-5.jpg"></div>
-          <div class="content">
-            <div class="title">SSS pendant — gold</div>
-            <div class="price">$125</div>
-            <div class="meta">Limited stock</div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="products/sss-pendant-gold.html">View</a>
-          </div>
-        </article>
-
-        <article class="card" data-view="products/ee-male-ring-silver.html">
-          <div class="media" data-images="img/products/EE-male-ring-silver-1.jpg"></div>
-          <div class="content">
-            <div class="title">EE male ring — silver</div>
-            <div class="price">$200</div>
-            <div class="meta">Customer favorite</div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="products/ee-male-ring-silver.html">View</a>
-          </div>
-        </article>
-
-        <article class="card" data-view="products/foto-earring.html">
-          <div class="media" data-images="img/products/foto-earring-1.jpg,img/products/foto-earring-2.jpg"></div>
-          <div class="content">
-            <div class="title">FOTO earring</div>
-            <div class="price">$310</div>
-            <div class="meta">New arrival</div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="products/foto-earring.html">View</a>
-          </div>
-        </article>
-
-        <article class="card" data-view="products/legs-pendant.html">
-          <div class="media" data-images="img/products/LEGS-pendant-1.jpg,img/products/LEGS-pendant-2.jpg,img/products/LEGS-pendant-3.jpg,img/products/LEGS-pendant-4.jpg,img/products/LEGS-pendant-5.jpg"></div>
-          <div class="content">
-            <div class="title">LEGS pendant</div>
-            <div class="price">$375</div>
-            <div class="meta">Sculptural statement</div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="products/legs-pendant.html">View</a>
-          </div>
-        </article>
-      </div>
-      <div class="swipe-indicator" aria-hidden="true"><div class="thumb"></div></div>
-    </div>
-  </section>
-
-  <!-- On-Body Gallery -->
-  <section id="onbody" aria-label="On‑Body Gallery">
-    <div class="wrap">
-      <div class="section-head">
-        <h2>On‑Body Gallery</h2>
-        <p>See our pieces in their natural element.</p>
-      </div>
-
-      <div class="collage-wrapper">
-        <div class="collage-surround">
-          <!-- Top row -->
-          <img src="img/models/5.jpeg" alt="Model portrait with ring" loading="lazy" decoding="async" class="collage-img">
-          <img src="img/models/6.jpeg" alt="Hands with multiple rings" loading="lazy" decoding="async" class="collage-img">
-
-          <!-- Middle row -->
-          <img src="img/models/7.jpeg" alt="Pendant layered styling" loading="lazy" decoding="async" class="collage-img">
-          <img src="img/models/8.jpeg" alt="Necklace in motion" loading="lazy" decoding="async" class="collage-img">
-
-          <!-- Bottom row -->
-          <img src="img/models/9.jpeg" alt="Earring editorial" loading="lazy" decoding="async" class="collage-img">
-          <img src="img/models/10.jpeg" alt="Bracelet detail" loading="lazy" decoding="async" class="collage-img">
+      <div class="slider-strip" aria-label="Recommended products (horizontal)" data-slider="recommended">
+        <button class="slider-arrow slider-arrow-prev" type="button" aria-label="Previous recommended item">‹</button>
+        <div class="slider-track">
+          <!-- Dynamically populated from #all-catalog by JS -->
         </div>
-
-        <!-- Center slideshow with arrows and dots -->
-        <div class="featured-strip collage-main">
-          <div class="featured-track">
-            <div class="feat-slide">
-              <img src="img/models/model-ring-sss.jpeg" alt="Model wearing pendant, close-up" loading="lazy" decoding="async">
-            </div>
-            <div class="feat-slide">
-              <img src="img/models/2.jpeg" alt="Model with ring detail, side light" loading="lazy" decoding="async">
-            </div>
-            <div class="feat-slide">
-              <img src="img/models/3.jpeg" alt="Necklace on model, collarbone" loading="lazy" decoding="async">
-            </div>
-            <div class="feat-slide">
-              <img src="img/models/4.jpeg" alt="Earring on model, profile" loading="lazy" decoding="async">
-            </div>
-          </div>
-
-          <!-- Navigation arrows -->
-          <button class="slider-btn slider-prev" type="button" aria-label="Previous image">‹</button>
-          <button class="slider-btn slider-next" type="button" aria-label="Next image">›</button>
-
-          <!-- Dots navigation -->
-          <div class="dots">
-            <div class="dot active" data-index="0"></div>
-            <div class="dot" data-index="1"></div>
-            <div class="dot" data-index="2"></div>
-            <div class="dot" data-index="3"></div>
-          </div>
-
-          <div class="swipe-indicator" aria-hidden="true"><div class="thumb"></div></div>
-        </div>
+        <button class="slider-arrow slider-arrow-next" type="button" aria-label="Next recommended item">›</button>
+        <div class="swipe-indicator" aria-hidden="true"><div class="thumb"></div></div>
       </div>
     </div>
   </section>
@@ -424,29 +333,33 @@
     <div class="wrap">
       <div class="section-head">
         <h2 id="contact-title">Contact & Social</h2>
-        <p>For orders, bespoke services, and inquiries: message us directly.</p>
       </div>
       <div class="grid-lite">
-        <div class="card">
-          <div class="content">
-            <div class="title">Direct channels</div>
-            <p class="meta">Prefer WhatsApp for quick responses.</p>
-          </div>
-          <div class="actions" style="flex-wrap: wrap;">
+        <div class="card contact-card">
+          <div class="content"></div>
+          <div class="actions">
             <a class="btn primary" href="https://wa.me/84944445084" target="_blank" rel="noopener" aria-label="WhatsApp">
-              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 00-8 16.1L3 22l3.9-1A10 10 0 1012 2zm5.2 14.2c-.2.6-1.2 1.1-1.7 1.1-.5 0-1 .2-3.3-1.1-2.8-1.6-4.5-4.6-4.6-4.8-.2-.3-1.1-1.5-1.1-2.8 0-1.2.6-1.8.9-2 .3-.2.8-.3 1-.3h.7c.2 0 .5 0 .7.6.3.7 1 2.4 1 2.5s.1.4 0 .6c-.1.2-.2.3-.4.5-.2.2-.4.5-.6.6-.2.2-.4.4-.2.7.2.3.9 1.5 2.1 2.4 1.5 1.1 2.7 1.5 3.1 1.7.3.1.6.1.8 0 .2-.1 1.3-.6 1.5-.8.2-.1.4-.2.7-.1.2.1 1.1.5 1.3.6.2.1.3.1.4.2.1 0 .1.6-.1 1.1z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
+                <path fill="currentColor" d="M12 2a10 10 0 00-8 16.1L3 22l3.9-1A10 10 0 1012 2zm5.2 14.2c-.2.6-1.2 1.1-1.7 1.1-.5 0-1 .2-3.3-1.1-2.8-1.6-4.5-4.6-4.6-4.8-.2-.3-1.1-1.5-1.1-2.8 0-1.2.6-1.8.9-2 .3-.2.8-.3 1-.3h.7c.2 0 .5 0 .7.6.3.7 1 2.4 1 2.5s.1.4 0 .6c-.1.2-.2.3-.4.5-.2.2-.4.5-.6.6-.2.2-.4.4-.2.7.2.3.9 1.5 2.1 2.4 1.5 1.1 2.7 1.5 3.1 1.7.3.1.6.1.8 0 .2-.1 1.3-.6 1.5-.8.2-.1.4-.2.7-.1.2.1 1.1.5 1.3.6.2.1.3.1.4.2.1 0 .1.6-.1 1.1z"/>
+              </svg>
               WhatsApp
             </a>
             <a class="btn btn-outline" href="https://www.instagram.com/edelhartvx/" target="_blank" rel="noopener" aria-label="Instagram">
-              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm5 5a5 5 0 100 10 5 5 0 000-10zm6-1a1 1 0 100 2 1 1 0 000-2zm-6 3a3 3 0 110 6 3 3 0 010-6z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
+                <path fill="currentColor" d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm5 5a5 5 0 100 10 5 5 0 000-10zm6-1a1 1 0 100 2 1 1 0 000-2zm-6 3a3 3 0 110 6 3 3 0 010-6z"/>
+              </svg>
               Instagram
             </a>
             <a class="btn btn-outline" href="https://www.facebook.com/people/Edelhart/61578850709155/" target="_blank" rel="noopener" aria-label="Facebook">
-              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M22 12a10 10 0 10-11.6 9.9v-7h-2.3V12h2.3V9.7c0-2.3 1.4-3.6 3.5-3.6 1 0 2 .2 2 .2v2.2H15c-1.1 0-1.5.7-1.5 1.4V12h2.6l-.4 2.9h-2.2v7A10 10 0 0022 12z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
+                <path fill="currentColor" d="M22 12a10 10 0 10-11.6 9.9v-7h-2.3V12h2.3V9.7c0-2.3 1.4-3.6 3.5-3.6 1 0 2 .2 2 .2v2.2H15c-1.1 0-1.5.7-1.5 1.4V12h2.6l-.4 2.9h-2.2v7A10 10 0 0022 12z"/>
+              </svg>
               Facebook
             </a>
             <a class="btn btn-outline" href="https://maps.google.com/?q=483/11+Le+Van+Sy+Street,+Ward+Nhieu+Loc,+Ho+Chi+Minh+City,+Vietnam" target="_blank" rel="noopener" aria-label="Open in Google Maps">
-              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 00-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 00-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
+                <path fill="currentColor" d="M12 2a7 7 0 00-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 00-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"/>
+              </svg>
               Open in Google Maps
             </a>
           </div>
