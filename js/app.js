@@ -468,10 +468,23 @@
   }
 
   /* ------------------------------------------------------------------ */
-  /*  Catalog cards & collection cards (index)                          */
+  /*  Catalog cards & collection cards (index + recommended)            */
   /* ------------------------------------------------------------------ */
+
+  /**
+   * Build inner image sliders for:
+   * - Catalog cards
+   * - Collection cards (inner gallery only)
+   * - Recommended cards (once filled)
+   *
+   * Inner controls (dots/arrows) only show when `media` has .show-controls:
+   *  - set on hover, tap, or swipe start
+   *  - never triggered by outer strip arrows
+   */
   function initCatalogCards() {
-    const cards = document.querySelectorAll('.catalog .card, .collection-card, .slider-strip[data-slider="recommended"] .card');
+    const cards = document.querySelectorAll(
+        '.catalog .card, .collection-card, .slider-strip[data-slider="recommended"] .card, #dynamic-related .related-card'
+    );
     if (!cards.length) {
       SlideClock.start();
       return;
@@ -501,22 +514,35 @@
     const imagesMap = {};
 
     cards.forEach(card => {
-      const media = card.querySelector('.media, .collection-media');
-      const viewUrl = card.getAttribute('data-view') || '#';
+      const isRelated = card.classList.contains('related-card');
+      const media = card.querySelector(
+          isRelated ? '.related-media' : '.media, .collection-media'
+      );
+      const viewUrl = card.getAttribute('data-view') || card.getAttribute('href') || '#';
       const title =
           card.querySelector('.title')?.textContent ||
           card.querySelector('.collection-name')?.textContent ||
           'product';
       const slug = slugFromPath(viewUrl);
 
-      const listRaw = media
-          ? listFromCSV(media.getAttribute('data-images'))
-          : [];
+      // only catalog/recommended/collections have data-images; related currently single image
+      const listRawAttr = isRelated
+          ? null
+          : media && media.getAttribute('data-images');
+      const listRaw = listRawAttr ? listFromCSV(listRawAttr) : [];
       const listAbs = toAbsList(listRaw, location.href);
-      if (slug && listAbs.length) imagesMap[slug] = { images: listAbs };
 
-      // clickable product cards
-      if (!card.classList.contains('collection-card')) {
+      if (!isRelated && slug && listAbs.length) {
+        imagesMap[slug] = { images: listAbs };
+      }
+
+      // clickable product cards (excluding related-card which is <a>)
+      if (
+          !card.classList.contains('collection-card') &&
+          !isRelated &&
+          viewUrl &&
+          !card.matches('a')
+      ) {
         card.style.cursor = 'pointer';
         card.addEventListener('click', e => {
           const t = e.target;
@@ -542,7 +568,15 @@
         card.setAttribute('aria-label', `Open ${title}`);
       }
 
-      if (!media || !listAbs.length) return;
+      if (!media) return;
+
+      // RELATED cards (You may also like) currently only show a single image and
+      // do not have inner gallery requirements in HTML; we leave them as-is.
+      if (isRelated) {
+        return;
+      }
+
+      if (!listAbs.length) return;
 
       if (!card.classList.contains('collection-card')) {
         card.querySelectorAll('a[href]').forEach(a => {
@@ -611,22 +645,32 @@
         e.preventDefault();
         e.stopPropagation();
       };
+
+      // inner slider: show controls only when interacting
+      function showInnerControls() {
+        media.classList.add('show-controls');
+      }
+
       prev.addEventListener('click', e => {
         stopNav(e);
+        showInnerControls();
         go(idx - 1);
-        media.classList.add('show-controls');
+        pauseOuterForCard(card);
       });
       next.addEventListener('click', e => {
         stopNav(e);
+        showInnerControls();
         go(idx + 1);
-        media.classList.add('show-controls');
+        pauseOuterForCard(card);
       });
       dots.addEventListener('click', e => {
         const t = e.target;
         if (!(t instanceof HTMLElement)) return;
         if (t.classList.contains('dot')) {
           stopNav(e);
+          showInnerControls();
           go(Number(t.dataset.index || 0));
+          pauseOuterForCard(card);
         }
       });
 
@@ -661,39 +705,41 @@
       };
       media.__api = api;
 
-      // swipe for product/collection cards (not for collection-card)
-      if (!card.classList.contains('collection-card')) {
-        let startX = 0,
-            dist = 0,
-            dragging = false;
-        function onStart(e) {
-          dragging = true;
-          startX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-          dist = 0;
-          clearTimeout(api.pauseTimeout);
-          api.paused = true;
-          api.updateSubscription();
-          media.classList.add('show-controls');
-        }
-        function onMove(e) {
-          if (!dragging) return;
-          const x = 'touches' in e ? e.touches[0].clientX : e.clientX;
-          dist = x - startX;
-        }
-        function onEnd(e) {
-          if (!dragging) return;
+      // swipe inner gallery
+      let startX = 0,
+          dist = 0,
           dragging = false;
-          if (Math.abs(dist) > 40) {
-            if (dist < 0) go(idx + 1);
-            else go(idx - 1);
-          }
-          if (e) e.stopPropagation();
-          api.paused = true;
-          api.pauseTimeout = setTimeout(() => {
-            api.paused = false;
-            api.updateSubscription();
-          }, 10000);
+      function onStart(e) {
+        dragging = true;
+        startX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+        dist = 0;
+        clearTimeout(api.pauseTimeout);
+        api.paused = true;
+        api.updateSubscription();
+        showInnerControls();
+        pauseOuterForCard(card);
+      }
+      function onMove(e) {
+        if (!dragging) return;
+        const x = 'touches' in e ? e.touches[0].clientX : e.clientX;
+        dist = x - startX;
+      }
+      function onEnd(e) {
+        if (!dragging) return;
+        dragging = false;
+        if (Math.abs(dist) > 40) {
+          if (dist < 0) go(idx + 1);
+          else go(idx - 1);
         }
+        if (e) e.stopPropagation();
+        api.paused = true;
+        api.pauseTimeout = setTimeout(() => {
+          api.paused = false;
+          api.updateSubscription();
+        }, 10000);
+      }
+
+      if (!card.classList.contains('collection-card')) {
         card.addEventListener('mousedown', onStart);
         addEventListener('mousemove', onMove);
         addEventListener('mouseup', onEnd);
@@ -702,7 +748,7 @@
         addEventListener('touchend', onEnd);
       }
 
-      // hide inner controls until interaction (keeps Recommended cards clean)
+      // hide inner controls by default
       media.classList.remove('show-controls');
 
       card.addEventListener('mouseenter', () => {
@@ -724,6 +770,15 @@
       writeImageCache(merged);
     }
     SlideClock.start();
+  }
+
+  /* Helper: pause outer slider for a card */
+  function pauseOuterForCard(card) {
+    const strip = card.closest('.related-strip, .slider-strip[data-slider="recommended"], .collection-strip');
+    if (!strip) return;
+    const api = strip.__stripApi;
+    if (!api) return;
+    api.pause();
   }
 
   /* ------------------------------------------------------------------ */
@@ -765,6 +820,15 @@
   /* ------------------------------------------------------------------ */
   /*  Auto-swiping strips (collections / related / recommended)         */
   /* ------------------------------------------------------------------ */
+
+  /**
+   * Shared outer strip behavior:
+   * - related-strip (index / product pages)
+   * - slider-strip[data-slider="recommended"]
+   * - collection-strip
+   *
+   * One card per step, looping; pause/resume for interactions.
+   */
   function initAutoStrips() {
     const containers = document.querySelectorAll(
         '.related-strip, .collection-strip, .slider-strip[data-slider="recommended"]'
@@ -781,9 +845,7 @@
       if (!slides.length) return;
       let idx = 0;
 
-      const isRecommended = container.matches('.slider-strip[data-slider="recommended"]');
-
-      // Arrows: preserve existing for collection-strip, otherwise use slider-arrow*
+      // Arrows
       let prev = isCollectionStrip
           ? container.querySelector('.col-prev')
           : container.querySelector('.slider-arrow-prev');
@@ -835,16 +897,7 @@
         return slides.length > 1;
       }
 
-      // For COLLECTION: treat each slide as full-width (100%) like original behavior
-      function goCollection(n) {
-        idx = (n + slides.length) % slides.length;
-        track.style.transform = `translateX(${idx * -100}%)`;
-        updateTransformIndicator(track, indicator, slides.length, idx);
-        container.classList.add('show-controls');
-      }
-
-      // For RECOMMENDED and related strips: one card-per-step, like "You may also like"
-      function goStrip(n) {
+      function go(n) {
         if (!hasOverflow()) return;
         idx = (n + slides.length) % slides.length;
         const w = cardWidth();
@@ -853,65 +906,19 @@
         container.classList.add('show-controls');
       }
 
-      const go = isCollectionStrip ? goCollection : goStrip;
-
       prev.addEventListener('click', e => {
         e.preventDefault();
         e.stopPropagation();
+        stripApi.pause();
         go(idx - 1);
       });
       next.addEventListener('click', e => {
         e.preventDefault();
         e.stopPropagation();
+        stripApi.pause();
         go(idx + 1);
       });
 
-      // COLLECTION STRIP: auto logic will be handled here, not in initCollectionStrip
-      if (isCollectionStrip) {
-        let inView = true;
-        const io =
-            'IntersectionObserver' in window
-                ? new IntersectionObserver(
-                    entries => {
-                      entries.forEach(
-                          entry =>
-                              (inView =
-                                  entry.isIntersecting &&
-                                  entry.intersectionRatio >= 0.4)
-                      );
-                    },
-                    { threshold: [0, 0.4, 1] }
-                )
-                : null;
-        if (io) io.observe(container);
-
-        const tick = () => {
-          if (!inView || slides.length <= 1) return;
-          goCollection(idx + 1);
-        };
-
-        function updateClockSubscription() {
-          SlideClock.unsubscribe(tick);
-          if (inView && slides.length > 1) SlideClock.subscribe(tick);
-        }
-
-        addEventListener('resize', () => {
-          track.style.transform = 'translateX(0%)';
-          idx = 0;
-          requestAnimationFrame(() => {
-            updateTransformIndicator(track, indicator, slides.length, idx);
-          });
-        });
-
-        requestAnimationFrame(() => {
-          updateTransformIndicator(track, indicator, slides.length, idx);
-          updateClockSubscription();
-        });
-
-        return; // do not run generic strip logic
-      }
-
-      // RECOMMENDED + generic related: auto + swipe
       let inView = true;
       const io =
           'IntersectionObserver' in window
@@ -923,21 +930,44 @@
                                 entry.isIntersecting &&
                                 entry.intersectionRatio >= 0.4)
                     );
+                    stripApi.updateSubscription();
                   },
                   { threshold: [0, 0.4, 1] }
               )
               : null;
       if (io) io.observe(container);
 
+      let pausedByUser = false;
+      let idleTimer = null;
+      const idleMs = 10000;
+
+      function setIdleResume() {
+        if (idleTimer) clearTimeout(idleTimer);
+        idleTimer = setTimeout(() => {
+          pausedByUser = false;
+          stripApi.updateSubscription();
+        }, idleMs);
+      }
+
       const tick = () => {
-        if (!hasOverflow() || !inView) return;
-        goStrip(idx + 1);
+        if (!hasOverflow() || !inView || pausedByUser) return;
+        go(idx + 1);
       };
 
-      function updateClockSubscription() {
-        SlideClock.unsubscribe(tick);
-        if (hasOverflow() && inView) SlideClock.subscribe(tick);
-      }
+      const stripApi = {
+        pause() {
+          pausedByUser = true;
+          SlideClock.unsubscribe(tick);
+          setIdleResume();
+        },
+        updateSubscription() {
+          SlideClock.unsubscribe(tick);
+          if (hasOverflow() && inView && !pausedByUser) {
+            SlideClock.subscribe(tick);
+          }
+        },
+      };
+      container.__stripApi = stripApi;
 
       // Swipe / drag support
       let startX = 0;
@@ -949,7 +979,7 @@
         startX = 'touches' in e ? e.touches[0].clientX : e.clientX;
         dist = 0;
         container.classList.add('show-controls');
-        SlideClock.unsubscribe(tick);
+        stripApi.pause();
       }
 
       function onMove(e) {
@@ -962,10 +992,10 @@
         if (!dragging) return;
         dragging = false;
         if (Math.abs(dist) > 40) {
-          if (dist < 0) goStrip(idx + 1);
-          else goStrip(idx - 1);
+          if (dist < 0) go(idx + 1);
+          else go(idx - 1);
         }
-        updateClockSubscription();
+        setIdleResume();
       }
 
       track.addEventListener('mousedown', onStart);
@@ -980,13 +1010,13 @@
         idx = 0;
         requestAnimationFrame(() => {
           updateTransformIndicator(track, indicator, slides.length, idx);
-          updateClockSubscription();
+          stripApi.updateSubscription();
         });
       });
 
       requestAnimationFrame(() => {
         updateTransformIndicator(track, indicator, slides.length, idx);
-        updateClockSubscription();
+        stripApi.updateSubscription();
       });
     });
   }
@@ -1403,6 +1433,7 @@
           .slice(0, 4);
     }
 
+    track.innerHTML = '';
     selected.forEach(product => {
       const card = document.createElement('a');
       card.className = 'related-card';
@@ -1472,11 +1503,15 @@
     prev.addEventListener('click', e => {
       e.preventDefault();
       e.stopPropagation();
+      const api = relatedStrip.__stripApi;
+      if (api) api.pause();
       go(idx - 1);
     });
     next.addEventListener('click', e => {
       e.preventDefault();
       e.stopPropagation();
+      const api = relatedStrip.__stripApi;
+      if (api) api.pause();
       go(idx + 1);
     });
 
@@ -1490,7 +1525,8 @@
       startX = 'touches' in e ? e.touches[0].clientX : e.clientX;
       dist = 0;
       relatedStrip.classList.add('show-controls');
-      SlideClock.unsubscribe(tick);
+      const api = relatedStrip.__stripApi;
+      if (api) api.pause();
     }
 
     function onMove(e) {
@@ -1506,7 +1542,6 @@
         if (dist < 0) go(idx + 1);
         else go(idx - 1);
       }
-      update();
     }
 
     track.addEventListener('mousedown', onStart);
@@ -1516,52 +1551,7 @@
     addEventListener('touchmove', onMove, { passive: true });
     addEventListener('touchend', onEnd);
 
-    let inView = true;
-    const io =
-        'IntersectionObserver' in window
-            ? new IntersectionObserver(
-                entries => {
-                  entries.forEach(
-                      entry =>
-                          (inView =
-                              entry.isIntersecting &&
-                              entry.intersectionRatio >= 0.4)
-                  );
-                },
-                { threshold: [0, 0.4, 1] }
-            )
-            : null;
-    if (io) io.observe(relatedStrip);
-
-    const tick = () => {
-      if (inView && hasOverflow()) go(idx + 1);
-    };
-    function update() {
-      SlideClock.unsubscribe(tick);
-      if (hasOverflow() && inView) SlideClock.subscribe(tick);
-    }
-    addEventListener('resize', () => {
-      track.style.transform = 'translateX(0px)';
-      idx = 0;
-      requestAnimationFrame(() => {
-        updateTransformIndicator(
-            track,
-            relatedStrip.querySelector('.swipe-indicator'),
-            slides.length,
-            idx
-        );
-        update();
-      });
-    });
-    requestAnimationFrame(() => {
-      updateTransformIndicator(
-          track,
-          relatedStrip.querySelector('.swipe-indicator'),
-          slides.length,
-          idx
-      );
-      update();
-    });
+    // outer auto-slide for this strip is handled by initAutoStrips via __stripApi
   }
 
   /* ------------------------------------------------------------------ */
@@ -1688,7 +1678,7 @@
   }
 
   /* ------------------------------------------------------------------ */
-  /*  Single collection strip equalizer (visual only)                   */
+  /*  Collection strip (equalizer only)                                 */
   /* ------------------------------------------------------------------ */
   function initCollectionStrip() {
     const strip = document.querySelector('.collection-strip');
@@ -1705,7 +1695,28 @@
     }
     widontCollectionNames();
 
-    // auto / arrows are now handled by initAutoStrips; here we only keep equalizer
+    // "View" button for each collection card, without changing layout
+    const cards = track.querySelectorAll('.collection-card');
+    cards.forEach(card => {
+      if (card.querySelector('.actions .btn')) return;
+      const viewUrl = card.getAttribute('data-view') || card.getAttribute('href') || '#';
+      const title =
+          card.querySelector('.collection-name')?.textContent ||
+          card.querySelector('.title')?.textContent ||
+          'Collection';
+      let actions = card.querySelector('.actions');
+      if (!actions) {
+        actions = document.createElement('div');
+        actions.className = 'actions';
+        card.appendChild(actions);
+      }
+      const btn = document.createElement('a');
+      btn.className = 'btn primary';
+      btn.href = viewUrl;
+      btn.textContent = 'View';
+      btn.setAttribute('aria-label', `View ${title}`);
+      actions.appendChild(btn);
+    });
   }
 
   /* ------------------------------------------------------------------ */
@@ -2068,14 +2079,14 @@
   /*  Init everything                                                   */
   /* ------------------------------------------------------------------ */
   function onReady() {
-    initCatalogCards();     // builds inner sliders for catalog + recommended + collection cards
+    initCatalogCards();     // builds inner sliders for catalog + collection + dynamic-related
     initRecommended();      // populate Recommended from #all-catalog
     initCatalogCards();     // re-init so Recommended cards get inner sliders
     initAutoStrips();       // Recommended + Collections + related strips
     initProductGallery();
-    initDynamicRelated();   // "You may also like" (kept intact, just added swipe)
+    initDynamicRelated();   // "You may also like" (outer logic aligned)
     initFeaturedSlideshow();
-    initCollectionStrip();  // widont names (visual only)
+    initCollectionStrip();  // collection names + view buttons
     initAllProductsSort();
     initFilterToggle();
     initCheckout();
