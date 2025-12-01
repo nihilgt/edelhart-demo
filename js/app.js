@@ -41,6 +41,7 @@
   /*  ScrollSpy                                                          */
   /* ------------------------------------------------------------------ */
   (function () {
+    // include dropdown button (Collections) + other links
     const links = Array.from(
         document.querySelectorAll('.menu .links a[data-spy], .menu .links .drop-btn[data-spy]')
     );
@@ -60,6 +61,7 @@
       );
     };
 
+    // click -> smooth scroll + active
     document.addEventListener('click', function (e) {
       const link = e.target.closest('.menu .links a[data-spy], .menu .links .drop-btn[data-spy]');
       if (!link) return;
@@ -76,6 +78,7 @@
       window.scrollTo({ top, behavior: 'smooth' });
     });
 
+    // smooth, forgiving observer
     const io = new IntersectionObserver(
         entries => {
           const visible = entries
@@ -658,6 +661,7 @@
       };
       media.__api = api;
 
+      // swipe for product/collection cards (not for collection-card)
       if (!card.classList.contains('collection-card')) {
         let startX = 0,
             dist = 0,
@@ -697,6 +701,9 @@
         addEventListener('touchmove', onMove, { passive: true });
         addEventListener('touchend', onEnd);
       }
+
+      // hide inner controls until interaction – for Recommended cards this keeps things clean
+      media.classList.remove('show-controls');
 
       card.addEventListener('mouseenter', () => {
         api.paused = true;
@@ -738,6 +745,7 @@
 
       const cardEl = document.createElement('article');
       cardEl.className = 'card';
+      cardEl.setAttribute('data-view', viewUrl);
       cardEl.innerHTML = `
         <div class="media" data-images="${imagesRaw}">
           <div class="media-fallback">${title}</div>
@@ -763,6 +771,7 @@
     );
 
     containers.forEach(container => {
+      const isCollectionStrip = container.classList.contains('collection-strip');
       container.style.position = container.style.position || 'relative';
       const track = container.querySelector(
           '.related-track, .collection-track, .slider-track'
@@ -772,28 +781,26 @@
       if (!slides.length) return;
       let idx = 0;
 
-      const isCollection = track.classList.contains('collection-track');
       const isRecommended = container.matches('.slider-strip[data-slider="recommended"]');
-      const isGenericRelated = !isCollection && !isRecommended;
 
-      // Arrows
-      let prev = isCollection
+      // Arrows: preserve existing for collection-strip, otherwise use slider-arrow*
+      let prev = isCollectionStrip
           ? container.querySelector('.col-prev')
           : container.querySelector('.slider-arrow-prev');
-      let next = isCollection
+      let next = isCollectionStrip
           ? container.querySelector('.col-next')
           : container.querySelector('.slider-arrow-next');
 
       if (!prev || !next) {
         prev = document.createElement('button');
-        prev.className = isCollection
+        prev.className = isCollectionStrip
             ? 'col-btn col-prev'
             : 'slider-arrow slider-arrow-prev';
         prev.setAttribute('aria-label', 'Previous');
         prev.textContent = '‹';
 
         next = document.createElement('button');
-        next.className = isCollection
+        next.className = isCollectionStrip
             ? 'col-btn col-next'
             : 'slider-arrow slider-arrow-next';
         next.setAttribute('aria-label', 'Next');
@@ -828,7 +835,16 @@
         return slides.length > 1;
       }
 
-      function go(n) {
+      // For COLLECTION: treat each slide as full-width (100%) like original behavior
+      function goCollection(n) {
+        idx = (n + slides.length) % slides.length;
+        track.style.transform = `translateX(${idx * -100}%)`;
+        updateTransformIndicator(track, indicator, slides.length, idx);
+        container.classList.add('show-controls');
+      }
+
+      // For RECOMMENDED and related strips: one card-per-step, like "You may also like"
+      function goStrip(n) {
         if (!hasOverflow()) return;
         idx = (n + slides.length) % slides.length;
         const w = cardWidth();
@@ -836,6 +852,8 @@
         updateTransformIndicator(track, indicator, slides.length, idx);
         container.classList.add('show-controls');
       }
+
+      const go = isCollectionStrip ? goCollection : goStrip;
 
       prev.addEventListener('click', e => {
         e.preventDefault();
@@ -848,15 +866,52 @@
         go(idx + 1);
       });
 
-      // COLLECTION: let initCollectionStrip handle auto-advance; only init indicator
-      if (isCollection) {
+      // COLLECTION STRIP: auto logic will be handled here, not in initCollectionStrip
+      if (isCollectionStrip) {
+        let inView = true;
+        const io =
+            'IntersectionObserver' in window
+                ? new IntersectionObserver(
+                    entries => {
+                      entries.forEach(
+                          entry =>
+                              (inView =
+                                  entry.isIntersecting &&
+                                  entry.intersectionRatio >= 0.4)
+                      );
+                    },
+                    { threshold: [0, 0.4, 1] }
+                )
+                : null;
+        if (io) io.observe(container);
+
+        const tick = () => {
+          if (!inView || slides.length <= 1) return;
+          goCollection(idx + 1);
+        };
+
+        function updateClockSubscription() {
+          SlideClock.unsubscribe(tick);
+          if (inView && slides.length > 1) SlideClock.subscribe(tick);
+        }
+
+        addEventListener('resize', () => {
+          track.style.transform = 'translateX(0%)';
+          idx = 0;
+          requestAnimationFrame(() => {
+            updateTransformIndicator(track, indicator, slides.length, idx);
+          });
+        });
+
         requestAnimationFrame(() => {
           updateTransformIndicator(track, indicator, slides.length, idx);
+          updateClockSubscription();
         });
-        return;
+
+        return; // do not run generic strip logic
       }
 
-      // RECOMMENDED + GENERIC RELATED: auto + swipe behavior like "You may also like"
+      // RECOMMENDED + generic related: auto + swipe
       let inView = true;
       const io =
           'IntersectionObserver' in window
@@ -876,11 +931,7 @@
 
       const tick = () => {
         if (!hasOverflow() || !inView) return;
-        idx = (idx + 1) % slides.length;
-        const w = cardWidth();
-        track.style.transform = `translateX(${idx * -w}px)`;
-        updateTransformIndicator(track, indicator, slides.length, idx);
-        container.classList.add('show-controls');
+        goStrip(idx + 1);
       };
 
       function updateClockSubscription() {
@@ -888,7 +939,7 @@
         if (hasOverflow() && inView) SlideClock.subscribe(tick);
       }
 
-      // Swipe / drag support (iPad / touch / mouse)
+      // Swipe / drag support
       let startX = 0;
       let dist = 0;
       let dragging = false;
@@ -911,8 +962,8 @@
         if (!dragging) return;
         dragging = false;
         if (Math.abs(dist) > 40) {
-          if (dist < 0) go(idx + 1);
-          else go(idx - 1);
+          if (dist < 0) goStrip(idx + 1);
+          else goStrip(idx - 1);
         }
         updateClockSubscription();
       }
@@ -924,7 +975,6 @@
       addEventListener('touchmove', onMove, { passive: true });
       addEventListener('touchend', onEnd);
 
-      // Recompute on resize
       addEventListener('resize', () => {
         track.style.transform = 'translateX(0px)';
         idx = 0;
@@ -1388,7 +1438,6 @@
 
     let idx = 0;
     const slides = track.children;
-
     function cardWidth() {
       const first = slides[0];
       if (!first) return track.getBoundingClientRect().width || 0;
@@ -1403,11 +1452,9 @@
               track.getBoundingClientRect().width) + gap
       );
     }
-
     function hasOverflow() {
       return slides.length > 1;
     }
-
     function go(n) {
       if (!hasOverflow()) return;
       idx = (n + slides.length) % slides.length;
@@ -1433,7 +1480,7 @@
       go(idx + 1);
     });
 
-    // NEW: swipe / drag logic (like Recommended)
+    // swipe / drag logic for mobiles / iPads
     let startX = 0;
     let dist = 0;
     let dragging = false;
@@ -1489,12 +1536,10 @@
     const tick = () => {
       if (inView && hasOverflow()) go(idx + 1);
     };
-
     function update() {
       SlideClock.unsubscribe(tick);
       if (hasOverflow() && inView) SlideClock.subscribe(tick);
     }
-
     addEventListener('resize', () => {
       track.style.transform = 'translateX(0px)';
       idx = 0;
@@ -1508,7 +1553,6 @@
         update();
       });
     });
-
     requestAnimationFrame(() => {
       updateTransformIndicator(
           track,
@@ -1644,16 +1688,13 @@
   }
 
   /* ------------------------------------------------------------------ */
-  /*  Single collection strip equalizer                                 */
+  /*  Single collection strip equalizer (visual only)                   */
   /* ------------------------------------------------------------------ */
   function initCollectionStrip() {
     const strip = document.querySelector('.collection-strip');
     if (!strip) return;
     const track = strip.querySelector('.collection-track');
     if (!track) return;
-    const slides = track.children;
-    if (!slides.length) return;
-    let idx = 0;
 
     function widontCollectionNames() {
       document.querySelectorAll('.collection-name').forEach(el => {
@@ -1664,93 +1705,7 @@
     }
     widontCollectionNames();
 
-    let prev = strip.querySelector('.col-prev');
-    let next = strip.querySelector('.col-next');
-    if (!prev || !next) {
-      prev = document.createElement('button');
-      prev.className = 'col-btn col-prev';
-      prev.setAttribute('aria-label', 'Previous');
-      prev.textContent = '‹';
-      next = document.createElement('button');
-      next.className = 'col-btn col-next';
-      next.setAttribute('aria-label', 'Next');
-      next.textContent = '›';
-      strip.appendChild(prev);
-      strip.appendChild(next);
-    }
-
-    let indicator = strip.querySelector('.swipe-indicator');
-    if (!indicator) {
-      indicator = document.createElement('div');
-      indicator.className = 'swipe-indicator';
-      indicator.innerHTML = '<div class="thumb"></div>';
-      strip.appendChild(indicator);
-    }
-
-    function go(n) {
-      idx = (n + slides.length) % slides.length;
-      track.style.transform = `translateX(${idx * -100}%)`;
-      updateTransformIndicator(track, indicator, slides.length, idx);
-      strip.classList.add('show-controls');
-    }
-    prev.addEventListener('click', e => {
-      e.preventDefault();
-      e.stopPropagation();
-      go(idx - 1);
-    });
-    next.addEventListener('click', e => {
-      e.preventDefault();
-      e.stopPropagation();
-      go(idx + 1);
-    });
-
-    let sx = 0,
-        dist = 0,
-        dragging = false;
-    function start(e) {
-      dragging = true;
-      sx = 'touches' in e ? e.touches[0].clientX : e.clientX;
-      dist = 0;
-      strip.classList.add('show-controls');
-    }
-    function move(e) {
-      if (!dragging) return;
-      const x = 'touches' in e ? e.touches[0].clientX : e.clientX;
-      dist = x - sx;
-    }
-    function end() {
-      if (!dragging) return;
-      dragging = false;
-      if (Math.abs(dist) > 40) {
-        if (dist < 0) go(idx + 1);
-        else go(idx - 1);
-      }
-    }
-    track.addEventListener('mousedown', start);
-    addEventListener('mousemove', move);
-    addEventListener('mouseup', end);
-    track.addEventListener('touchstart', start, { passive: true });
-    addEventListener('touchmove', move, { passive: true });
-    addEventListener('touchend', end);
-
-    const tick = () => go((idx + 1) % slides.length);
-    let inView = true;
-    const io =
-        'IntersectionObserver' in window
-            ? new IntersectionObserver(
-                entries => {
-                  entries.forEach(
-                      entry =>
-                          (inView =
-                              entry.isIntersecting &&
-                              entry.intersectionRatio >= 0.4)
-                  );
-                },
-                { threshold: [0, 0.4, 1] }
-            )
-            : null;
-    if (io) io.observe(track);
-    if (inView) SlideClock.subscribe(tick);
+    // auto / arrows are now handled by initAutoStrips; here we only keep equalizer
   }
 
   /* ------------------------------------------------------------------ */
@@ -1834,7 +1789,6 @@
       document.body.appendChild(div);
       setTimeout(() => div.remove(), 1600);
 
-      // Immediately refresh cart count so header shows updated quantity
       if (typeof updateCartCount === 'function') {
         updateCartCount();
       }
@@ -1845,7 +1799,7 @@
   /* ------------------------------------------------------------------ */
   /*  Cart drawer (index and product pages)                             */
   /* ------------------------------------------------------------------ */
-  let updateCartCount; // declared here so initCheckout can call it
+  let updateCartCount; // so checkout can call it
 
   function initCartDrawer() {
     const drawer = document.querySelector('.cart-drawer');
@@ -1959,7 +1913,7 @@
           if (isNaN(newQty) || newQty < 1) newQty = 1;
           c[index].qty = newQty;
           writeCart(c);
-          render(); // recompute line + total so prices update
+          render();
         });
 
         itemsEl.appendChild(li);
@@ -1972,7 +1926,6 @@
       if (checkoutBtn)
         checkoutBtn.href = `https://wa.me/84944445084?text=${msg.encoded}`;
 
-      // Add event listener for cart copy buttons
       document.addEventListener('click', handleCartCopy);
     }
 
@@ -2115,14 +2068,14 @@
   /*  Init everything                                                   */
   /* ------------------------------------------------------------------ */
   function onReady() {
-    initCatalogCards();
-    initRecommended();
-    initCatalogCards();
-    initAutoStrips();
+    initCatalogCards();     // builds inner sliders for catalog + recommended + collection cards
+    initRecommended();      // populate Recommended from #all-catalog
+    initCatalogCards();     // re-init so Recommended cards get inner sliders
+    initAutoStrips();       // Recommended + Collections + related strips
     initProductGallery();
-    initDynamicRelated();    // "You may also like" (unchanged)
+    initDynamicRelated();   // "You may also like" (kept intact, just added swipe)
     initFeaturedSlideshow();
-    initCollectionStrip();
+    initCollectionStrip();  // widont names (visual only)
     initAllProductsSort();
     initFilterToggle();
     initCheckout();
