@@ -630,7 +630,93 @@ main > section{
 .media .dots{ position:absolute; bottom:8px; left:50%; transform:translateX(-50%); display:flex; gap:6px; z-index:3; }
 .media .dot{ width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,0.35); }
 .media .dot.active{ background:rgba(255,255,255,0.9); }
+/* Related media slider (You may also like) – mirror .media behavior */
+.related-media {
+  position: relative;
+  aspect-ratio: var(--mediaRatio, 3/4);
+  background: #0f1012;
+  overflow: clip;
+  contain: paint;
+}
 
+/* Slides */
+.related-media .slides {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transform: translateX(0);
+  transition: transform .45s cubic-bezier(.4,.9,.4,1);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+.related-media .slide {
+  min-width: 100%;
+  height: 100%;
+}
+.related-media .slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Dots */
+.related-media .dots {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  z-index: 3;
+}
+.related-media .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.35);
+}
+.related-media .dot.active {
+  background: rgba(255,255,255,0.9);
+}
+
+/* Arrows – hidden by default on touch, show on hover/interaction */
+.related-media .slider-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(0,0,0,0.32);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  z-index: 3;
+  opacity: 0;
+  transition: opacity .2s ease, background .2s ease, transform .15s ease;
+}
+@media (hover:hover) {
+  .related-media:hover .slider-btn {
+    opacity: 1;
+  }
+}
+@media (pointer:coarse), (max-width: 900px) {
+  .related-media .slider-btn {
+    opacity: 0;
+  }
+  .related-media.show-controls .slider-btn {
+    opacity: 1;
+  }
+}
+.related-media .slider-btn:hover {
+  background: rgba(0,0,0,0.65);
+  transform: translateY(-50%) scale(1.05);
+}
+.related-media .slider-prev { left: 8px; }
+.related-media .slider-next { right: 8px; }
 /* Content */
 .content{ padding:14px; display:grid; gap:6px; min-height:var(--contentMinH); }
 .title{ font-weight:600; font-size:17px; letter-spacing:.01em; line-height:1.2; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }

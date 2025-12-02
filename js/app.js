@@ -41,7 +41,6 @@
   /*  ScrollSpy                                                          */
   /* ------------------------------------------------------------------ */
   (function () {
-    // include dropdown button (Collections) + other links
     const links = Array.from(
         document.querySelectorAll('.menu .links a[data-spy], .menu .links .drop-btn[data-spy]')
     );
@@ -61,7 +60,6 @@
       );
     };
 
-    // click -> smooth scroll + active
     document.addEventListener('click', function (e) {
       const link = e.target.closest('.menu .links a[data-spy], .menu .links .drop-btn[data-spy]');
       if (!link) return;
@@ -78,7 +76,6 @@
       window.scrollTo({ top, behavior: 'smooth' });
     });
 
-    // smooth, forgiving observer
     const io = new IntersectionObserver(
         entries => {
           const visible = entries
@@ -120,6 +117,7 @@
       nav && nav.classList.remove('open');
       btn && btn.setAttribute('aria-expanded', 'false');
     }
+
     btn &&
     btn.addEventListener('click', () => {
       const open = nav.classList.toggle('open');
@@ -147,6 +145,7 @@
     links.addEventListener('click', e => {
       if (e.target.matches('a')) closeMenu();
     });
+
     document.addEventListener('click', e => {
       if (!nav || !btn) return;
       if (!nav.contains(e.target) && !btn.contains(e.target)) closeMenu();
@@ -238,11 +237,12 @@
     if (heroImg.complete) {
       computeFitMode();
       update();
-    } else
+    } else {
       heroImg.addEventListener('load', () => {
         computeFitMode();
         update();
       });
+    }
     addEventListener('scroll', onScroll, { passive: true });
     addEventListener('resize', onResize);
   }
@@ -299,7 +299,7 @@
   /* ------------------------------------------------------------------ */
   const CACHE_KEY = 'edelhart:images:v5';
   const HANDOFF_KEY = 'edelhart:handoff:v2';
-  const CART_KEY = 'edelhart:cart:v2'; // v2 = with priceNum
+  const CART_KEY = 'edelhart:cart:v2';
 
   function readImageCache() {
     try {
@@ -361,7 +361,6 @@
     return isNaN(num) ? 0 : num;
   }
 
-  /* --- cart storage --- */
   function readCart() {
     try {
       return JSON.parse(localStorage.getItem(CART_KEY) || '[]');
@@ -470,20 +469,9 @@
   /* ------------------------------------------------------------------ */
   /*  Catalog cards & collection cards (index + recommended)            */
   /* ------------------------------------------------------------------ */
-
-  /**
-   * Build inner image sliders for:
-   * - Catalog cards
-   * - Collection cards (inner gallery only)
-   * - Recommended cards (once filled)
-   *
-   * Inner controls (dots/arrows) only show when `media` has .show-controls:
-   *  - set on hover, tap, or swipe start
-   *  - never triggered by outer strip arrows
-   */
   function initCatalogCards() {
     const cards = document.querySelectorAll(
-        '.catalog .card, .collection-card, .slider-strip[data-slider="recommended"] .card, #dynamic-related .related-card'
+        '.catalog .card, .collection-card, .slider-strip[data-slider="recommended"] .card'
     );
     if (!cards.length) {
       SlideClock.start();
@@ -514,35 +502,22 @@
     const imagesMap = {};
 
     cards.forEach(card => {
-      const isRelated = card.classList.contains('related-card');
-      const media = card.querySelector(
-          isRelated ? '.related-media' : '.media, .collection-media'
-      );
-      const viewUrl = card.getAttribute('data-view') || card.getAttribute('href') || '#';
+      const media = card.querySelector('.media, .collection-media');
+      const viewUrl = card.getAttribute('data-view') || '#';
       const title =
           card.querySelector('.title')?.textContent ||
           card.querySelector('.collection-name')?.textContent ||
           'product';
       const slug = slugFromPath(viewUrl);
 
-      // only catalog/recommended/collections have data-images; related currently single image
-      const listRawAttr = isRelated
-          ? null
-          : media && media.getAttribute('data-images');
-      const listRaw = listRawAttr ? listFromCSV(listRawAttr) : [];
+      const listRaw = media
+          ? listFromCSV(media.getAttribute('data-images'))
+          : [];
       const listAbs = toAbsList(listRaw, location.href);
+      if (slug && listAbs.length) imagesMap[slug] = { images: listAbs };
 
-      if (!isRelated && slug && listAbs.length) {
-        imagesMap[slug] = { images: listAbs };
-      }
-
-      // clickable product cards (excluding related-card which is <a>)
-      if (
-          !card.classList.contains('collection-card') &&
-          !isRelated &&
-          viewUrl &&
-          !card.matches('a')
-      ) {
+      // clickable product cards
+      if (!card.classList.contains('collection-card')) {
         card.style.cursor = 'pointer';
         card.addEventListener('click', e => {
           const t = e.target;
@@ -568,15 +543,7 @@
         card.setAttribute('aria-label', `Open ${title}`);
       }
 
-      if (!media) return;
-
-      // RELATED cards (You may also like) currently only show a single image and
-      // do not have inner gallery requirements in HTML; we leave them as-is.
-      if (isRelated) {
-        return;
-      }
-
-      if (!listAbs.length) return;
+      if (!media || !listAbs.length) return;
 
       if (!card.classList.contains('collection-card')) {
         card.querySelectorAll('a[href]').forEach(a => {
@@ -645,32 +612,23 @@
         e.preventDefault();
         e.stopPropagation();
       };
-
-      // inner slider: show controls only when interacting
-      function showInnerControls() {
-        media.classList.add('show-controls');
-      }
-
       prev.addEventListener('click', e => {
         stopNav(e);
-        showInnerControls();
         go(idx - 1);
-        pauseOuterForCard(card);
+        media.classList.add('show-controls');
       });
       next.addEventListener('click', e => {
         stopNav(e);
-        showInnerControls();
         go(idx + 1);
-        pauseOuterForCard(card);
+        media.classList.add('show-controls');
       });
       dots.addEventListener('click', e => {
         const t = e.target;
         if (!(t instanceof HTMLElement)) return;
         if (t.classList.contains('dot')) {
           stopNav(e);
-          showInnerControls();
           go(Number(t.dataset.index || 0));
-          pauseOuterForCard(card);
+          media.classList.add('show-controls');
         }
       });
 
@@ -705,41 +663,38 @@
       };
       media.__api = api;
 
-      // swipe inner gallery
-      let startX = 0,
-          dist = 0,
-          dragging = false;
-      function onStart(e) {
-        dragging = true;
-        startX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-        dist = 0;
-        clearTimeout(api.pauseTimeout);
-        api.paused = true;
-        api.updateSubscription();
-        showInnerControls();
-        pauseOuterForCard(card);
-      }
-      function onMove(e) {
-        if (!dragging) return;
-        const x = 'touches' in e ? e.touches[0].clientX : e.clientX;
-        dist = x - startX;
-      }
-      function onEnd(e) {
-        if (!dragging) return;
-        dragging = false;
-        if (Math.abs(dist) > 40) {
-          if (dist < 0) go(idx + 1);
-          else go(idx - 1);
-        }
-        if (e) e.stopPropagation();
-        api.paused = true;
-        api.pauseTimeout = setTimeout(() => {
-          api.paused = false;
-          api.updateSubscription();
-        }, 10000);
-      }
-
       if (!card.classList.contains('collection-card')) {
+        let startX = 0,
+            dist = 0,
+            dragging = false;
+        function onStart(e) {
+          dragging = true;
+          startX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+          dist = 0;
+          clearTimeout(api.pauseTimeout);
+          api.paused = true;
+          api.updateSubscription();
+          media.classList.add('show-controls');
+        }
+        function onMove(e) {
+          if (!dragging) return;
+          const x = 'touches' in e ? e.touches[0].clientX : e.clientX;
+          dist = x - startX;
+        }
+        function onEnd(e) {
+          if (!dragging) return;
+          dragging = false;
+          if (Math.abs(dist) > 40) {
+            if (dist < 0) go(idx + 1);
+            else go(idx - 1);
+          }
+          if (e) e.stopPropagation();
+          api.paused = true;
+          api.pauseTimeout = setTimeout(() => {
+            api.paused = false;
+            api.updateSubscription();
+          }, 10000);
+        }
         card.addEventListener('mousedown', onStart);
         addEventListener('mousemove', onMove);
         addEventListener('mouseup', onEnd);
@@ -748,7 +703,6 @@
         addEventListener('touchend', onEnd);
       }
 
-      // hide inner controls by default
       media.classList.remove('show-controls');
 
       card.addEventListener('mouseenter', () => {
@@ -770,15 +724,6 @@
       writeImageCache(merged);
     }
     SlideClock.start();
-  }
-
-  /* Helper: pause outer slider for a card */
-  function pauseOuterForCard(card) {
-    const strip = card.closest('.related-strip, .slider-strip[data-slider="recommended"], .collection-strip');
-    if (!strip) return;
-    const api = strip.__stripApi;
-    if (!api) return;
-    api.pause();
   }
 
   /* ------------------------------------------------------------------ */
@@ -820,15 +765,6 @@
   /* ------------------------------------------------------------------ */
   /*  Auto-swiping strips (collections / related / recommended)         */
   /* ------------------------------------------------------------------ */
-
-  /**
-   * Shared outer strip behavior:
-   * - related-strip (index / product pages)
-   * - slider-strip[data-slider="recommended"]
-   * - collection-strip
-   *
-   * One card per step, looping; pause/resume for interactions.
-   */
   function initAutoStrips() {
     const containers = document.querySelectorAll(
         '.related-strip, .collection-strip, .slider-strip[data-slider="recommended"]'
@@ -845,7 +781,6 @@
       if (!slides.length) return;
       let idx = 0;
 
-      // Arrows
       let prev = isCollectionStrip
           ? container.querySelector('.col-prev')
           : container.querySelector('.slider-arrow-prev');
@@ -872,7 +807,6 @@
         container.appendChild(next);
       }
 
-      // Indicator
       let indicator = container.querySelector('.swipe-indicator');
       if (!indicator) {
         indicator = document.createElement('div');
@@ -897,7 +831,14 @@
         return slides.length > 1;
       }
 
-      function go(n) {
+      function goCollection(n) {
+        idx = (n + slides.length) % slides.length;
+        track.style.transform = `translateX(${idx * -100}%)`;
+        updateTransformIndicator(track, indicator, slides.length, idx);
+        container.classList.add('show-controls');
+      }
+
+      function goStrip(n) {
         if (!hasOverflow()) return;
         idx = (n + slides.length) % slides.length;
         const w = cardWidth();
@@ -906,18 +847,62 @@
         container.classList.add('show-controls');
       }
 
+      const go = isCollectionStrip ? goCollection : goStrip;
+
       prev.addEventListener('click', e => {
         e.preventDefault();
         e.stopPropagation();
-        stripApi.pause();
         go(idx - 1);
       });
       next.addEventListener('click', e => {
         e.preventDefault();
         e.stopPropagation();
-        stripApi.pause();
         go(idx + 1);
       });
+
+      if (isCollectionStrip) {
+        let inView = true;
+        const io =
+            'IntersectionObserver' in window
+                ? new IntersectionObserver(
+                    entries => {
+                      entries.forEach(
+                          entry =>
+                              (inView =
+                                  entry.isIntersecting &&
+                                  entry.intersectionRatio >= 0.4)
+                      );
+                    },
+                    { threshold: [0, 0.4, 1] }
+                )
+                : null;
+        if (io) io.observe(container);
+
+        const tick = () => {
+          if (!inView || slides.length <= 1) return;
+          goCollection(idx + 1);
+        };
+
+        function updateClockSubscription() {
+          SlideClock.unsubscribe(tick);
+          if (inView && slides.length > 1) SlideClock.subscribe(tick);
+        }
+
+        addEventListener('resize', () => {
+          track.style.transform = 'translateX(0%)';
+          idx = 0;
+          requestAnimationFrame(() => {
+            updateTransformIndicator(track, indicator, slides.length, idx);
+          });
+        });
+
+        requestAnimationFrame(() => {
+          updateTransformIndicator(track, indicator, slides.length, idx);
+          updateClockSubscription();
+        });
+
+        return;
+      }
 
       let inView = true;
       const io =
@@ -930,46 +915,22 @@
                                 entry.isIntersecting &&
                                 entry.intersectionRatio >= 0.4)
                     );
-                    stripApi.updateSubscription();
                   },
                   { threshold: [0, 0.4, 1] }
               )
               : null;
       if (io) io.observe(container);
 
-      let pausedByUser = false;
-      let idleTimer = null;
-      const idleMs = 10000;
+      const tick = () => {
+        if (!hasOverflow() || !inView) return;
+        goStrip(idx + 1);
+      };
 
-      function setIdleResume() {
-        if (idleTimer) clearTimeout(idleTimer);
-        idleTimer = setTimeout(() => {
-          pausedByUser = false;
-          stripApi.updateSubscription();
-        }, idleMs);
+      function updateClockSubscription() {
+        SlideClock.unsubscribe(tick);
+        if (hasOverflow() && inView) SlideClock.subscribe(tick);
       }
 
-      const tick = () => {
-        if (!hasOverflow() || !inView || pausedByUser) return;
-        go(idx + 1);
-      };
-
-      const stripApi = {
-        pause() {
-          pausedByUser = true;
-          SlideClock.unsubscribe(tick);
-          setIdleResume();
-        },
-        updateSubscription() {
-          SlideClock.unsubscribe(tick);
-          if (hasOverflow() && inView && !pausedByUser) {
-            SlideClock.subscribe(tick);
-          }
-        },
-      };
-      container.__stripApi = stripApi;
-
-      // Swipe / drag support
       let startX = 0;
       let dist = 0;
       let dragging = false;
@@ -979,7 +940,7 @@
         startX = 'touches' in e ? e.touches[0].clientX : e.clientX;
         dist = 0;
         container.classList.add('show-controls');
-        stripApi.pause();
+        SlideClock.unsubscribe(tick);
       }
 
       function onMove(e) {
@@ -992,10 +953,10 @@
         if (!dragging) return;
         dragging = false;
         if (Math.abs(dist) > 40) {
-          if (dist < 0) go(idx + 1);
-          else go(idx - 1);
+          if (dist < 0) goStrip(idx + 1);
+          else goStrip(idx - 1);
         }
-        setIdleResume();
+        updateClockSubscription();
       }
 
       track.addEventListener('mousedown', onStart);
@@ -1010,13 +971,13 @@
         idx = 0;
         requestAnimationFrame(() => {
           updateTransformIndicator(track, indicator, slides.length, idx);
-          stripApi.updateSubscription();
+          updateClockSubscription();
         });
       });
 
       requestAnimationFrame(() => {
         updateTransformIndicator(track, indicator, slides.length, idx);
-        stripApi.updateSubscription();
+        updateClockSubscription();
       });
     });
   }
@@ -1033,47 +994,44 @@
     const prev = gallery.querySelector('.slider-prev');
     const next = gallery.querySelector('.slider-next');
 
-    const thisSlug = slugFromPath(location.pathname);
+    // ALWAYS start from inline data-images on the product page
+    const inlineRaw = listFromCSV(gallery.getAttribute('data-images') || '');
+    let images = toAbsList(inlineRaw, location.href);
 
-    async function ensureImagesMapInner() {
-      const cached = readImageCache()?.items || null;
-      if (cached && Object.keys(cached).length) return cached;
-      if (location.protocol === 'file:') return {};
-      const candidates = [
-        new URL('../index.html', location.href).href,
-        new URL('../../index.html', location.href).href,
-        new URL('./index.html', location.href).href,
-        new URL('/index.html', location.origin).href,
-      ];
-      for (const url of candidates) {
-        try {
-          const res = await fetch(url, {
-            cache: 'no-store',
-            mode: 'same-origin',
-          });
-          if (res.ok) {
-            const html = await res.text();
-            const doc = new DOMParser().parseFromString(html, 'text/html');
-            const cards = doc.querySelectorAll('.catalog .card');
-            const map = {};
-            cards.forEach(card => {
-              const vu = card.getAttribute('data-view') || '';
-              const slug = slugFromPath(vu);
-              const imagesRaw = listFromCSV(
-                  card.querySelector('.media')?.getAttribute('data-images')
-              );
-              const imagesAbs = toAbsList(imagesRaw, url);
-              if (slug && imagesAbs.length) map[slug] = { images: imagesAbs };
-            });
-            if (Object.keys(map).length) {
-              writeImageCache(map);
-              return map;
-            }
-          }
-        } catch {}
-      }
-      return {};
+    const thisSlug = slugFromPath(location.pathname);
+    const hand = readHandoff();
+    const cacheItems = readImageCache()?.items || {};
+    const cached = cacheItems?.[thisSlug]?.images || [];
+
+    function baseFromSlug(slug) {
+      return slug
+          .replace(/-(gold-18k|gold-14k|black-rhodium|e-silver|gold|silver)$/, '')
+          .replace(/-?$/, '');
     }
+
+    if (
+        hand &&
+        (hand.slug === thisSlug ||
+            baseFromSlug(hand.slug) === baseFromSlug(thisSlug))
+    ) {
+      const handList = Array.isArray(hand.images) ? hand.images : [];
+      if (handList.length) {
+        const merged = [...images];
+        handList.forEach(src => {
+          if (!merged.includes(src)) merged.push(src);
+        });
+        images = merged;
+      }
+      clearHandoff();
+    } else if (cached && cached.length) {
+      const merged = [...images];
+      cached.forEach(src => {
+        if (!merged.includes(src)) merged.push(src);
+      });
+      images = merged;
+    }
+
+    if (!images.length) return;
 
     function buildFromImages(listAbs) {
       slidesWrap.innerHTML = '';
@@ -1102,7 +1060,9 @@
             e => {
               const t = e.target;
               if (!(t instanceof HTMLElement)) return;
-              if (t.classList.contains('thumb')) go(Number(t.dataset.index || 0));
+              if (t.classList.contains('thumb')) {
+                go(Number(t.dataset.index || 0));
+              }
             },
             { passive: true }
         );
@@ -1169,6 +1129,7 @@
       const btnNext = lb.querySelector('.lightbox-next');
       const btnClose = lb.querySelector('.lightbox-close');
       let i = startIndex || 0;
+
       function show() {
         imgEl.src = list[i];
         imgEl.alt = `Image ${i + 1} of ${list.length}`;
@@ -1191,6 +1152,7 @@
         else if (e.key === 'ArrowLeft') prevImg();
         else if (e.key === 'ArrowRight') nextImg();
       }
+
       btnPrev.onclick = prevImg;
       btnNext.onclick = nextImg;
       btnClose.onclick = close;
@@ -1227,16 +1189,18 @@
       render();
     }
 
-    prev &&
-    prev.addEventListener('click', () => {
-      go(idx - 1);
-      gallery.classList.add('show-controls');
-    });
-    next &&
-    next.addEventListener('click', () => {
-      go(idx + 1);
-      gallery.classList.add('show-controls');
-    });
+    if (prev) {
+      prev.addEventListener('click', () => {
+        go(idx - 1);
+        gallery.classList.add('show-controls');
+      });
+    }
+    if (next) {
+      next.addEventListener('click', () => {
+        go(idx + 1);
+        gallery.classList.add('show-controls');
+      });
+    }
 
     let startX = 0,
         dist = 0,
@@ -1256,7 +1220,7 @@
       const x = 'touches' in e ? e.touches[0].clientX : e.clientX;
       dist = x - startX;
     }
-    function onEnd(e) {
+    function onEnd() {
       if (!dragging) return;
       dragging = false;
       if (Math.abs(dist) > 40) {
@@ -1306,44 +1270,12 @@
       if (!paused && inView && total > 1) SlideClock.subscribe(tick);
     }
 
-    const hand = readHandoff();
-    let imagesMap = await ensureImagesMap();
-    let initial = null;
-
-    function baseFromSlug(slug) {
-      return slug
-          .replace(
-              /-(gold-18k|gold-14k|black-rhodium|e-silver|gold|silver)$/,
-              ''
-          )
-          .replace(/-?$/, '');
-    }
-
-    if (
-        hand &&
-        (hand.slug === thisSlug ||
-            baseFromSlug(hand.slug) === baseFromSlug(thisSlug))
-    ) {
-      initial = Array.isArray(hand.images) ? hand.images : [];
-      const merged = { ...(imagesMap || {}) };
-      if (initial.length) {
-        merged[hand.slug] = { images: initial };
-        merged[thisSlug] = merged[thisSlug] || { images: initial };
-        writeImageCache(merged);
-        imagesMap = merged;
-      }
-      clearHandoff();
-    } else {
-      const cached = imagesMap?.[thisSlug]?.images || [];
-      if (cached.length) initial = cached;
-    }
-    if (!initial || !initial.length) {
-      const inlineRaw = listFromCSV(gallery.getAttribute('data-images'));
-      initial = toAbsList(inlineRaw, location.href);
-    }
-    if (initial && initial.length) buildFromImages(initial);
+    buildFromImages(images);
   }
 
+  /* ------------------------------------------------------------------ */
+  /*  ensureImagesMap stub (not used by new product gallery)            */
+  /* ------------------------------------------------------------------ */
   async function ensureImagesMap() {
     const cached = readImageCache()?.items || null;
     if (cached && Object.keys(cached).length) return cached;
@@ -1363,39 +1295,123 @@
     const currentSlug = slugFromPath(location.pathname);
 
     async function fetchAllProducts() {
-      const candidates = [
-        new URL('../index.html', location.href).href,
-        new URL('../../index.html', location.href).href,
-        new URL('./index.html', location.href).href,
-        new URL('/index.html', location.origin).href,
+      const products = [
+        {
+          view: 'products/sss-pendant-gold.html',
+          title: 'SSS pendant — gold',
+          price: '$125',
+          images: [
+            '../img/products/sss-gold-1.jpg',
+            '../img/products/sss-gold-2.jpg',
+            '../img/products/sss-gold-3.jpg',
+            '../img/products/sss-gold-4.jpg',
+            '../img/products/sss-gold-5.jpg',
+          ],
+        },
+        {
+          view: 'products/sss-pendant-silver.html',
+          title: 'SSS pendant — silver',
+          price: '$125',
+          images: [
+            '../img/products/sss-silver-2.jpg',
+            '../img/products/sss-silver-3.jpg',
+            '../img/products/sss-silver-5.jpg',
+          ],
+        },
+        {
+          view: 'products/legs-pendant.html',
+          title: 'LEGS pendant',
+          price: '$375',
+          images: [
+            '../img/products/LEGS-pendant-1.jpg',
+            '../img/products/LEGS-pendant-2.jpg',
+            '../img/products/LEGS-pendant-3.jpg',
+            '../img/products/LEGS-pendant-4.jpg',
+            '../img/products/LEGS-pendant-5.jpg',
+          ],
+        },
+        {
+          view: 'products/ee-female-ring-gold.html',
+          title: 'EE female ring — gold',
+          price: '$140',
+          images: [
+            '../img/products/EE-female-ring-gold-1.jpg',
+          ],
+        },
+        {
+          view: 'products/ee-female-ring-silver.html',
+          title: 'EE female ring — silver',
+          price: '$140',
+          images: [
+            '../img/products/EE-female-ring-silver-1.jpg',
+            '../img/products/EE-female-ring-silver-2.png',
+          ],
+        },
+        {
+          view: 'products/ee-female-ring-black-rhodium.html',
+          title: 'EE female ring — black rhodium',
+          price: '$140',
+          images: [
+            '../img/products/EE-female-ring-BR-1.jpg',
+          ],
+        },
+        {
+          view: 'products/ee-male-ring-black-rhodium-stone.html',
+          title: 'EE male ring — black rhodium (Stone trapping)',
+          price: '$190',
+          images: [
+            '../img/products/EE-male-ring-BR-trap-1.jpg',
+          ],
+        },
+        {
+          view: 'products/ee-male-ring-black-rhodium.html',
+          title: 'EE male ring — black rhodium',
+          price: '$200',
+          images: [
+            '../img/products/EE-male-ring-BR-1.jpg',
+          ],
+        },
+        {
+          view: 'products/ee-male-ring-silver.html',
+          title: 'EE male ring — silver',
+          price: '$200',
+          images: [
+            '../img/products/EE-male-ring-silver-1.jpg',
+          ],
+        },
+        {
+          view: 'products/foto-ring.html',
+          title: 'FOTO ring',
+          price: '$345',
+          images: [
+            '../img/products/foto-ring-1.jpg',
+            '../img/products/foto-ring-2.jpg',
+          ],
+        },
+        {
+          view: 'products/foto-earring.html',
+          title: 'FOTO earring',
+          price: '$310',
+          images: [
+            '../img/products/foto-earring-1.jpg',
+            '../img/products/foto-earring-2.jpg',
+          ],
+        },
+        {
+          view: 'products/foto-necklace.html',
+          title: 'FOTO necklace',
+          price: '$935',
+          images: [
+            '../img/products/foto-necklace-1.jpg',
+            '../img/products/foto-necklace-2.jpg',
+          ],
+        },
       ];
-      for (const url of candidates) {
-        try {
-          const res = await fetch(url, {
-            cache: 'no-store',
-            mode: 'same-origin',
-          });
-          if (res.ok) {
-            const html = await res.text();
-            const doc = new DOMParser().parseFromString(html, 'text/html');
-            const cards = Array.from(
-                doc.querySelectorAll('#all-catalog .card')
-            ).map(card => ({
-              view: card.getAttribute('data-view') || '#',
-              title: card.querySelector('.title')?.textContent || 'Product',
-              price: card.querySelector('.price')?.textContent || '$0',
-              images: listFromCSV(
-                  card.querySelector('.media')?.getAttribute('data-images') || ''
-              ),
-            }));
-            const filtered = cards.filter(
-                p => p.view !== '#' && slugFromPath(p.view) !== currentSlug
-            );
-            if (filtered.length) return filtered;
-          }
-        } catch {}
-      }
-      return [];
+
+      const filtered = products.filter(
+          p => slugFromPath(p.view) !== currentSlug
+      );
+      return filtered;
     }
 
     let allProducts = await fetchAllProducts();
@@ -1433,16 +1449,19 @@
           .slice(0, 4);
     }
 
-    track.innerHTML = '';
+    track.innerHTML = ''; // clear any previous content
+
     selected.forEach(product => {
       const card = document.createElement('a');
       card.className = 'related-card';
       card.href = product.view.replace('products/', '');
+
+      // Put ALL images into data-images on .related-media
+      const imagesCsv = (product.images || []).join(',');
+
       card.innerHTML = `
-        <div class="related-media">
-          <img src="../${product.images[0] || 'img/placeholder.jpg'}" alt="${
-          product.title
-      }" loading="lazy">
+        <div class="related-media" data-images="${imagesCsv}">
+          <div class="media-fallback">${product.title}</div>
         </div>
         <div class="related-info">
           <div class="title">${product.title}</div>
@@ -1503,19 +1522,14 @@
     prev.addEventListener('click', e => {
       e.preventDefault();
       e.stopPropagation();
-      const api = relatedStrip.__stripApi;
-      if (api) api.pause();
       go(idx - 1);
     });
     next.addEventListener('click', e => {
       e.preventDefault();
       e.stopPropagation();
-      const api = relatedStrip.__stripApi;
-      if (api) api.pause();
       go(idx + 1);
     });
 
-    // swipe / drag logic for mobiles / iPads
     let startX = 0;
     let dist = 0;
     let dragging = false;
@@ -1525,8 +1539,7 @@
       startX = 'touches' in e ? e.touches[0].clientX : e.clientX;
       dist = 0;
       relatedStrip.classList.add('show-controls');
-      const api = relatedStrip.__stripApi;
-      if (api) api.pause();
+      SlideClock.unsubscribe(tick);
     }
 
     function onMove(e) {
@@ -1542,6 +1555,7 @@
         if (dist < 0) go(idx + 1);
         else go(idx - 1);
       }
+      update();
     }
 
     track.addEventListener('mousedown', onStart);
@@ -1551,7 +1565,189 @@
     addEventListener('touchmove', onMove, { passive: true });
     addEventListener('touchend', onEnd);
 
-    // outer auto-slide for this strip is handled by initAutoStrips via __stripApi
+    let inView = true;
+    const io =
+        'IntersectionObserver' in window
+            ? new IntersectionObserver(
+                entries => {
+                  entries.forEach(
+                      entry =>
+                          (inView =
+                              entry.isIntersecting &&
+                              entry.intersectionRatio >= 0.4)
+                  );
+                },
+                { threshold: [0, 0.4, 1] }
+            )
+            : null;
+    if (io) io.observe(relatedStrip);
+
+    const tick = () => {
+      if (inView && hasOverflow()) go(idx + 1);
+    };
+    function update() {
+      SlideClock.unsubscribe(tick);
+      if (hasOverflow() && inView) SlideClock.subscribe(tick);
+    }
+    addEventListener('resize', () => {
+      track.style.transform = 'translateX(0px)';
+      idx = 0;
+      requestAnimationFrame(() => {
+        updateTransformIndicator(
+            track,
+            relatedStrip.querySelector('.swipe-indicator'),
+            slides.length,
+            idx
+        );
+        update();
+      });
+    });
+    requestAnimationFrame(() => {
+      updateTransformIndicator(
+          track,
+          relatedStrip.querySelector('.swipe-indicator'),
+          slides.length,
+          idx
+      );
+      update();
+    });
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  Inner sliders for "You may also like" cards                       */
+  /* ------------------------------------------------------------------ */
+  function initRelatedInnerSliders() {
+    const cards = document.querySelectorAll('#dynamic-related .related-card');
+    if (!cards.length) return;
+
+    cards.forEach(card => {
+      const media = card.querySelector('.related-media');
+      if (!media) return;
+
+      const raw = media.getAttribute('data-images') || '';
+      const list = listFromCSV(raw);
+      if (!list.length) return;
+
+      const absList = toAbsList(list, location.href);
+
+      // Build slides
+      const slidesWrap = document.createElement('div');
+      slidesWrap.className = 'slides';
+      absList.forEach(src => {
+        const slide = document.createElement('div');
+        slide.className = 'slide';
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = card.querySelector('.title')?.textContent || 'Product';
+        img.loading = 'lazy';
+        slide.appendChild(img);
+        slidesWrap.appendChild(slide);
+      });
+
+      media.innerHTML = '';
+      media.appendChild(slidesWrap);
+
+      // Dots
+      const dots = document.createElement('div');
+      dots.className = 'dots';
+      absList.forEach((_, i) => {
+        const d = document.createElement('div');
+        d.className = 'dot' + (i === 0 ? ' active' : '');
+        d.dataset.index = String(i);
+        dots.appendChild(d);
+      });
+      media.appendChild(dots);
+
+      // Arrows
+      const prev = document.createElement('button');
+      prev.className = 'slider-btn slider-prev';
+      prev.type = 'button';
+      prev.setAttribute('aria-label', 'Previous image');
+      prev.innerHTML = '&#10094;';
+
+      const next = document.createElement('button');
+      next.className = 'slider-btn slider-next';
+      next.type = 'button';
+      next.setAttribute('aria-label', 'Next image');
+      next.innerHTML = '&#10095;';
+
+      media.appendChild(prev);
+      media.appendChild(next);
+
+      // Slider state
+      let idx = 0;
+      const total = absList.length;
+
+      function render() {
+        slidesWrap.style.transform = `translateX(${idx * -100}%)`;
+        Array.from(dots.children).forEach((el, i) =>
+            el.classList.toggle('active', i === idx)
+        );
+      }
+
+      function go(n) {
+        idx = (n + total) % total;
+        render();
+      }
+
+      const stopNav = e => {
+        e.preventDefault();
+        e.stopPropagation();
+      };
+
+      prev.addEventListener('click', e => {
+        stopNav(e);
+        go(idx - 1);
+        media.classList.add('show-controls');
+      });
+
+      next.addEventListener('click', e => {
+        stopNav(e);
+        go(idx + 1);
+        media.classList.add('show-controls');
+      });
+
+      dots.addEventListener('click', e => {
+        const t = e.target;
+        if (!(t instanceof HTMLElement)) return;
+        if (t.classList.contains('dot')) {
+          stopNav(e);
+          go(Number(t.dataset.index || 0));
+          media.classList.add('show-controls');
+        }
+      });
+
+      // Light swipe on the card
+      let startX = 0, dist = 0, dragging = false;
+      function onStart(e) {
+        dragging = true;
+        startX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+        dist = 0;
+        media.classList.add('show-controls');
+      }
+      function onMove(e) {
+        if (!dragging) return;
+        const x = 'touches' in e ? e.touches[0].clientX : e.clientX;
+        dist = x - startX;
+      }
+      function onEnd() {
+        if (!dragging) return;
+        dragging = false;
+        if (Math.abs(dist) > 40) {
+          if (dist < 0) go(idx + 1);
+          else go(idx - 1);
+        }
+      }
+
+      card.addEventListener('mousedown', onStart);
+      addEventListener('mousemove', onMove);
+      addEventListener('mouseup', onEnd);
+      card.addEventListener('touchstart', onStart, { passive: true });
+      addEventListener('touchmove', onMove, { passive: true });
+      addEventListener('touchend', onEnd);
+
+      render();
+    });
   }
 
   /* ------------------------------------------------------------------ */
@@ -1634,7 +1830,7 @@
       const x = 'touches' in e ? e.touches[0].clientX : e.clientX;
       dist = x - startX;
     }
-    function onEnd(e) {
+    function onEnd() {
       if (!dragging) return;
       dragging = false;
       if (Math.abs(dist) > 50) {
@@ -1678,7 +1874,7 @@
   }
 
   /* ------------------------------------------------------------------ */
-  /*  Collection strip (equalizer only)                                 */
+  /*  Single collection strip equalizer (visual only)                   */
   /* ------------------------------------------------------------------ */
   function initCollectionStrip() {
     const strip = document.querySelector('.collection-strip');
@@ -1694,29 +1890,6 @@
       });
     }
     widontCollectionNames();
-
-    // "View" button for each collection card, without changing layout
-    const cards = track.querySelectorAll('.collection-card');
-    cards.forEach(card => {
-      if (card.querySelector('.actions .btn')) return;
-      const viewUrl = card.getAttribute('data-view') || card.getAttribute('href') || '#';
-      const title =
-          card.querySelector('.collection-name')?.textContent ||
-          card.querySelector('.title')?.textContent ||
-          'Collection';
-      let actions = card.querySelector('.actions');
-      if (!actions) {
-        actions = document.createElement('div');
-        actions.className = 'actions';
-        card.appendChild(actions);
-      }
-      const btn = document.createElement('a');
-      btn.className = 'btn primary';
-      btn.href = viewUrl;
-      btn.textContent = 'View';
-      btn.setAttribute('aria-label', `View ${title}`);
-      actions.appendChild(btn);
-    });
   }
 
   /* ------------------------------------------------------------------ */
@@ -1810,7 +1983,7 @@
   /* ------------------------------------------------------------------ */
   /*  Cart drawer (index and product pages)                             */
   /* ------------------------------------------------------------------ */
-  let updateCartCount; // so checkout can call it
+  let updateCartCount;
 
   function initCartDrawer() {
     const drawer = document.querySelector('.cart-drawer');
@@ -1892,9 +2065,9 @@
             <div class="cart-item-title">${item.p || 'Item'}</div>
             <div class="cart-item-meta">
               ${item.metal ? `Metal: ${item.metal} · ` : ''}
-              ${
-            item.stone ? `Stone: ${item.stone} · ` : ''
-        }${item.size ? `Size: ${item.size}` : ''}
+              ${item.stone ? `Stone: ${item.stone} · ` : ''}${
+            item.size ? `Size: ${item.size}` : ''
+        }
             </div>
             <button type="button" class="cart-item-remove">Remove</button>
           </div>
@@ -1943,7 +2116,6 @@
     function handleCartCopy(e) {
       if (e.target.classList.contains('cart-copy')) {
         const button = e.target;
-        const platform = button.dataset.platform;
         const cart = readCart();
         const orderText = buildOrderMessageFromCart(cart).plain;
 
@@ -2006,6 +2178,7 @@
     });
     cards.forEach(c => grid.appendChild(c));
   }
+
   function initAllProductsSort() {
     const grid = document.getElementById('all-catalog');
     const sel = document.getElementById('all-sort');
@@ -2078,15 +2251,24 @@
   /* ------------------------------------------------------------------ */
   /*  Init everything                                                   */
   /* ------------------------------------------------------------------ */
-  function onReady() {
-    initCatalogCards();     // builds inner sliders for catalog + collection + dynamic-related
-    initRecommended();      // populate Recommended from #all-catalog
-    initCatalogCards();     // re-init so Recommended cards get inner sliders
-    initAutoStrips();       // Recommended + Collections + related strips
+  /* ------------------------------------------------------------------ */
+  /*  Init everything                                                   */
+  /* ------------------------------------------------------------------ */
+  async function onReady() {
+    initCatalogCards();
+    initRecommended();
+    initCatalogCards();     // enhance Recommended cards
+    initAutoStrips();       // outer sliders
     initProductGallery();
-    initDynamicRelated();   // "You may also like" (outer logic aligned)
+
+    // Wait until related cards are actually built
+    await initDynamicRelated();
+
+    // Now their DOM exists, turn them into inner sliders
+    initRelatedInnerSliders();
+
     initFeaturedSlideshow();
-    initCollectionStrip();  // collection names + view buttons
+    initCollectionStrip();
     initAllProductsSort();
     initFilterToggle();
     initCheckout();
