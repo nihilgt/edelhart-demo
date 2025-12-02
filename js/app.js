@@ -994,45 +994,37 @@
     const prev = gallery.querySelector('.slider-prev');
     const next = gallery.querySelector('.slider-next');
 
-    // ALWAYS start from inline data-images on the product page
-    const inlineRaw = listFromCSV(gallery.getAttribute('data-images') || '');
-    let images = toAbsList(inlineRaw, location.href);
-
+    // Figure out which product page we are on, e.g. "ee-female-ring-gold"
     const thisSlug = slugFromPath(location.pathname);
-    const hand = readHandoff();
-    const cacheItems = readImageCache()?.items || {};
-    const cached = cacheItems?.[thisSlug]?.images || [];
 
-    function baseFromSlug(slug) {
-      return slug
-          .replace(/-(gold-18k|gold-14k|black-rhodium|e-silver|gold|silver)$/, '')
-          .replace(/-?$/, '');
-    }
+    let images = [];
 
-    if (
-        hand &&
-        (hand.slug === thisSlug ||
-            baseFromSlug(hand.slug) === baseFromSlug(thisSlug))
-    ) {
-      const handList = Array.isArray(hand.images) ? hand.images : [];
-      if (handList.length) {
-        const merged = [...images];
-        handList.forEach(src => {
-          if (!merged.includes(src)) merged.push(src);
-        });
-        images = merged;
+    // 1) Try shared products-data.js (if it loaded correctly)
+    try {
+      if (Array.isArray(window.EDELHART_PRODUCTS)) {
+        const allProducts = window.EDELHART_PRODUCTS;
+        // match by view path (products/xxx.html) instead of slug text, to be safe
+        const productFromData = allProducts.find(
+            p => slugFromPath(p.view) === thisSlug
+        );
+        if (productFromData && Array.isArray(productFromData.images)) {
+          images = toAbsList(productFromData.images, location.href);
+        }
       }
-      clearHandoff();
-    } else if (cached && cached.length) {
-      const merged = [...images];
-      cached.forEach(src => {
-        if (!merged.includes(src)) merged.push(src);
-      });
-      images = merged;
+    } catch {
+      // ignore, we'll fall back to inline data-images
     }
 
+    // 2) Fallback: use inline data-images from the HTML page
+    if (!images.length) {
+      const inlineRaw = listFromCSV(gallery.getAttribute('data-images') || '');
+      images = toAbsList(inlineRaw, location.href);
+    }
+
+    // 3) If still nothing, stop – nothing to render
     if (!images.length) return;
 
+    // Build DOM from this final images array ----------------------------
     function buildFromImages(listAbs) {
       slidesWrap.innerHTML = '';
       listAbs.forEach((src, i) => {
@@ -1295,168 +1287,31 @@
     const currentSlug = slugFromPath(location.pathname);
 
     async function fetchAllProducts() {
-      const products = [
-        {
-          view: 'products/sss-pendant-gold.html',
-          title: 'SSS pendant — gold',
-          price: '$125',
-          images: [
-            '../img/products/sss-gold-1.jpg',
-            '../img/products/sss-gold-2.jpg',
-            '../img/products/sss-gold-3.jpg',
-            '../img/products/sss-gold-4.jpg',
-            '../img/products/sss-gold-5.jpg',
-          ],
-        },
-        {
-          view: 'products/sss-pendant-silver.html',
-          title: 'SSS pendant — silver',
-          price: '$125',
-          images: [
-            '../img/products/sss-silver-2.jpg',
-            '../img/products/sss-silver-3.jpg',
-            '../img/products/sss-silver-5.jpg',
-          ],
-        },
-        {
-          view: 'products/legs-pendant.html',
-          title: 'LEGS pendant',
-          price: '$375',
-          images: [
-            '../img/products/LEGS-pendant-1.jpg',
-            '../img/products/LEGS-pendant-2.jpg',
-            '../img/products/LEGS-pendant-3.jpg',
-            '../img/products/LEGS-pendant-4.jpg',
-            '../img/products/LEGS-pendant-5.jpg',
-          ],
-        },
-        {
-          view: 'products/ee-female-ring-gold.html',
-          title: 'EE female ring — gold',
-          price: '$140',
-          images: [
-            '../img/products/EE-female-ring-gold-1.jpg',
-          ],
-        },
-        {
-          view: 'products/ee-female-ring-silver.html',
-          title: 'EE female ring — silver',
-          price: '$140',
-          images: [
-            '../img/products/EE-female-ring-silver-1.jpg',
-            '../img/products/EE-female-ring-silver-2.png',
-          ],
-        },
-        {
-          view: 'products/ee-female-ring-black-rhodium.html',
-          title: 'EE female ring — black rhodium',
-          price: '$140',
-          images: [
-            '../img/products/EE-female-ring-BR-1.jpg',
-          ],
-        },
-        {
-          view: 'products/ee-male-ring-black-rhodium-stone.html',
-          title: 'EE male ring — black rhodium (Stone trapping)',
-          price: '$190',
-          images: [
-            '../img/products/EE-male-ring-BR-trap-1.jpg',
-          ],
-        },
-        {
-          view: 'products/ee-male-ring-black-rhodium.html',
-          title: 'EE male ring — black rhodium',
-          price: '$200',
-          images: [
-            '../img/products/EE-male-ring-BR-1.jpg',
-          ],
-        },
-        {
-          view: 'products/ee-male-ring-silver.html',
-          title: 'EE male ring — silver',
-          price: '$200',
-          images: [
-            '../img/products/EE-male-ring-silver-1.jpg',
-          ],
-        },
-        {
-          view: 'products/foto-ring.html',
-          title: 'FOTO ring',
-          price: '$345',
-          images: [
-            '../img/products/foto-ring-1.jpg',
-            '../img/products/foto-ring-2.jpg',
-          ],
-        },
-        {
-          view: 'products/foto-earring.html',
-          title: 'FOTO earring',
-          price: '$310',
-          images: [
-            '../img/products/foto-earring-1.jpg',
-            '../img/products/foto-earring-2.jpg',
-          ],
-        },
-        {
-          view: 'products/foto-necklace.html',
-          title: 'FOTO necklace',
-          price: '$935',
-          images: [
-            '../img/products/foto-necklace-1.jpg',
-            '../img/products/foto-necklace-2.jpg',
-          ],
-        },
-      ];
-
-      const filtered = products.filter(
-          p => slugFromPath(p.view) !== currentSlug
-      );
-      return filtered;
+      const all = Array.isArray(window.EDELHART_PRODUCTS)
+          ? window.EDELHART_PRODUCTS
+          : [];
+      // Filter out current product
+      return all.filter(p => slugFromPath(p.view) !== currentSlug);
     }
 
     let allProducts = await fetchAllProducts();
     let selected = [];
+
     if (allProducts.length >= 4) {
       selected = allProducts.sort(() => 0.5 - Math.random()).slice(0, 4);
     } else {
-      selected = [
-        {
-          view: 'products/sss-pendant-gold.html',
-          title: 'SSS pendant — gold',
-          price: '$125',
-          images: ['img/products/sss-gold-1.jpg'],
-        },
-        {
-          view: 'products/ee-male-ring-silver.html',
-          title: 'EE male ring — silver',
-          price: '$200',
-          images: ['img/products/EE-male-ring-silver-1.jpg'],
-        },
-        {
-          view: 'products/foto-earring.html',
-          title: 'FOTO earring',
-          price: '$310',
-          images: ['img/products/foto-earring-1.jpg'],
-        },
-        {
-          view: 'products/legs-pendant.html',
-          title: 'LEGS pendant',
-          price: '$375',
-          images: ['img/products/LEGS-pendant-1.jpg'],
-        },
-      ]
-          .filter(p => slugFromPath(p.view) !== currentSlug)
-          .slice(0, 4);
+      selected = allProducts;
     }
 
-    track.innerHTML = ''; // clear any previous content
+    track.innerHTML = '';
 
     selected.forEach(product => {
       const card = document.createElement('a');
       card.className = 'related-card';
+      // product.view is relative to site root; on a product page we are in /products/,
+      // so strip the leading "products/" to link correctly as existing code does.
       card.href = product.view.replace('products/', '');
 
-      // Put ALL images into data-images on .related-media
       const imagesCsv = (product.images || []).join(',');
 
       card.innerHTML = `
@@ -1465,11 +1320,12 @@
         </div>
         <div class="related-info">
           <div class="title">${product.title}</div>
-          <div class="price">${product.price}</div>
+          <div class="price">$${product.price}</div>
         </div>
       `;
       track.appendChild(card);
     });
+
 
     let prev = relatedStrip.querySelector('.slider-arrow-prev');
     let next = relatedStrip.querySelector('.slider-arrow-next');
