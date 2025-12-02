@@ -406,25 +406,56 @@
   function buildOrderMessageFromCart(cart) {
     if (!Array.isArray(cart) || !cart.length) {
       const plainEmpty =
-          `Hello EDELHART,\n\nMy cart is currently empty, ` +
-          `but I'm interested in your pieces.\n\nThank you.`;
+          `Hello EDELHART,\n\n` +
+          `My cart is currently empty, but I'm interested in your pieces.\n` +
+          `Could you please share more information about availability and pricing?\n\n` +
+          `Thank you.`;
       return { plain: plainEmpty, encoded: encodeURIComponent(plainEmpty) };
     }
 
+    let grandTotal = 0;
+
     const lines = [
-      `I would like to order the following items:`,
+      `Hello EDELHART,\n`,
+      `I would love to order the following pieces from your collection:`,
+      '',
       ...cart.map(item => {
+        const qty = item.qty || 1;
+        const price = Number(item.priceNum || 0);
+        const lineTotal = price * qty;
+        if (price) grandTotal += lineTotal;
+
         const parts = [];
-        parts.push(`- ${item.qty || 1} × ${item.p || 'Item'}`);
+        parts.push(`- ${qty} × ${item.p || 'Item'}`);
         if (item.metal) parts.push(`Metal: ${item.metal}`);
         if (item.stone) parts.push(`Stone: ${item.stone}`);
         if (item.size) parts.push(`Size: ${item.size}`);
+
+        if (price) {
+          parts.push(
+              `Line total: $${lineTotal.toFixed(2).replace(/\.00$/, '')}`
+          );
+        }
+
         return parts.join(' · ');
       }),
-      `\nYou can reply here, or I can also complete the order via Instagram or Facebook if you prefer.`,
-      `\nCould you please confirm availability and provide next steps?`,
     ];
-    const plain = `Hello EDELHART,\n\n${lines.join('\n')}\n\nThank you.`;
+
+    if (grandTotal > 0) {
+      lines.push(
+          '',
+          `Estimated cart total: $${grandTotal.toFixed(2).replace(/\.00$/, '')}`
+      );
+    }
+
+    lines.push(
+        '',
+        `Could you please confirm availability, lead time, and next steps for payment?`,
+        '',
+        `Thank you.`
+    );
+
+    const plain = lines.join('\n');
     return { plain, encoded: encodeURIComponent(plain) };
   }
 
@@ -1970,32 +2001,64 @@
     }
 
     function handleCartCopy(e) {
-      if (e.target.classList.contains('cart-copy')) {
-        const button = e.target;
-        const cart = readCart();
-        const orderText = buildOrderMessageFromCart(cart).plain;
+      const target = e.target;
+      if (!target.classList.contains('cart-copy')) return;
 
-        navigator.clipboard.writeText(orderText).then(() => {
-          const originalHTML = button.innerHTML;
-          button.innerHTML = `
-            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
-              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-            </svg>
-            Copied!
-          `;
-          button.style.background = 'rgba(0, 255, 0, 0.1)';
-          button.style.borderColor = 'rgba(0, 255, 0, 0.5)';
+      const button = target;
+      const platform = button.dataset.platform || '';
+      const cart = readCart();
+      const orderText = buildOrderMessageFromCart(cart).plain;
 
-          setTimeout(() => {
-            button.innerHTML = originalHTML;
-            button.style.background = '';
-            button.style.borderColor = '';
-          }, 3000);
-        }).catch(err => {
-          console.error('Failed to copy: ', err);
-          alert('Failed to copy. Please try again.');
-        });
-      }
+      navigator.clipboard.writeText(orderText).then(() => {
+        const originalHTML = button.innerHTML;
+        button.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
+        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+      </svg>
+      Copied!
+    `;
+        button.style.background = 'rgba(0, 255, 0, 0.1)';
+        button.style.borderColor = 'rgba(0, 255, 0, 0.5)';
+
+        setTimeout(() => {
+          button.innerHTML = originalHTML;
+          button.style.background = '';
+          button.style.borderColor = '';
+        }, 3000);
+
+        // Centered popup with clear instructions
+        if (/instagram/i.test(platform)) {
+          showToast(
+              'Your order message has been copied.\n\nIn the Instagram tab that opens, paste it into your DM to @edelhartvx and send.'
+          );
+        } else if (/facebook/i.test(platform)) {
+          showToast(
+              'Your order message has been copied.\n\nIn the Facebook tab that opens, paste it into your message to Edelhart and send.'
+          );
+        } else {
+          showToast('Message copied to clipboard.');
+        }
+
+        // Small delay so the popup is visible before opening the platform
+        setTimeout(() => {
+          try {
+            if (/instagram/i.test(platform)) {
+              window.open('https://www.instagram.com/edelhartvx/', '_blank', 'noopener');
+            } else if (/facebook/i.test(platform)) {
+              window.open(
+                  'https://www.facebook.com/people/Edelhart/61578850709155/',
+                  '_blank',
+                  'noopener'
+              );
+            }
+          } catch (err) {
+            console.error('Failed to open platform:', err);
+          }
+        }, 5000); // 0.8s delay
+      }).catch(err => {
+        console.error('Failed to copy: ', err);
+        alert('Failed to copy. Please try again.');
+      });
     }
 
     function open() {
@@ -2019,6 +2082,52 @@
 
     updateCartCount();
   }
+  function showToast(message) {
+    // Overlay
+    const overlay = document.createElement('div');
+    Object.assign(overlay.style, {
+      position: 'fixed',
+      inset: '0',
+      background: 'rgba(0, 0, 0, 0.55)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 4000,
+    });
+
+    // Popup
+    const box = document.createElement('div');
+    box.textContent = message;
+    Object.assign(box.style, {
+      maxWidth: '420px',
+      margin: '0 20px',
+      background: '#141516',
+      color: '#f6f7f9',
+      padding: '18px 20px',
+      borderRadius: '18px',
+      border: '1px solid rgba(255, 255, 255, 0.18)',
+      boxShadow: '0 18px 50px rgba(0, 0, 0, 0.75)',
+      fontSize: '14px',
+      lineHeight: '1.6',
+      textAlign: 'center',
+    });
+
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    function close() {
+      overlay.remove();
+    }
+
+    // Close on click or Escape, or after 3 seconds
+    overlay.addEventListener('click', close);
+    const onKey = e => { if (e.key === 'Escape') close(); };
+    document.addEventListener('keydown', onKey, { once: true });
+
+    setTimeout(close, 8000);
+  }
+
+
 
   /* ------------------------------------------------------------------ */
   /*  All products sort + filter toggle                                 */
