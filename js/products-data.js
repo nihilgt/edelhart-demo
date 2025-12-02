@@ -8,14 +8,15 @@ window.EDELHART_PRODUCTS = [
         title: 'SSS pendant — gold',
         price: 125,
         images: [
-            '/img/products/sss-gold-1.jpg',
-            '/img/products/sss-gold-2.jpg',
-            '/img/products/sss-gold-3.jpg',
-            '/img/products/sss-gold-4.jpg',
-            '/img/products/sss-gold-5.jpg',
+            'img/products/sss-gold-1.jpg',
+            'img/products/sss-gold-2.jpg',
+            'img/products/sss-gold-3.jpg',
+            'img/products/sss-gold-4.jpg',
+            'img/products/sss-gold-5.jpg',
         ],
     },
     {
+<<<<<<< HEAD
   slug: 'sss-pendant-silver',
   view: 'products/sss-pendant-silver.html',
   title: 'SSS pendant — silver',
@@ -26,17 +27,29 @@ window.EDELHART_PRODUCTS = [
       'img/products/sss-silver-5.jpg',
   ],
 },
+=======
+        slug: 'sss-pendant-silver',
+        view: 'products/sss-pendant-silver.html',
+        title: 'SSS pendant — silver',
+        price: 125,
+        images: [
+            'img/products/sss-silver-2.jpg',
+            'img/products/sss-silver-3.jpg',
+            'img/products/sss-silver-5.jpg',
+        ],
+    },
+>>>>>>> 8acbff7 (cart updated)
     {
         slug: 'legs-pendant',
         view: 'products/legs-pendant.html',
         title: 'LEGS pendant',
         price: 375,
         images: [
-            '/img/products/LEGS-pendant-1.jpg',
-            '/img/products/LEGS-pendant-2.jpg',
-            '/img/products/LEGS-pendant-3.jpg',
-            '/img/products/LEGS-pendant-4.jpg',
-            '/img/products/LEGS-pendant-5.jpg',
+            'img/products/LEGS-pendant-1.jpg',
+            'img/products/LEGS-pendant-2.jpg',
+            'img/products/LEGS-pendant-3.jpg',
+            'img/products/LEGS-pendant-4.jpg',
+            'img/products/LEGS-pendant-5.jpg',
         ],
     },
     {
@@ -45,7 +58,7 @@ window.EDELHART_PRODUCTS = [
         title: 'EE female ring — gold',
         price: 140,
         images: [
-            '/img/products/EE-female-ring-gold-1.jpg',
+            'img/products/EE-female-ring-gold-1.jpg',
         ],
     },
     {
@@ -54,8 +67,8 @@ window.EDELHART_PRODUCTS = [
         title: 'EE female ring — silver',
         price: 140,
         images: [
-            '/img/products/EE-female-ring-silver-1.jpg',
-            '/img/products/EE-female-ring-silver-2.png',
+            'img/products/EE-female-ring-silver-1.jpg',
+            'img/products/EE-female-ring-silver-2.png',
         ],
     },
     {
@@ -64,7 +77,7 @@ window.EDELHART_PRODUCTS = [
         title: 'EE female ring — black rhodium',
         price: 140,
         images: [
-            '/img/products/EE-female-ring-BR-1.jpg',
+            'img/products/EE-female-ring-BR-1.jpg',
         ],
     },
     {
@@ -73,7 +86,7 @@ window.EDELHART_PRODUCTS = [
         title: 'EE male ring — black rhodium (Stone trapping)',
         price: 190,
         images: [
-            '/img/products/EE-male-ring-BR-trap-1.jpg',
+            'img/products/EE-male-ring-BR-trap-1.jpg',
         ],
     },
     {
@@ -82,7 +95,7 @@ window.EDELHART_PRODUCTS = [
         title: 'EE male ring — black rhodium',
         price: 200,
         images: [
-            '/img/products/EE-male-ring-BR-1.jpg',
+            'img/products/EE-male-ring-BR-1.jpg',
         ],
     },
     {
@@ -91,7 +104,7 @@ window.EDELHART_PRODUCTS = [
         title: 'EE male ring — silver',
         price: 200,
         images: [
-            '/img/products/EE-male-ring-silver-1.jpg',
+            'img/products/EE-male-ring-silver-1.jpg',
         ],
     },
     {
@@ -100,8 +113,8 @@ window.EDELHART_PRODUCTS = [
         title: 'FOTO ring',
         price: 345,
         images: [
-            '/img/products/foto-ring-1.jpg',
-            '/img/products/foto-ring-2.jpg',
+            'img/products/foto-ring-1.jpg',
+            'img/products/foto-ring-2.jpg',
         ],
     },
     {
@@ -110,8 +123,8 @@ window.EDELHART_PRODUCTS = [
         title: 'FOTO earring',
         price: 310,
         images: [
-            '/img/products/foto-earring-1.jpg',
-            '/img/products/foto-earring-2.jpg',
+            'img/products/foto-earring-1.jpg',
+            'img/products/foto-earring-2.jpg',
         ],
     },
     {
@@ -120,8 +133,8 @@ window.EDELHART_PRODUCTS = [
         title: 'FOTO necklace',
         price: 935,
         images: [
-            '/img/products/foto-necklace-1.jpg',
-            '/img/products/foto-necklace-2.jpg',
+            'img/products/foto-necklace-1.jpg',
+            'img/products/foto-necklace-2.jpg',
         ],
     },
 ];
