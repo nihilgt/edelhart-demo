@@ -16,16 +16,16 @@ window.EDELHART_PRODUCTS = [
         ],
     },
     {
-        slug: 'sss-pendant-silver',
-        view: 'products/sss-pendant-silver.html',
-        title: 'SSS pendant — silver',
-        price: 125,
-        images: [
-            '/img/products/sss-silver-2.jpg',
-            '/img/products/sss-silver-3.jpg',
-            '/img/products/sss-silver-5.jpg',
-        ],
-    },
+  slug: 'sss-pendant-silver',
+  view: 'products/sss-pendant-silver.html',
+  title: 'SSS pendant — silver',
+  price: 125,
+  images: [
+      'img/products/sss-silver-2.jpg',
+      'img/products/sss-silver-3.jpg',
+      'img/products/sss-silver-5.jpg',
+  ],
+},
     {
         slug: 'legs-pendant',
         view: 'products/legs-pendant.html',
