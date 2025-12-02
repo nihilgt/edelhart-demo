@@ -22,11 +22,14 @@
       <button class="menu-btn" aria-label="Open menu" aria-expanded="false">
         <span class="menu-icon" aria-hidden="true"></span>
       </button>
+
       <div class="links">
         <div class="dropdown">
           <button class="drop-btn" aria-haspopup="true" aria-expanded="false">
             Collections
-            <svg class="caret" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
+            <svg class="caret" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+              <path fill="currentColor" d="M7 10l5 5 5-5z" />
+            </svg>
           </button>
           <div class="drop-menu" role="menu">
             <a href="sss.html" role="menuitem">SSS</a>
@@ -41,6 +44,10 @@
         <span class="sep">·</span>
         <a href="../index.html#about">About</a>
       </div>
+
+      <button class="cart-toggle" type="button" aria-label="Open cart">
+        Cart <span class="cart-count" aria-hidden="true">0</span>
+      </button>
     </nav>
   </div>
 </header>
@@ -66,7 +73,7 @@
     <div class="wrap">
       <div class="section-head">
         <h2>The Core Collection</h2>
-        <p>Essential pieces with timeless appeal. Explore our EE rings and LEGS pendants.</p>
+        <p>The Core collection focuses on foundational pieces that blend comfort, durability, and understated elegance.</p>
       </div>
 
       <!-- Filters -->
@@ -93,16 +100,6 @@
       </div>
     </div>
   </section>
-
-  <!-- About -->
-  <section id="about" aria-label="About The Core">
-    <div class="wrap">
-      <div class="section-head">
-        <h2>About The Core</h2>
-        <p>The Core collection focuses on foundational pieces that blend comfort, durability, and understated elegance.</p>
-      </div>
-    </div>
-  </section>
 </main>
 
 <footer>
@@ -112,11 +109,39 @@
   </div>
 </footer>
 
+<!-- Cart drawer -->
+<div class="cart-drawer" aria-hidden="true">
+  <div class="cart-overlay"></div>
+  <aside class="cart-panel" role="dialog" aria-modal="true" aria-label="Cart">
+    <header class="cart-header">
+      <h2>Your Cart</h2>
+      <button type="button" class="cart-close" aria-label="Close cart">✕</button>
+    </header>
+    <div class="cart-body">
+      <div class="cart-empty">Your cart is empty.</div>
+      <ul class="cart-items"></ul>
+    </div>
+    <footer class="cart-footer">
+      <div class="cart-summary">
+        <span>Total</span>
+        <span class="cart-total">$0</span>
+      </div>
+      <a class="btn primary cart-checkout" href="https://wa.me/84944445084" target="_blank" rel="noopener">
+        Send order via WhatsApp
+      </a>
+      <button class="btn outline cart-copy" data-platform="Instagram" type="button">Copy for Instagram</button>
+      <button class="btn outline cart-copy" data-platform="Facebook" type="button">Copy for Facebook</button>
+    </footer>
+  </aside>
+</div>
+
+<!-- Back to top -->
+<button id="back-to-top" aria-label="Back to top">↑</button>
+
 <script src="../js/app.js" defer></script>
 <script>
   // Collection-specific JS
   (function(){
-    const collection = 'the-core'; // Identifier for this collection
     const collectionGrid = document.getElementById('collection-catalog');
 
     // Fetch and filter products
@@ -171,6 +196,7 @@
         const card = document.createElement('article');
         card.className = 'card';
         card.setAttribute('data-price', product.priceNum);
+        card.setAttribute('data-view', product.view);
         card.innerHTML = `
           <div class="media" data-images="${product.images.join(',')}">
             <div class="media-fallback">${product.title.split(' ')[0]}</div>
