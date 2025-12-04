@@ -2156,8 +2156,9 @@
     const grid = document.getElementById('all-catalog');
     const sel = document.getElementById('all-sort');
     if (!grid || !sel) return;
+
+    // Don't sort on load. Use HTML order as default.
     sel.addEventListener('change', () => sortGridByPrice(grid, sel.value));
-    sortGridByPrice(grid, sel.value || 'asc');
   }
 
   function initFilterToggle() {
