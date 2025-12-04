@@ -345,13 +345,13 @@
     return (csv || '').split(',').map(s => s.trim()).filter(Boolean);
   }
   function toAbsList(list, baseUrl) {
-    // Detect the repo base path ("/edelhart-demo/") from current path
-    const origin = location.origin;
-    const path = location.pathname; // e.g. "/edelhart-demo/index.html"
+    // On GitHub Pages, our site is at /edelhart-demo/
+    const origin = location.origin;           // "https://nihilgt.github.io"
+    const path = location.pathname;           // e.g. "/edelhart-demo/index.html"
     const firstSegment = path.split('/').filter(Boolean)[0] || '';
     const basePath = firstSegment ? `/${firstSegment}/` : '/';
 
-    const base = origin + basePath; // "https://nihilgt.github.io/edelhart-demo/"
+    const base = origin + basePath;           // "https://nihilgt.github.io/edelhart-demo/"
 
     return list.map(src => {
       try {
