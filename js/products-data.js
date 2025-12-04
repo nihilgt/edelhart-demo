@@ -1,7 +1,6 @@
 // js/products-data.js
 // Single source of truth for all product metadata + images.
-// IMPORTANT: Make sure your actual files match these paths and extensions.
-// Updated: Image paths now use ../img/ to work from product pages (products/).
+// Updated: Image paths use ../img/ for product pages. JS (app.js) must adjust for root pages.
 
 window.EDELHART_PRODUCTS = [
     // 1. sss-gold — 11 images
