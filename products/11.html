@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Coming soon · EDELHART</title>
+  <meta name="description" content="Coming soon — new piece under development. Stay tuned for updates." />
+  <link rel="icon" type="image/png" href="../img/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+<body>
+<header id="site-header">
+  <div class="wrap nav">
+    <a href="../index.html#home" class="brand" aria-label="EDELHART Home">
+      <img src="../img/logo.png" alt="EDELHART Logo" class="navbar-logo">
+      <span class="brand-word">EDELHART</span>
+    </a>
+    <nav class="menu" aria-label="Main">
+      <button class="menu-btn" aria-label="Open menu" aria-expanded="false">
+        <span class="menu-icon" aria-hidden="true"></span>
+      </button>
+
+      <div class="links">
+        <div class="dropdown">
+          <button class="drop-btn" aria-haspopup="true" aria-expanded="false">
+            Collections
+            <svg class="caret" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+              <path fill="currentColor" d="M7 10l5 5 5-5z"/>
+            </svg>
+          </button>
+          <div class="drop-menu" role="menu">
+            <a href="../collections/sss.html" role="menuitem">SSS</a>
+            <a href="../collections/whispering-a.html" role="menuitem">Whispering A</a>
+            <a href="../collections/the-core.html" role="menuitem">The Core</a>
+          </div>
+        </div>
+        <span class="sep">·</span>
+        <a href="../index.html#products">All Products</a>
+        <span class="sep">·</span>
+        <a href="../index.html#contact">Contact</a>
+        <span class="sep">·</span>
+        <a href="../index.html#about">About</a>
+      </div>
+
+      <button class="cart-toggle" type="button" aria-label="Open cart">
+        Cart <span class="cart-count" aria-hidden="true">0</span>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main class="product-page" aria-label="Product page">
+  <div class="wrap">
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <a href="../index.html#products">All Products</a>
+      <span aria-current="page">Coming soon</span>
+    </nav>
+
+    <a class="page-back" href="../index.html#products" aria-label="Back to catalog">Back to catalog</a>
+
+    <div class="product">
+      <!-- LEFT: Gallery -->
+      <div>
+        <div class="product-gallery" data-images="">
+          <div class="slides"></div>
+          <button class="slider-btn slider-prev" aria-label="Previous">‹</button>
+          <button class="slider-btn slider-next" aria-label="Next">›</button>
+          <div class="thumbs"></div>
+        </div>
+        <!-- Thumbnail strip below gallery -->
+        <div class="thumb-strip">
+          <div class="thumb-row"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Checkout -->
+      <aside class="checkout">
+        <div class="title">Coming soon</div>
+        <div class="price">$0</div>
+
+        <p class="meta">New piece under development. Stay tuned for updates.</p>
+      </aside>
+    </div>
+
+    <!-- CRITICAL: Wrapper prevents overlap -->
+    <div class="product-page-content">
+      <!-- Product Description -->
+      <div class="product-description">
+        <h3>About This Piece</h3>
+        <p>
+          Coming soon — a new piece is under development. Check back for more details.
+        </p>
+      </div>
+
+      <!-- On-Body Gallery -->
+      <section aria-label="On‑Body Gallery">
+        <div class="section-head">
+          <h2>On‑Body Gallery</h2>
+          <p>See how it sits on body and pairs with other pieces.</p>
+        </div>
+
+        <div class="collage-wrapper">
+          <div class="collage-surround">
+            <img src="../img/models/5.jpeg" alt="Model portrait with ring" loading="lazy" decoding="async" class="collage-img">
+            <img src="../img/models/6.jpeg" alt="Hands with multiple rings" loading="lazy" decoding="async" class="collage-img">
+            <img src="../img/models/7.jpeg" alt="Pendant layered styling" loading="lazy" decoding="async" class="collage-img">
+            <img src="../img/models/8.jpeg" alt="Necklace in motion" loading="lazy" decoding="async" class="collage-img">
+            <img src="../img/models/9.jpeg" alt="Earring editorial" loading="lazy" decoding="async" class="collage-img">
+            <img src="../img/models/10.jpeg" alt="Bracelet detail" loading="lazy" decoding="async" class="collage-img">
+          </div>
+
+          <div class="featured-strip collage-main">
+            <div class="featured-track">
+              <div class="feat-slide"><img src="../img/models/model-ring-sss.jpeg" alt="Model wearing ring, close-up" decoding="async"></div>
+              <div class="feat-slide"><img src="../img/models/2.jpeg" alt="Model with ring detail, side light" decoding="async"></div>
+              <div class="feat-slide"><img src="../img/models/3.jpeg" alt="Necklace on model, collarbone" decoding="async"></div>
+              <div class="feat-slide"><img src="../img/models/4.jpeg" alt="Earring on model, profile" decoding="async"></div>
+            </div>
+
+            <button class="slider-btn slider-prev" type="button" aria-label="Previous image">‹</button>
+            <button class="slider-btn slider-next" type="button" aria-label="Next image">›</button>
+
+            <div class="dots">
+              <div class="dot active" data-index="0"></div>
+              <div class="dot" data-index="1"></div>
+              <div class="dot" data-index="2"></div>
+              <div class="dot" data-index="3"></div>
+            </div>
+
+            <div class="swipe-indicator" aria-hidden="true"><div class="thumb"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- You may also like -->
+      <section aria-label="You may also like">
+        <div class="section-head">
+          <h2>You may also like</h2>
+          <p>Pair it with complementary pieces.</p>
+        </div>
+        <div class="related-strip" id="dynamic-related">
+          <div class="related-track" data-auto="true">
+            <!-- Dynamically populated by JS -->
+          </div>
+          <div class="swipe-indicator" aria-hidden="true"><div class="thumb"></div></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Lightbox root injected by JS when opened -->
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <small>© <span id="year"></span> EDELHART.</small>
+    <small><a href="../index.html#home">Back to home ↑</a></small>
+  </div>
+</footer>
+
+<!-- Cart drawer -->
+<div class="cart-drawer" aria-hidden="true">
+  <div class="cart-overlay"></div>
+  <aside class="cart-panel" role="dialog" aria-modal="true" aria-label="Cart">
+    <header class="cart-header">
+      <h2>Your Cart</h2>
+      <button type="button" class="cart-close" aria-label="Close cart">✕</button>
+    </header>
+    <div class="cart-body">
+      <div class="cart-empty">Your cart is empty.</div>
+      <ul class="cart-items"></ul>
+    </div>
+    <footer class="cart-footer">
+      <div class="cart-summary">
+        <span>Total</span>
+        <span class="cart-total">$0</span>
+      </div>
+      <a class="btn primary cart-checkout" href="https://wa.me/84944445084" target="_blank" rel="noopener">
+        Send order via WhatsApp
+      </a>
+      <button class="btn outline cart-copy" data-platform="Instagram" type="button">Copy for Instagram</button>
+      <button class="btn outline cart-copy" data-platform="Facebook" type="button">Copy for Facebook</button>
+    </footer>
+  </aside>
+</div>
+
+<!-- Back to top -->
+<button id="back-to-top" aria-label="Back to top">↑</button>
+
+<script src="../js/products-data.js" defer></script>
+<script src="../js/app.js" defer></script>
+</body>
+</html>

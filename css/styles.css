@@ -9,7 +9,7 @@ body {
   text-rendering: optimizeLegibility;
   background: var(--bg);
   color: var(--text);
-  font-family: "Optima", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-family: "Optima", "Optima LT Std", "Segoe UI", sans-serif;
 }
 img, picture, svg, video { display: block; max-width: 100%; height: auto; }
 a { color: inherit; text-decoration: none; }
@@ -169,7 +169,7 @@ header.is-visible{
 .full-hero .hero-content{ position:relative; z-index:2; text-align:center; padding:0 20px; max-width:900px; }
 
 h1.script{
-  font-family: 'Signatura Monoline Script', 'Dancing Script', cursive;
+  font-family: "Signatura Monoline Script", "Dancing Script", cursive;
   font-weight:400;
   font-size:clamp(30px, 5.8vw, 70px);
   color:var(--accent);
@@ -233,7 +233,11 @@ main > section{
   gap:16px;
   margin-bottom: clamp(16px, 2.4vw, 24px);
 }
-.section-head h2{ font-family:"Playfair Display", serif; font-size: clamp(26px, 3.8vw, 40px); margin:0; }
+.section-head h2{
+  font-family: "Optima", "Optima LT Std", "Segoe UI", sans-serif;
+  font-size: clamp(26px, 3.8vw, 40px);
+  margin:0;
+}
 .section-head p{ color:var(--muted); max-width: 60ch; }
 
 /* ===== Collection strip ===== */
@@ -1289,7 +1293,7 @@ footer{ border-top:1px solid rgba(255,255,255,0.1); background: color-mix(in hsl
   }
 }
 .checkout .title {
-  font-family: "Playfair Display", serif;
+  font-family: "Optima", "Optima LT Std", "Segoe UI", sans-serif;
   font-size: clamp(20px, 4vw, 26px);
   margin: 0 0 10px 0;
   line-height: 1.3;
@@ -1379,7 +1383,7 @@ footer{ border-top:1px solid rgba(255,255,255,0.1); background: color-mix(in hsl
   margin-bottom: 80px;
 }
 .product-description h3 {
-  font-family: "Playfair Display", serif;
+  font-family: "Optima", "Optima LT Std", "Segoe UI", sans-serif;
   font-size: 20px;
   margin: 0 0 12px 0;
 }
