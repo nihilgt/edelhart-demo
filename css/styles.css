@@ -69,7 +69,6 @@ header.is-visible{
   height:36px;
   width:auto;
   margin-right:6px;
-  filter: sepia(1) hue-rotate(10deg) saturate(1.4);
 }
 .brand-word{
   font-weight:700;
