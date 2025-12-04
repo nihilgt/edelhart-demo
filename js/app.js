@@ -345,9 +345,10 @@
     return (csv || '').split(',').map(s => s.trim()).filter(Boolean);
   }
   function toAbsList(list, baseUrl) {
+    const origin = location.origin || baseUrl;
     return list.map(src => {
       try {
-        return new URL(src, baseUrl).href;
+        return new URL(src, origin + '/').href;
       } catch {
         return src;
       }
