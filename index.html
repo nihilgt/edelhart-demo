@@ -12,6 +12,19 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600&family=Signatura+Monoline+Script&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./css/styles.css">
+  <script>
+    (function() {
+      let BASE = "https://nihilgt.github.io/edelhart-demo/";
+      let baseTag = document.querySelector("base");
+
+      if (!baseTag) {
+        baseTag = document.createElement("base");
+        document.head.prepend(baseTag);
+      }
+
+      baseTag.href = BASE;
+    })();
+  </script>
 </head>
 <body>
 <header id="site-header">
