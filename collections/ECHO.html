@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The Core Collection · EDELHART</title>
-  <meta name="description" content="The Core collection — essential pieces with timeless appeal. Explore our EE rings and LEGS pendants." />
+  <title>ECHO Collection · EDELHART</title>
+  <meta name="description" content="ECHO collection — essential pieces with timeless appeal. Explore our EE rings and LEGS pendants." />
   <link rel="icon" type="image/png" href="../img/favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,7 +34,7 @@
           <div class="drop-menu" role="menu">
             <a href="sss.html" role="menuitem">SSS</a>
             <a href="whispering-a.html" role="menuitem">Whispering A</a>
-            <a href="the-core.html" role="menuitem">The Core</a>
+            <a href="ECHO.html" role="menuitem">ECHO</a>
           </div>
         </div>
         <span class="sep">·</span>
@@ -45,38 +45,42 @@
         <a href="../index.html#about">About</a>
       </div>
 
-      <button class="cart-toggle" type="button" aria-label="Open cart">
-        Cart <span class="cart-count" aria-hidden="true">0</span>
-      </button>
+      <div class="nav-utilities" aria-label="Cart and currency">
+        <button class="cart-toggle" type="button" aria-label="Open cart">
+          Cart <span class="cart-count" aria-hidden="true">0</span>
+        </button>
+        <select class="currency-select" data-role="currency-select" aria-label="Select currency">
+          <option value="VND">VND</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+        </select>
+      </div>
     </nav>
   </div>
 </header>
 
 <main>
-  <!-- Collection Hero -->
-  <section class="hero full-hero fit-width" id="home" aria-label="The Core Collection hero">
+  <section class="hero full-hero fit-width" id="home" aria-label="ECHO Collection hero">
     <div class="hero-bg" aria-hidden="true">
       <picture>
         <source media="(max-width: 480px)" srcset="../img/ee-hero.jpeg" />
-        <img src="../img/ee-hero.jpeg" alt="The Core Collection Hero" loading="eager" sizes="100vw" />
+        <img src="../img/ee-hero.jpeg" alt="ECHO Collection Hero" loading="eager" sizes="100vw" />
       </picture>
     </div>
     <div class="overlay" aria-hidden="true"></div>
     <div class="hero-content">
-      <h1 class="script">The Core Collection</h1>
+      <h1 class="script">ECHO Collection</h1>
       <a class="scroll-indicator" href="#products" role="button" aria-label="Scroll to products" title="Scroll to products">⌄</a>
     </div>
   </section>
 
-  <!-- Products -->
-  <section id="products" aria-label="The Core Collection Products">
+  <section id="products" aria-label="ECHO Collection Products">
     <div class="wrap">
       <div class="section-head">
-        <h2>The Core Collection</h2>
-        <p>The Core collection focuses on foundational pieces that blend comfort, durability, and understated elegance.</p>
+        <h2>ECHO Collection</h2>
+        <p>ECHO collection focuses on foundational pieces that blend comfort, durability, and understated elegance.</p>
       </div>
 
-      <!-- Filters -->
       <div class="filters-wrap">
         <button class="filter-toggle" type="button" aria-expanded="false" aria-controls="sort-panel">
           <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M3 5h18v2H3V5zm4 6h10v2H7v-2zm3 6h4v2h-4v-2z"/></svg>
@@ -94,9 +98,8 @@
         </div>
       </div>
 
-      <!-- Collection grid -->
-      <div class="catalog" id="collection-catalog">
-        <!-- Dynamically populated by JS -->
+      <div class="catalog" id="collection-catalog" data-collection="ECHO">
+        <!-- populated by app.js -->
       </div>
     </div>
   </section>
@@ -109,7 +112,6 @@
   </div>
 </footer>
 
-<!-- Cart drawer -->
 <div class="cart-drawer" aria-hidden="true">
   <div class="cart-overlay"></div>
   <aside class="cart-panel" role="dialog" aria-modal="true" aria-label="Cart">
@@ -124,7 +126,7 @@
     <footer class="cart-footer">
       <div class="cart-summary">
         <span>Total</span>
-        <span class="cart-total">$0</span>
+        <span class="cart-total" data-price-vnd="0">₫0</span>
       </div>
       <a class="btn primary cart-checkout" href="https://wa.me/84944445084" target="_blank" rel="noopener">
         Send order via WhatsApp
@@ -135,95 +137,10 @@
   </aside>
 </div>
 
-<!-- Back to top -->
 <button id="back-to-top" aria-label="Back to top">↑</button>
 
+<script src="../js/products-data.js" defer></script>
+<script src="../js/currency-manager.js" defer></script>
 <script src="../js/app.js" defer></script>
-<script>
-  // Collection-specific JS
-  (function(){
-    const collectionGrid = document.getElementById('collection-catalog');
-
-    // Fetch and filter products
-    async function loadCollectionProducts(){
-      // Fetch from index.html all products
-      const candidates = [
-        new URL('../index.html', location.href).href,
-        new URL('../../index.html', location.href).href,
-        new URL('./index.html', location.href).href,
-        new URL('/index.html', location.origin).href
-      ];
-      let allProducts = [];
-      for (const url of candidates){
-        try {
-          const res = await fetch(url, { cache:'no-store', mode:'same-origin' });
-          if (res.ok){
-            const html = await res.text();
-            const doc = new DOMParser().parseFromString(html, 'text/html');
-            allProducts = Array.from(doc.querySelectorAll('#all-catalog .card')).map(card => ({
-              view: card.getAttribute('data-view') || '#',
-              title: card.querySelector('.title')?.textContent || 'Product',
-              price: card.querySelector('.price')?.textContent || '$0',
-              priceNum: Number(card.getAttribute('data-price') || 0),
-              meta: card.querySelector('.meta')?.textContent || '',
-              images: listFromCSV(card.querySelector('.media')?.getAttribute('data-images') || '')
-            }));
-            break;
-          }
-        } catch {}
-      }
-
-      // Filter for The Core: titles containing 'EE' or 'LEGS'
-      const collectionProducts = allProducts.filter(p => p.title.toLowerCase().includes('ee') || p.title.toLowerCase().includes('legs'));
-      if (!collectionProducts.length){
-        // Fallback
-        collectionProducts.push(
-                { view: '../products/ee-female-ring-gold.html', title: 'EE female ring — gold', price: '$140', priceNum: 140, meta: 'Also in silver & black rhodium.', images: ['../img/products/ee-female-ring-gold/ee-female-ring-gold-1.jpeg', '../img/products/ee-female-ring-gold/ee-female-ring-gold-2.jpeg', '../img/products/ee-female-ring-gold/ee-female-ring-gold-3.jpeg', '../img/products/ee-female-ring-gold/ee-female-ring-gold-4.jpeg', '../img/products/ee-female-ring-gold/ee-female-ring-gold-5.jpeg'] },
-                { view: '../products/ee-female-ring-silver.html', title: 'EE female ring — silver', price: '$140', priceNum: 140, meta: 'Sterling silver option.', images: ['../img/products/ee-female-ring-silver/ee-female-ring-silver-1.jpeg', '../img/products/ee-female-ring-silver/ee-female-ring-silver-2.jpeg', '../img/products/ee-female-ring-silver/ee-female-ring-silver-3.jpeg', '../img/products/ee-female-ring-silver/ee-female-ring-silver-4.jpeg', '../img/products/ee-female-ring-silver/ee-female-ring-silver-5.jpeg'] },
-                { view: '../products/ee-female-ring-black-rhodium.html', title: 'EE female ring — black rhodium', price: '$140', priceNum: 140, meta: 'Striking dark finish.', images: ['../img/products/ee-female-ring-BR/ee-female-ring-BR-1.jpeg', '../img/products/ee-female-ring-BR/ee-female-ring-BR-2.jpeg', '../img/products/ee-female-ring-BR/ee-female-ring-BR-3.jpeg', '../img/products/ee-female-ring-BR/ee-female-ring-BR-4.jpeg'] },
-                { view: '../products/ee-male-ring-silver.html', title: 'EE male ring — silver', price: '$200', priceNum: 200, meta: 'Sterling silver option.', images: ['../img/products/ee-male-ring-silver/ee-male-ring-silver-1.jpeg', '../img/products/ee-male-ring-silver/ee-male-ring-silver-2.jpeg', '../img/products/ee-male-ring-silver/ee-male-ring-silver-3.jpeg', '../img/products/ee-male-ring-silver/ee-male-ring-silver-4.jpeg'] },
-                { view: '../products/ee-male-ring-black-rhodium.html', title: 'EE male ring — black rhodium', price: '$200', priceNum: 200, meta: 'Dark rhodium finish.', images: ['../img/products/ee-male-ring-BR/ee-male-ring-BR-1.jpeg', '../img/products/ee-male-ring-BR/ee-male-ring-BR-2.jpeg', '../img/products/ee-male-ring-BR/ee-male-ring-BR-3.jpeg', '../img/products/ee-male-ring-BR/ee-male-ring-BR-4.jpeg', '../img/products/ee-male-ring-BR/ee-male-ring-BR-5.jpeg'] },
-                { view: '../products/legs-pendant.html', title: 'LEGS pendant', price: '$375', priceNum: 375, meta: 'Sculptural statement.', images: ['../img/products/LEGS-pendant/LEGS-pendant-1.jpeg', '../img/products/LEGS-pendant/LEGS-pendant-2.jpeg', '../img/products/LEGS-pendant/LEGS-pendant-3.jpeg', '../img/products/LEGS-pendant/LEGS-pendant-4.jpeg', '../img/products/LEGS-pendant/LEGS-pendant-5.jpeg', '../img/products/LEGS-pendant/LEGS-pendant-6.jpeg', '../img/products/LEGS-pendant/LEGS-pendant-7.jpeg'] }
-        );
-      }
-
-      // Sort by price asc
-      collectionProducts.sort((a,b) => a.priceNum - b.priceNum);
-
-      // Render
-      collectionGrid.innerHTML = '';
-      collectionProducts.forEach(product => {
-        const card = document.createElement('article');
-        card.className = 'card';
-        card.setAttribute('data-price', product.priceNum);
-        card.setAttribute('data-view', product.view);
-        card.innerHTML = `
-          <div class="media" data-images="${product.images.join(',')}">
-            <div class="media-fallback">${product.title.split(' ')[0]}</div>
-          </div>
-          <div class="content">
-            <div class="title">${product.title}</div>
-            <div class="price">${product.price}</div>
-            <div class="meta">${product.meta}</div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="${product.view}" aria-label="View ${product.title}">View</a>
-          </div>
-        `;
-        collectionGrid.appendChild(card);
-      });
-
-      // Initialize cards and sort
-      initCatalogCards();
-      const sortSel = document.getElementById('sort-price');
-      if (sortSel){
-        sortSel.addEventListener('change', () => sortGridByPrice(collectionGrid, sortSel.value));
-        sortGridByPrice(collectionGrid, sortSel.value);
-      }
-    }
-
-    loadCollectionProducts();
-  })();
-</script>
 </body>
 </html>

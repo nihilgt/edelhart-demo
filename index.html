@@ -7,19 +7,17 @@
   <meta name="description" content="Jewelry reflecting the world — both its brilliance and its shadows. Bespoke pieces in silver, 10K/14K/18K gold, diamonds, and precious stones." />
   <meta name="color-scheme" content="dark light">
   <meta name="supported-color-schemes" content="dark">
-  <link rel="icon" type="image/png" href="img/favicon.png"/>
-
+  <link rel="icon" type="image/png" href="./img/favicon.png"/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600&family=Signatura+Monoline+Script&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="./css/styles.css">
 </head>
 <body>
 <header id="site-header">
   <div class="wrap nav">
     <a href="#home" class="brand" aria-label="EDELHART Home">
-      <img src="img/logo.png" alt="EDELHART Logo" class="navbar-logo">
+      <img src="./img/logo.png" alt="EDELHART Logo" class="navbar-logo">
       <span class="brand-word">EDELHART</span>
     </a>
     <nav class="menu" aria-label="Main">
@@ -35,9 +33,9 @@
             </svg>
           </button>
           <div class="drop-menu" role="menu">
-            <a href="collections/sss.html" role="menuitem">SSS</a>
-            <a href="collections/whispering-a.html" role="menuitem">Whispering A</a>
-            <a href="collections/the-core.html" role="menuitem">The Core</a>
+            <a href="./collections/sss.html" role="menuitem">SSS</a>
+            <a href="./collections/whispering-a.html" role="menuitem">Whispering A</a>
+            <a href="./collections/ECHO.html" role="menuitem">ECHO</a>
           </div>
         </div>
         <span class="sep">·</span>
@@ -47,20 +45,27 @@
         <span class="sep">·</span>
         <a href="#about" data-spy="#about">About</a>
       </div>
-      <button class="cart-toggle" type="button" aria-label="Open cart">
-        Cart <span class="cart-count" aria-hidden="true">0</span>
-      </button>
+
+      <div class="nav-utilities" aria-label="Cart and currency">
+        <button class="cart-toggle" type="button" aria-label="Open cart">
+          Cart <span class="cart-count" aria-hidden="true">0</span>
+        </button>
+        <select class="currency-select" data-role="currency-select" aria-label="Select currency">
+          <option value="VND">VND</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+        </select>
+      </div>
     </nav>
   </div>
 </header>
 
 <main>
-  <!-- Fullscreen Hero -->
   <section class="hero full-hero fit-width" id="home" aria-label="Edelhart hero">
     <div class="hero-bg" aria-hidden="true">
       <picture>
-        <source media="(max-width: 480px)" srcset="img/1.jpeg" />
-        <img src="img/1.jpeg" alt="Edelhart Hero" loading="eager" sizes="100vw" />
+        <source media="(max-width: 480px)" srcset="./img/1.jpeg" />
+        <img src="./img/1.jpeg" alt="Edelhart Hero" loading="eager" sizes="100vw" />
       </picture>
     </div>
     <div class="overlay" aria-hidden="true"></div>
@@ -70,7 +75,6 @@
     </div>
   </section>
 
-  <!-- Collections -->
   <section id="collections" aria-label="Collections">
     <div class="wrap">
       <div class="section-head">
@@ -81,35 +85,13 @@
         <button class="col-btn col-prev" type="button" aria-label="Previous collection">‹</button>
         <button class="col-btn col-next" type="button" aria-label="Next collection">›</button>
         <div class="collection-track">
-          <a class="collection-card" href="collections/sss.html" aria-label="Open SSS collection">
-            <div class="collection-media" data-images="
-              img/products/sss-gold/sss-gold-1.jpeg,
-              img/products/sss-silver/sss-silver-1.jpeg,
-              img/products/sss-gold/sss-gold-2.jpeg
-            "></div>
-            <div class="collection-name">SSS</div>
-          </a>
-          <a class="collection-card" href="collections/whispering-a.html" aria-label="Open Whispering A collection">
-            <div class="collection-media" data-images="
-              img/products/earring-blue-gem/earring-blue-gem-1.jpeg,
-              img/products/ring-blue-gem/ring-blue-gem-1.jpeg
-            "></div>
-            <div class="collection-name">Whispering&nbsp;A</div>
-          </a>
-          <a class="collection-card" href="collections/the-core.html" aria-label="Open The Core collection">
-            <div class="collection-media" data-images="
-              img/products/LEGS-pendant/LEGS-pendant-1.jpeg,
-              img/products/EE-female-ring-gold/EE-female-ring-gold-1.jpeg
-            "></div>
-            <div class="collection-name">The Core</div>
-          </a>
+          <!-- populated by app.js from products-data.js -->
         </div>
         <div class="swipe-indicator" aria-hidden="true"><div class="thumb"></div></div>
       </div>
     </div>
   </section>
 
-  <!-- All Products -->
   <section id="products" aria-label="All Products">
     <div class="wrap">
       <div class="section-head">
@@ -117,7 +99,6 @@
         <p>Discover the full catalog. Bespoke variations available upon request.</p>
       </div>
 
-      <!-- Filters -->
       <div class="filters-wrap">
         <button class="filter-toggle" type="button" aria-expanded="false" aria-controls="sort-panel">
           <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
@@ -139,447 +120,10 @@
         </div>
       </div>
 
-      <!-- FULL 21-PRODUCT CATALOG IN EXACT ORDER -->
       <div class="catalog" id="all-catalog">
-        <!-- 1. sss-gold -->
-        <article class="card" data-view="products/sss-pendant-gold.html" data-price="125">
-          <div class="media" data-images="
-            img/products/sss-gold/sss-gold-1.jpeg,
-            img/products/sss-gold/sss-gold-2.jpeg,
-            img/products/sss-gold/sss-gold-3.jpeg,
-            img/products/sss-gold/sss-gold-4.jpeg,
-            img/products/sss-gold/sss-gold-5.jpeg,
-            img/products/sss-gold/sss-gold-6.jpeg,
-            img/products/sss-gold/sss-gold-7.jpeg,
-            img/products/sss-gold/sss-gold-8.jpeg,
-            img/products/sss-gold/sss-gold-9.jpeg,
-            img/products/sss-gold/sss-gold-10.jpeg,
-            img/products/sss-gold/sss-gold-11.jpeg
-          ">
-            <div class="media-fallback">SSS</div>
-          </div>
-          <div class="content">
-            <div class="title">SSS pendant — gold</div>
-            <div class="price">$125</div>
-            <div class="meta">Also available in silver.</div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="products/sss-pendant-gold.html" aria-label="View SSS pendant — gold">View</a>
-          </div>
-        </article>
-
-        <!-- 2. sss-silver -->
-        <article class="card" data-view="products/sss-pendant-silver.html" data-price="125">
-          <div class="media" data-images="
-            img/products/sss-silver/sss-silver-1.jpeg,
-            img/products/sss-silver/sss-silver-2.jpeg,
-            img/products/sss-silver/sss-silver-3.jpeg,
-            img/products/sss-silver/sss-silver-4.jpeg,
-            img/products/sss-silver/sss-silver-5.jpeg,
-            img/products/sss-silver/sss-silver-6.jpeg,
-            img/products/sss-silver/sss-silver-7.jpeg,
-            img/products/sss-silver/sss-silver-8.jpeg,
-            img/products/sss-silver/sss-silver-9.jpeg,
-            img/products/sss-silver/sss-silver-10.jpeg,
-            img/products/sss-silver/sss-silver-11.jpeg
-          ">
-            <div class="media-fallback">SSS</div>
-          </div>
-          <div class="content">
-            <div class="title">SSS pendant — silver</div>
-            <div class="price">$125</div>
-            <div class="meta">Sterling silver finish.</div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="products/sss-pendant-silver.html" aria-label="View SSS pendant — silver">View</a>
-          </div>
-        </article>
-
-        <!-- 3. squid -->
-        <article class="card" data-view="products/squid.html" data-price="0">
-          <div class="media" data-images="
-            img/products/squid/squid-1.jpeg,
-            img/products/squid/squid-2.jpeg,
-            img/products/squid/squid-3.jpeg,
-            img/products/squid/squid-4.jpeg
-          ">
-            <div class="media-fallback">SQUID</div>
-          </div>
-          <div class="content">
-            <div class="title">Squid</div>
-            <div class="price">$0</div>
-            <div class="meta">Organic, fluid silhouette.</div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="products/squid.html" aria-label="View Squid">View</a>
-          </div>
-        </article>
-
-        <!-- 4. LEGS-pendant -->
-        <article class="card" data-view="products/legs-pendant.html" data-price="375">
-          <div class="media" data-images="
-            img/products/LEGS-pendant/LEGS-pendant-1.jpeg,
-            img/products/LEGS-pendant/LEGS-pendant-2.jpeg,
-            img/products/LEGS-pendant/LEGS-pendant-3.jpeg,
-            img/products/LEGS-pendant/LEGS-pendant-4.jpeg,
-            img/products/LEGS-pendant/LEGS-pendant-5.jpeg,
-            img/products/LEGS-pendant/LEGS-pendant-6.jpeg,
-            img/products/LEGS-pendant/LEGS-pendant-7.jpeg
-          ">
-            <div class="media-fallback">LEGS</div>
-          </div>
-          <div class="content">
-            <div class="title">LEGS pendant</div>
-            <div class="price">$375</div>
-            <div class="meta">Sculptural silhouette.</div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="products/legs-pendant.html" aria-label="View LEGS pendant">View</a>
-          </div>
-        </article>
-
-        <!-- 5. EE-male-ring-BR-trap -->
-        <article class="card" data-view="products/ee-male-ring-black-rhodium-stone.html" data-price="190">
-          <div class="media" data-images="
-            img/products/EE-male-ring-BR-trap/EE-male-ring-BR-trap-1.jpeg,
-            img/products/EE-male-ring-BR-trap/EE-male-ring-BR-trap-2.jpeg,
-            img/products/EE-male-ring-BR-trap/EE-male-ring-BR-trap-3.jpeg,
-            img/products/EE-male-ring-BR-trap/EE-male-ring-BR-trap-4.jpeg,
-            img/products/EE-male-ring-BR-trap/EE-male-ring-BR-trap-5.jpeg
-          ">
-            <div class="media-fallback">EE</div>
-          </div>
-          <div class="content">
-            <div class="title">EE male ring — black rhodium (Stone trapping)</div>
-            <div class="price">$190</div>
-            <div class="meta">Stone trapping version.</div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="products/ee-male-ring-black-rhodium-stone.html" aria-label="View EE male ring — black rhodium (Stone trapping)">View</a>
-          </div>
-        </article>
-
-        <!-- 6. EE-female-ring-gold -->
-        <article class="card" data-view="products/ee-female-ring-gold.html" data-price="140">
-          <div class="media" data-images="
-            img/products/EE-female-ring-gold/EE-female-ring-gold-1.jpeg,
-            img/products/EE-female-ring-gold/EE-female-ring-gold-2.jpeg,
-            img/products/EE-female-ring-gold/EE-female-ring-gold-3.jpeg,
-            img/products/EE-female-ring-gold/EE-female-ring-gold-4.jpeg,
-            img/products/EE-female-ring-gold/EE-female-ring-gold-5.jpeg
-          ">
-            <div class="media-fallback">EE</div>
-          </div>
-          <div class="content">
-            <div class="title">EE female ring — gold</div>
-            <div class="price">$140</div>
-            <div class="meta">Also in silver & black rhodium.</div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="products/ee-female-ring-gold.html" aria-label="View EE female ring — gold">View</a>
-          </div>
-        </article>
-
-        <!-- 7. EE-female-ring-silver -->
-        <article class="card" data-view="products/ee-female-ring-silver.html" data-price="140">
-          <div class="media" data-images="
-            img/products/EE-female-ring-silver/EE-female-ring-silver-1.jpeg,
-            img/products/EE-female-ring-silver/EE-female-ring-silver-2.jpeg,
-            img/products/EE-female-ring-silver/EE-female-ring-silver-3.jpeg,
-            img/products/EE-female-ring-silver/EE-female-ring-silver-4.jpeg,
-            img/products/EE-female-ring-silver/EE-female-ring-silver-5.jpeg
-          ">
-            <div class="media-fallback">EE</div>
-          </div>
-          <div class="content">
-            <div class="title">EE female ring — silver</div>
-            <div class="price">$140</div>
-            <div class="meta">Sterling silver option.</div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="products/ee-female-ring-silver.html" aria-label="View EE female ring — silver">View</a>
-          </div>
-        </article>
-
-        <!-- 8. EE-female-ring-BR -->
-        <article class="card" data-view="products/ee-female-ring-black-rhodium.html" data-price="140">
-          <div class="media" data-images="
-            img/products/EE-female-ring-BR/EE-female-ring-BR-1.jpeg,
-            img/products/EE-female-ring-BR/EE-female-ring-BR-2.jpeg,
-            img/products/EE-female-ring-BR/EE-female-ring-BR-3.jpeg,
-            img/products/EE-female-ring-BR/EE-female-ring-BR-4.jpeg
-          ">
-            <div class="media-fallback">EE</div>
-          </div>
-          <div class="content">
-            <div class="title">EE female ring — black rhodium</div>
-            <div class="price">$140</div>
-            <div class="meta">Striking dark finish.</div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="products/ee-female-ring-black-rhodium.html" aria-label="View EE female ring — black rhodium">View</a>
-          </div>
-        </article>
-
-        <!-- 9. EE-male-ring-silver -->
-        <article class="card" data-view="products/ee-male-ring-silver.html" data-price="200">
-          <div class="media" data-images="
-            img/products/EE-male-ring-silver/EE-male-ring-silver-1.jpeg,
-            img/products/EE-male-ring-silver/EE-male-ring-silver-2.jpeg,
-            img/products/EE-male-ring-silver/EE-male-ring-silver-3.jpeg,
-            img/products/EE-male-ring-silver/EE-male-ring-silver-4.jpeg
-          ">
-            <div class="media-fallback">EE</div>
-          </div>
-          <div class="content">
-            <div class="title">EE male ring — silver</div>
-            <div class="price">$200</div>
-            <div class="meta">Sterling silver option.</div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="products/ee-male-ring-silver.html" aria-label="View EE male ring — silver">View</a>
-          </div>
-        </article>
-
-        <!-- 10. EE-male-ring-BR -->
-        <article class="card" data-view="products/ee-male-ring-black-rhodium.html" data-price="200">
-          <div class="media" data-images="
-            img/products/EE-male-ring-BR/EE-male-ring-BR-1.jpeg,
-            img/products/EE-male-ring-BR/EE-male-ring-BR-2.jpeg,
-            img/products/EE-male-ring-BR/EE-male-ring-BR-3.jpeg,
-            img/products/EE-male-ring-BR/EE-male-ring-BR-4.jpeg,
-            img/products/EE-male-ring-BR/EE-male-ring-BR-5.jpeg
-          ">
-            <div class="media-fallback">EE</div>
-          </div>
-          <div class="content">
-            <div class="title">EE male ring — black rhodium</div>
-            <div class="price">$200</div>
-            <div class="meta">Dark rhodium finish.</div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="products/ee-male-ring-black-rhodium.html" aria-label="View EE male ring — black rhodium">View</a>
-          </div>
-        </article>
-
-        <!-- 11. EE-male-ring-BR-trap (duplicate) -->
-        <article class="card" data-view="products/ee-male-ring-black-rhodium-stone.html" data-price="190">
-          <div class="media" data-images="
-            img/products/EE-male-ring-BR-trap/EE-male-ring-BR-trap-1.jpeg,
-            img/products/EE-male-ring-BR-trap/EE-male-ring-BR-trap-2.jpeg,
-            img/products/EE-male-ring-BR-trap/EE-male-ring-BR-trap-3.jpeg,
-            img/products/EE-male-ring-BR-trap/EE-male-ring-BR-trap-4.jpeg,
-            img/products/EE-male-ring-BR-trap/EE-male-ring-BR-trap-5.jpeg
-          ">
-            <div class="media-fallback">EE</div>
-          </div>
-          <div class="content">
-            <div class="title">EE male ring — black rhodium (Stone trapping)</div>
-            <div class="price">$190</div>
-            <div class="meta">Stone trapping version.</div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="products/ee-male-ring-black-rhodium-stone.html" aria-label="View EE male ring — black rhodium (Stone trapping)">View</a>
-          </div>
-        </article>
-
-        <!-- 12. 11 -->
-        <article class="card" data-view="products/11.html" data-price="0">
-          <div class="media" data-images="">
-            <div class="media-fallback">11</div>
-          </div>
-          <div class="content">
-            <div class="title">Coming soon</div>
-            <div class="price">$0</div>
-            <div class="meta">New piece under development.</div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="products/11.html" aria-label="View coming soon piece">View</a>
-          </div>
-        </article>
-
-        <!-- 13. EE-female-earring-br -->
-        <article class="card" data-view="products/ee-female-earring-br.html" data-price="0">
-          <div class="media" data-images="
-            img/products/EE-female-earring-br/EE-female-earring-br-1.jpeg,
-            img/products/EE-female-earring-br/EE-female-earring-br-2.jpeg
-          ">
-            <div class="media-fallback">EE</div>
-          </div>
-          <div class="content">
-            <div class="title">EE female earring — black rhodium</div>
-            <div class="price">$0</div>
-            <div class="meta">Bold dark finish.</div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="products/ee-female-earring-br.html" aria-label="View EE female earring — black rhodium">View</a>
-          </div>
-        </article>
-
-        <!-- 14. Earring-shell -->
-        <article class="card" data-view="products/earring-shell.html" data-price="0">
-          <div class="media" data-images="
-            img/products/Earring-shell/Earring-shell-1.jpeg,
-            img/products/Earring-shell/Earring-shell-2.jpeg
-          ">
-            <div class="media-fallback">Shell</div>
-          </div>
-          <div class="content">
-            <div class="title">Shell earring</div>
-            <div class="price">$0</div>
-            <div class="meta">Sea‑inspired form.</div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="products/earring-shell.html" aria-label="View Shell earring">View</a>
-          </div>
-        </article>
-
-        <!-- 15. earring-blue-gem -->
-        <article class="card" data-view="products/earring-blue-gem.html" data-price="0">
-          <div class="media" data-images="
-            img/products/earring-blue-gem/earring-blue-gem-1.jpeg,
-            img/products/earring-blue-gem/earring-blue-gem-2.jpeg,
-            img/products/earring-blue-gem/earring-blue-gem-3.jpeg,
-            img/products/earring-blue-gem/earring-blue-gem-4.jpeg,
-            img/products/earring-blue-gem/earring-blue-gem-5.jpeg
-          ">
-            <div class="media-fallback">Earring</div>
-          </div>
-          <div class="content">
-            <div class="title">Blue gemstone earring</div>
-            <div class="price">$0</div>
-            <div class="meta">Icy blue focal stone.</div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="products/earring-blue-gem.html" aria-label="View Blue gemstone earring">View</a>
-          </div>
-        </article>
-
-        <!-- 16. ring-blue-gem -->
-        <article class="card" data-view="products/ring-blue-gem.html" data-price="0">
-          <div class="media" data-images="
-            img/products/ring-blue-gem/ring-blue-gem-1.jpeg,
-            img/products/ring-blue-gem/ring-blue-gem-2.jpeg,
-            img/products/ring-blue-gem/ring-blue-gem-3.jpeg,
-            img/products/ring-blue-gem/ring-blue-gem-4.jpeg
-          ">
-            <div class="media-fallback">Ring</div>
-          </div>
-          <div class="content">
-            <div class="title">Blue gemstone ring</div>
-            <div class="price">$0</div>
-            <div class="meta">Sculpted band with blue gem.</div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="products/ring-blue-gem.html" aria-label="View Blue gemstone ring">View</a>
-          </div>
-        </article>
-
-        <!-- 17. necklace-blue-gem -->
-        <article class="card" data-view="products/necklace-blue-gem.html" data-price="0">
-          <div class="media" data-images="
-            img/products/necklace-blue-gem/necklace-blue-gem-1.jpeg,
-            img/products/necklace-blue-gem/necklace-blue-gem-2.jpeg,
-            img/products/necklace-blue-gem/necklace-blue-gem-3.jpeg,
-            img/products/necklace-blue-gem/necklace-blue-gem-4.jpeg,
-            img/products/necklace-blue-gem/necklace-blue-gem-5.jpeg,
-            img/products/necklace-blue-gem/necklace-blue-gem-6.jpeg,
-            img/products/necklace-blue-gem/necklace-blue-gem-7.jpeg
-          ">
-            <div class="media-fallback">Necklace</div>
-          </div>
-          <div class="content">
-            <div class="title">Blue gemstone necklace</div>
-            <div class="price">$0</div>
-            <div class="meta">Layer‑friendly centerpiece.</div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="products/necklace-blue-gem.html" aria-label="View Blue gemstone necklace">View</a>
-          </div>
-        </article>
-
-        <!-- 18. stingray-gold -->
-        <article class="card" data-view="products/stingray-gold.html" data-price="0">
-          <div class="media" data-images="
-            img/products/stingray-gold/stingray-gold-1.jpeg,
-            img/products/stingray-gold/stingray-gold-2.jpeg,
-            img/products/stingray-gold/stingray-gold-3.jpeg,
-            img/products/stingray-gold/stingray-gold-4.jpeg
-          ">
-            <div class="media-fallback">Stingray</div>
-          </div>
-          <div class="content">
-            <div class="title">Stingray — gold</div>
-            <div class="price">$0</div>
-            <div class="meta">Gliding, tapering form.</div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="products/stingray-gold.html" aria-label="View Stingray — gold">View</a>
-          </div>
-        </article>
-
-        <!-- 19. ring-gold-multi-gems -->
-        <article class="card" data-view="products/ring-gold-multi-gems.html" data-price="0">
-          <div class="media" data-images="
-            img/products/ring-gold-multi-gems/ring-gold-multi-gems-1.jpeg,
-            img/products/ring-gold-multi-gems/ring-gold-multi-gems-2.jpeg,
-            img/products/ring-gold-multi-gems/ring-gold-multi-gems-3.jpeg,
-            img/products/ring-gold-multi-gems/ring-gold-multi-gems-4.jpeg
-          ">
-            <div class="media-fallback">Ring</div>
-          </div>
-          <div class="content">
-            <div class="title">Gold ring — multicolor gemstones</div>
-            <div class="price">$0</div>
-            <div class="meta">Playful spectrum of stones.</div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="products/ring-gold-multi-gems.html" aria-label="View Gold ring — multicolor gemstones">View</a>
-          </div>
-        </article>
-
-        <!-- 20. ring-chameleon -->
-        <article class="card" data-view="products/ring-chameleon.html" data-price="0">
-          <div class="media" data-images="
-            img/products/ring-chameleon/ring-chameleon-1.jpeg,
-            img/products/ring-chameleon/ring-chameleon-2.jpeg
-          ">
-            <div class="media-fallback">Ring</div>
-          </div>
-          <div class="content">
-            <div class="title">Chameleon ring</div>
-            <div class="price">$0</div>
-            <div class="meta">Changing, shifting contours.</div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="products/ring-chameleon.html" aria-label="View Chameleon ring">View</a>
-          </div>
-        </article>
-
-        <!-- 21. necklace-ants -->
-        <article class="card" data-view="products/necklace-ants.html" data-price="0">
-          <div class="media" data-images="
-            img/products/necklace-ants/necklace-ants-1.jpeg,
-            img/products/necklace-ants/necklace-ants-2.jpeg,
-            img/products/necklace-ants/necklace-ants-3.jpeg,
-            img/products/necklace-ants/necklace-ants-4.jpeg,
-            img/products/necklace-ants/necklace-ants-5.jpeg,
-            img/products/necklace-ants/necklace-ants-6.jpeg
-          ">
-            <div class="media-fallback">Ants</div>
-          </div>
-          <div class="content">
-            <div class="title">Ants necklace</div>
-            <div class="price">$0</div>
-            <div class="meta">Rhythmic chain of tiny forms.</div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="products/necklace-ants.html" aria-label="View Ants necklace">View</a>
-          </div>
-        </article>
+        <!-- populated by app.js from products-data.js -->
       </div>
 
-      <!-- Recommended -->
       <div class="section-head" id="recommended" style="margin-top: 48px;">
         <h2>Recommended for you</h2>
         <p>Curated picks based on our best-sellers and new releases.</p>
@@ -587,7 +131,7 @@
       <div class="slider-strip" aria-label="Recommended products (horizontal)" data-slider="recommended">
         <button class="slider-arrow slider-arrow-prev" type="button" aria-label="Previous recommended item">‹</button>
         <div class="slider-track">
-          <!-- Dynamically populated from #all-catalog by JS -->
+          <!-- populated by app.js -->
         </div>
         <button class="slider-arrow slider-arrow-next" type="button" aria-label="Next recommended item">›</button>
         <div class="swipe-indicator" aria-hidden="true"><div class="thumb"></div></div>
@@ -595,7 +139,191 @@
     </div>
   </section>
 
-  <!-- Contact -->
+  <!-- Place this section before the About or Contact section -->
+  <section id="lookbook" aria-label="Lookbook Flipbook">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Lookbook Flipbook</h2>
+        <p>Swipe or use arrows to flip through hero shots from our catalog.</p>
+      </div>
+
+      <div class="flipbook-scene">
+        <div class="flipbook-book" id="flipbook">
+          <div class="flipbook-cover"></div>
+          <div class="flipbook-spine"></div>
+
+          <div class="flipbook-base-spread">
+            <div class="flipbook-page"><div class="flipbook-img" id="flipLeft"></div></div>
+            <div class="flipbook-page"><div class="flipbook-img" id="flipRight"></div></div>
+          </div>
+
+          <div class="flipbook-turner" id="flipTurner">
+            <div class="flipbook-face flipbook-front">
+              <div class="flipbook-img" id="flipFront"></div><div class="flipbook-peek"></div>
+            </div>
+            <div class="flipbook-face flipbook-back">
+              <div class="flipbook-img" id="flipBack"></div><div class="flipbook-peek"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flipbook-controls">
+          <button class="flipbook-btn" id="flipPrev">Prev</button>
+          <div class="flipbook-indicator">
+            <div class="flipbook-dots" id="flipDots"></div>
+            <span id="flipLabel">Spread 1 of 1</span>
+          </div>
+          <button class="flipbook-btn" id="flipNext">Next</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    (() => {
+      const images = [
+        "img/products/sss-gold/sss-gold-1.jpeg",
+        "img/products/sss-silver/sss-silver-1.jpeg",
+        "img/products/LEGS-pendant/LEGS-pendant-1.jpeg",
+        "img/products/ee-female-ring-gold/ee-female-ring-gold-1.jpeg",
+        "img/products/ee-female-ring-silver/ee-female-ring-silver-1.jpeg",
+        "img/products/earring-blue-gem/earring-blue-gem-1.jpeg",
+        "img/products/ring-blue-gem/ring-blue-gem-1.jpeg"
+      ];
+      if (images.length % 2 === 1) images.push(images[images.length - 1]);
+
+      const ANIM_MS = 700, DRAG_THRESHOLD = 70;
+      const spreadCount = images.length / 2;
+      let currentSpread = 0, isDragging = false, dragStartX = 0, dragDir = null;
+
+      const leftPage  = document.getElementById('flipLeft');
+      const rightPage = document.getElementById('flipRight');
+      const turner    = document.getElementById('flipTurner');
+      const frontImg  = document.getElementById('flipFront');
+      const backImg   = document.getElementById('flipBack');
+      const dotsEl    = document.getElementById('flipDots');
+      const labelEl   = document.getElementById('flipLabel');
+      const prevBtn   = document.getElementById('flipPrev');
+      const nextBtn   = document.getElementById('flipNext');
+
+      function setSpread(idx) {
+        const li = idx * 2;
+        leftPage.style.backgroundImage  = `url("${images[li]}")`;
+        rightPage.style.backgroundImage = `url("${images[li + 1]}")`;
+      }
+      function renderDots() {
+        dotsEl.innerHTML = '';
+        for (let i = 0; i < spreadCount; i++) {
+          const d = document.createElement('div');
+          d.className = 'flipbook-dot' + (i === currentSpread ? ' active' : '');
+          dotsEl.appendChild(d);
+        }
+      }
+      function updateUI() {
+        renderDots();
+        labelEl.textContent = `Spread ${currentSpread + 1} of ${spreadCount}`;
+        prevBtn.disabled = currentSpread === 0;
+        nextBtn.disabled = currentSpread === spreadCount - 1;
+      }
+
+      function setAngle(deg) {
+        turner.style.transform = `rotateY(${deg}deg) translateZ(0)`;
+        const frontPeek = turner.querySelector('.flipbook-front .flipbook-peek');
+        const backPeek  = turner.querySelector('.flipbook-back .flipbook-peek');
+        const p = Math.min(1, Math.abs(deg) / 160);
+        const op = Math.min(0.7, p * 0.8);
+        if (deg < 0 && deg > -180) { frontPeek.style.opacity = op; backPeek.style.opacity = 0; }
+        else { frontPeek.style.opacity = 0; backPeek.style.opacity = op; }
+      }
+      function tween({from, to, dur, ease, onUpdate, onDone}) {
+        const start = performance.now();
+        const step = now => {
+          const t = Math.min(1, (now - start) / dur);
+          const v = ease(t);
+          onUpdate(from + (to - from) * v);
+          if (t < 1) requestAnimationFrame(step); else onDone && onDone();
+        };
+        requestAnimationFrame(step);
+      }
+      const easeOut = t => 1 - Math.pow(1 - t, 2.1);
+      function glide(toDeg, onDone) {
+        const m = turner.style.transform.match(/rotateY\((-?\d+\.?\d*)deg\)/);
+        const from = m ? parseFloat(m[1]) : 0;
+        tween({ from, to: toDeg, dur: ANIM_MS, ease: easeOut, onUpdate: setAngle, onDone });
+      }
+
+      function prepare(direction) {
+        const target = direction === 'forward' ? currentSpread + 1 : currentSpread - 1;
+        if (target < 0 || target >= spreadCount) return false;
+        if (direction === 'forward') {
+          frontImg.style.backgroundImage = `url("${images[currentSpread * 2 + 1]}")`;
+          backImg.style.backgroundImage  = `url("${images[target * 2]}")`;
+          setAngle(0);
+        } else {
+          frontImg.style.backgroundImage = `url("${images[target * 2 + 1]}")`;
+          backImg.style.backgroundImage  = `url("${images[currentSpread * 2]}")`;
+          setAngle(-180);
+        }
+        turner.classList.add('active');
+        return true;
+      }
+      function finishFlip(direction) {
+        currentSpread += direction === 'forward' ? 1 : -1;
+        setSpread(currentSpread);
+        turner.classList.remove('active');
+        updateUI();
+      }
+      function flip(direction) {
+        if (!prepare(direction)) return;
+        if (direction === 'forward') glide(-180, () => finishFlip('forward'));
+        else glide(0, () => finishFlip('backward'));
+      }
+
+      function onDragStart(e) {
+        if (turner.classList.contains('active')) return;
+        dragStartX = (e.touches ? e.touches[0].clientX : e.clientX);
+        isDragging = true; dragDir = null;
+      }
+      function onDragMove(e) {
+        if (!isDragging || turner.classList.contains('active')) return;
+        const x = (e.touches ? e.touches[0].clientX : e.clientX);
+        const delta = x - dragStartX;
+        if (!dragDir) {
+          if (delta < -20 && currentSpread < spreadCount - 1) { dragDir = 'forward'; if (!prepare('forward')) return; turner.style.transition = 'none'; }
+          else if (delta > 20 && currentSpread > 0) { dragDir = 'backward'; if (!prepare('backward')) return; turner.style.transition = 'none'; }
+          else return;
+        }
+        if (dragDir === 'forward') setAngle(Math.max(-180, Math.min(0, -delta)));
+        else setAngle(Math.max(-180, Math.min(0, -180 - delta)));
+      }
+      function onDragEnd(e) {
+        if (!isDragging || !dragDir) { isDragging = false; dragDir = null; return; }
+        const x = (e.changedTouches ? e.changedTouches[0].clientX : e.clientX);
+        const delta = x - dragStartX;
+        if (dragDir === 'forward') {
+          if (delta < -DRAG_THRESHOLD) glide(-180, () => finishFlip('forward'));
+          else glide(0, () => { turner.classList.remove('active'); updateUI(); });
+        } else {
+          if (delta > DRAG_THRESHOLD) glide(0, () => finishFlip('backward'));
+          else glide(-180, () => { turner.classList.remove('active'); updateUI(); });
+        }
+        isDragging = false; dragDir = null;
+      }
+
+      nextBtn.addEventListener('click', () => flip('forward'));
+      prevBtn.addEventListener('click', () => flip('backward'));
+      window.addEventListener('mousedown', onDragStart);
+      window.addEventListener('mousemove', onDragMove, { passive: false });
+      window.addEventListener('mouseup', onDragEnd);
+      window.addEventListener('touchstart', onDragStart, { passive: true });
+      window.addEventListener('touchmove', onDragMove, { passive: false });
+      window.addEventListener('touchend', onDragEnd);
+
+      setSpread(currentSpread);
+      updateUI();
+    })();
+  </script>
+
   <section id="contact" aria-labelledby="contact-title">
     <div class="wrap">
       <div class="section-head">
@@ -623,7 +351,8 @@
               </svg>
               Facebook
             </a>
-            <a class="btn btn-outline" href="https://maps.google.com/?q=483/11+Le+Van+Sy+Street,+Ward+Nhieu+Loc,+Ho+Chi+Minh+City,+Vietnam" target="_blank" rel="noopener" aria-label="Open in Google Maps">
+            <a class="btn btn-outline" href="https://maps.google.com/?q=483/11+Le+Van+Sy+Street,+Ward+Nhieu+Loc,+Ho+Chi+Minh+City,+Vietnam"
+               target="_blank" rel="noopener" aria-label="Open in Google Maps">
               <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
                 <path fill="currentColor" d="M12 2a7 7 0 00-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 00-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"/>
               </svg>
@@ -635,20 +364,14 @@
     </div>
   </section>
 
-  <!-- About -->
   <section id="about" aria-label="About">
     <div class="wrap">
       <div class="section-head">
         <h2>About</h2>
         <p>EDELHART crafts pieces that balance light and shadow, precision and emotion.</p>
-        <div style="text-align: left; font-style: italic; margin-top: 20px;">
-          <p><strong>"EDELHART"</strong> "How does Edelhart sound?" - M</p>
-          <p>"Edel" means noble or precious—like edelstein (precious stone) or edelmetall (precious metal). "Hart" means like strong or resilient, and phonetically, "hart" also echoes the word "heart". Together, "Edelhart" evokes the image of a heart forged from rare, valuable metal—symbolizing both strength and inner beauty.</p>
-          <p>To us, "Edelhart" is more than a name. It captures the essence of jewelry that holds intrinsic worth: hand-cut gemstones paired with precious metals, shaped and refined by master artisans. With a deep appreciation for core values and refined craftsmanship, we create timeless pieces that embody the enduring art of jewelry making—where beauty, technique, and soul meet.</p>
-          <p>Thank you M, for a name that speaks to who we are.</p>
-          <hr style="border: none; border-top: 1px solid #ccc; margin: 20px 0;">
+        <div style="text-align: left; font-style: italic; ">
+          <hr style="border: none; border-top: 1px solid #ccc;">
           <p>At Edelhart, we believe that the essence of true luxury lies not only in the materials, but in the story and message that each piece conveys—meticulously brought to life through complex technical structures and exquisite craftsmanship by the hands of master artisans.</p>
-          <p>Chúng tôi tin rằng bản chất của những món trang sức xa xỉ đích thực không chỉ nằm ở chất liệu, mà còn ở câu chuyện và thông điệp truyền tải phía sau những thiết kế được hoàn thiện một cách tỉ mỉ, với những kết cấu kỹ thuật phức tạp, tinh xảo dưới bàn tay của những người thợ thủ công lành nghề.</p>
           <hr style="border: none; border-top: 1px solid #ccc; margin: 20px 0;">
           <p>We'd be delighted to hear from you at <a href="mailto:chvchvchv1102@edelhart.co" style="color: var(--accent);">chvchvchv1102@edelhart.co</a></p>
         </div>
@@ -664,7 +387,6 @@
   </div>
 </footer>
 
-<!-- Cart drawer -->
 <div class="cart-drawer" aria-hidden="true">
   <div class="cart-overlay"></div>
   <aside class="cart-panel" role="dialog" aria-modal="true" aria-label="Cart">
@@ -679,21 +401,21 @@
     <footer class="cart-footer">
       <div class="cart-summary">
         <span>Total</span>
-        <span class="cart-total">$0</span>
+        <span class="cart-total" data-price-vnd="0">₫0</span>
       </div>
       <a class="btn primary cart-checkout" href="https://wa.me/84944445084" target="_blank" rel="noopener">
         Send order via WhatsApp
       </a>
-      <button class="btn outline cart-copy" data-platform="Instagram" type="button">Copy for Instagram</button>
-      <button class="btn outline cart-copy" data-platform="Facebook" type="button">Copy for Facebook</button>
+      <button class="btn outline cart-copy" data-platform="Instagram" type="button">Copy cart & Inquire on Instagram</button>
+      <button class="btn outline cart-copy" data-platform="Facebook" type="button">Copy cart & Inquire on Facebook</button>
     </footer>
   </aside>
 </div>
 
-<!-- Back to top -->
 <button id="back-to-top" aria-label="Back to top">↑</button>
 
-<script src="js/products-data.js" defer></script>
-<script src="js/app.js" defer></script>
+<script src="./js/products-data.js" defer></script>
+<script src="./js/currency-manager.js" defer></script>
+<script src="./js/app.js" defer></script>
 </body>
 </html>

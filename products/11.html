@@ -34,7 +34,7 @@
           <div class="drop-menu" role="menu">
             <a href="../collections/sss.html" role="menuitem">SSS</a>
             <a href="../collections/whispering-a.html" role="menuitem">Whispering A</a>
-            <a href="../collections/the-core.html" role="menuitem">The Core</a>
+            <a href="../collections/ECHO.html" role="menuitem">ECHO</a>
           </div>
         </div>
         <span class="sep">·</span>
@@ -45,14 +45,21 @@
         <a href="../index.html#about">About</a>
       </div>
 
-      <button class="cart-toggle" type="button" aria-label="Open cart">
-        Cart <span class="cart-count" aria-hidden="true">0</span>
-      </button>
+      <div class="nav-utilities" aria-label="Cart and currency">
+        <button class="cart-toggle" type="button" aria-label="Open cart">
+          Cart <span class="cart-count" aria-hidden="true">0</span>
+        </button>
+        <select class="currency-select" data-role="currency-select" aria-label="Select currency">
+          <option value="VND">VND</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+        </select>
+      </div>
     </nav>
   </div>
 </header>
 
-<main class="product-page" aria-label="Product page">
+<main class="product-page" aria-label="Product page" data-product-slug="11">
   <div class="wrap">
     <nav class="breadcrumbs" aria-label="Breadcrumb">
       <a href="../index.html#products">All Products</a>
@@ -62,7 +69,6 @@
     <a class="page-back" href="../index.html#products" aria-label="Back to catalog">Back to catalog</a>
 
     <div class="product">
-      <!-- LEFT: Gallery -->
       <div>
         <div class="product-gallery" data-images="">
           <div class="slides"></div>
@@ -70,35 +76,28 @@
           <button class="slider-btn slider-next" aria-label="Next">›</button>
           <div class="thumbs"></div>
         </div>
-        <!-- Thumbnail strip below gallery -->
         <div class="thumb-strip">
           <div class="thumb-row"></div>
         </div>
       </div>
 
-      <!-- RIGHT: Checkout -->
       <aside class="checkout">
         <div class="title">Coming soon</div>
-        <div class="price">$0</div>
+        <div class="price" data-price-vnd="0">Price on request</div>
 
         <p class="meta">New piece under development. Stay tuned for updates.</p>
       </aside>
     </div>
 
-    <!-- CRITICAL: Wrapper prevents overlap -->
     <div class="product-page-content">
-      <!-- Product Description -->
       <div class="product-description">
         <h3>About This Piece</h3>
-        <p>
-          Coming soon — a new piece is under development. Check back for more details.
-        </p>
+        <p>Coming soon — a new piece is under development. Check back for more details.</p>
       </div>
 
-      <!-- On-Body Gallery -->
-      <section aria-label="On‑Body Gallery">
+      <section aria-label="Catalogue">
         <div class="section-head">
-          <h2>On‑Body Gallery</h2>
+          <h2>Catalogue</h2>
           <p>See how it sits on body and pairs with other pieces.</p>
         </div>
 
@@ -135,23 +134,18 @@
         </div>
       </section>
 
-      <!-- You may also like -->
       <section aria-label="You may also like">
         <div class="section-head">
           <h2>You may also like</h2>
           <p>Pair it with complementary pieces.</p>
         </div>
         <div class="related-strip" id="dynamic-related">
-          <div class="related-track" data-auto="true">
-            <!-- Dynamically populated by JS -->
-          </div>
+          <div class="related-track" data-auto="true"></div>
           <div class="swipe-indicator" aria-hidden="true"><div class="thumb"></div></div>
         </div>
       </section>
     </div>
   </div>
-
-  <!-- Lightbox root injected by JS when opened -->
 </main>
 
 <footer>
@@ -161,7 +155,6 @@
   </div>
 </footer>
 
-<!-- Cart drawer -->
 <div class="cart-drawer" aria-hidden="true">
   <div class="cart-overlay"></div>
   <aside class="cart-panel" role="dialog" aria-modal="true" aria-label="Cart">
@@ -176,21 +169,21 @@
     <footer class="cart-footer">
       <div class="cart-summary">
         <span>Total</span>
-        <span class="cart-total">$0</span>
+        <span class="cart-total" data-price-vnd="0">Price on request</span>
       </div>
       <a class="btn primary cart-checkout" href="https://wa.me/84944445084" target="_blank" rel="noopener">
         Send order via WhatsApp
       </a>
-      <button class="btn outline cart-copy" data-platform="Instagram" type="button">Copy for Instagram</button>
-      <button class="btn outline cart-copy" data-platform="Facebook" type="button">Copy for Facebook</button>
+      <button class="btn outline cart-copy" data-platform="Instagram" type="button">Copy cart & Inquire on Instagram</button>
+      <button class="btn outline cart-copy" data-platform="Facebook" type="button">Copy cart & Inquire on Facebook</button>
     </footer>
   </aside>
 </div>
 
-<!-- Back to top -->
 <button id="back-to-top" aria-label="Back to top">↑</button>
 
 <script src="../js/products-data.js" defer></script>
+<script src="../js/currency-manager.js" defer></script>
 <script src="../js/app.js" defer></script>
 </body>
 </html>

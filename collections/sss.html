@@ -34,7 +34,7 @@
                     <div class="drop-menu" role="menu">
                         <a href="sss.html" role="menuitem">SSS</a>
                         <a href="whispering-a.html" role="menuitem">Whispering A</a>
-                        <a href="the-core.html" role="menuitem">The Core</a>
+                        <a href="ECHO.html" role="menuitem">ECHO</a>
                     </div>
                 </div>
                 <span class="sep">·</span>
@@ -45,16 +45,21 @@
                 <a href="../index.html#about">About</a>
             </div>
 
-            <!-- Cart must be AFTER .links, like index.html -->
-            <button class="cart-toggle" type="button" aria-label="Open cart">
-                Cart <span class="cart-count" aria-hidden="true">0</span>
-            </button>
+            <div class="nav-utilities" aria-label="Cart and currency">
+                <button class="cart-toggle" type="button" aria-label="Open cart">
+                    Cart <span class="cart-count" aria-hidden="true">0</span>
+                </button>
+                <select class="currency-select" data-role="currency-select" aria-label="Select currency">
+                    <option value="VND">VND</option>
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                </select>
+            </div>
         </nav>
     </div>
 </header>
 
 <main>
-    <!-- Collection Hero -->
     <section class="hero full-hero fit-width" id="home" aria-label="SSS Collection hero">
         <div class="hero-bg" aria-hidden="true">
             <picture>
@@ -69,7 +74,6 @@
         </div>
     </section>
 
-    <!-- Products -->
     <section id="products" aria-label="SSS Collection Products">
         <div class="wrap">
             <div class="section-head">
@@ -77,7 +81,6 @@
                 <p>The SSS collection captures the essence of minimalism with intricate detailing that catches light from every angle.</p>
             </div>
 
-            <!-- Filters -->
             <div class="filters-wrap">
                 <button class="filter-toggle" type="button" aria-expanded="false" aria-controls="sort-panel">
                     <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M3 5h18v2H3V5zm4 6h10v2H7v-2zm3 6h4v2h-4v-2z"/></svg>
@@ -95,10 +98,7 @@
                 </div>
             </div>
 
-            <!-- Collection grid -->
-            <div class="catalog" id="collection-catalog">
-                <!-- Dynamically populated by JS -->
-            </div>
+            <div class="catalog" id="collection-catalog" data-collection="SSS"></div>
         </div>
     </section>
 </main>
@@ -110,7 +110,6 @@
     </div>
 </footer>
 
-<!-- Cart drawer -->
 <div class="cart-drawer" aria-hidden="true">
     <div class="cart-overlay"></div>
     <aside class="cart-panel" role="dialog" aria-modal="true" aria-label="Cart">
@@ -125,7 +124,7 @@
         <footer class="cart-footer">
             <div class="cart-summary">
                 <span>Total</span>
-                <span class="cart-total">$0</span>
+                <span class="cart-total" data-price-vnd="0">₫0</span>
             </div>
             <a class="btn primary cart-checkout" href="https://wa.me/84944445084" target="_blank" rel="noopener">
                 Send order via WhatsApp
@@ -136,91 +135,10 @@
     </aside>
 </div>
 
-<!-- Back to top -->
 <button id="back-to-top" aria-label="Back to top">↑</button>
 
+<script src="../js/products-data.js" defer></script>
+<script src="../js/currency-manager.js" defer></script>
 <script src="../js/app.js" defer></script>
-<script>
-    // Collection-specific JS
-    (function(){
-        const collectionGrid = document.getElementById('collection-catalog');
-
-        // Fetch and filter products
-        async function loadCollectionProducts(){
-            // Fetch from index.html all products
-            const candidates = [
-                new URL('../index.html', location.href).href,
-                new URL('../../index.html', location.href).href,
-                new URL('./index.html', location.href).href,
-                new URL('/index.html', location.origin).href
-            ];
-            let allProducts = [];
-            for (const url of candidates){
-                try {
-                    const res = await fetch(url, { cache:'no-store', mode:'same-origin' });
-                    if (res.ok){
-                        const html = await res.text();
-                        const doc = new DOMParser().parseFromString(html, 'text/html');
-                        allProducts = Array.from(doc.querySelectorAll('#all-catalog .card')).map(card => ({
-                            view: card.getAttribute('data-view') || '#',
-                            title: card.querySelector('.title')?.textContent || 'Product',
-                            price: card.querySelector('.price')?.textContent || '$0',
-                            priceNum: Number(card.getAttribute('data-price') || 0),
-                            meta: card.querySelector('.meta')?.textContent || '',
-                            images: listFromCSV(card.querySelector('.media')?.getAttribute('data-images') || '')
-                        }));
-                        break;
-                    }
-                } catch {}
-            }
-
-            // Filter for SSS: titles containing 'SSS'
-            const collectionProducts = allProducts.filter(p => p.title.toLowerCase().includes('sss'));
-            if (!collectionProducts.length){
-                // Fallback
-                collectionProducts.push(
-                    { view: '../products/sss-pendant-gold.html', title: 'SSS pendant — gold', price: '$125', priceNum: 125, meta: 'Also available in silver.', images: ['../img/products/sss-gold/sss-gold-1.jpeg', '../img/products/sss-gold/sss-gold-2.jpeg', '../img/products/sss-gold/sss-gold-3.jpeg', '../img/products/sss-gold/sss-gold-4.jpeg', '../img/products/sss-gold/sss-gold-5.jpeg', '../img/products/sss-gold/sss-gold-6.jpeg', '../img/products/sss-gold/sss-gold-7.jpeg', '../img/products/sss-gold/sss-gold-8.jpeg', '../img/products/sss-gold/sss-gold-9.jpeg', '../img/products/sss-gold/sss-gold-10.jpeg', '../img/products/sss-gold/sss-gold-11.jpeg'] },
-                    { view: '../products/sss-pendant-silver.html', title: 'SSS pendant — silver', price: '$125', priceNum: 125, meta: 'Sterling silver finish.', images: ['../img/products/sss-silver/sss-silver-1.jpeg', '../img/products/sss-silver/sss-silver-2.jpeg', '../img/products/sss-silver/sss-silver-3.jpeg', '../img/products/sss-silver/sss-silver-4.jpeg', '../img/products/sss-silver/sss-silver-5.jpeg', '../img/products/sss-silver/sss-silver-6.jpeg', '../img/products/sss-silver/sss-silver-7.jpeg', '../img/products/sss-silver/sss-silver-8.jpeg', '../img/products/sss-silver/sss-silver-9.jpeg', '../img/products/sss-silver/sss-silver-10.jpeg', '../img/products/sss-silver/sss-silver-11.jpeg'] }
-                );
-            }
-
-            // Sort by price asc
-            collectionProducts.sort((a,b) => a.priceNum - b.priceNum);
-
-            // Render
-            collectionGrid.innerHTML = '';
-            collectionProducts.forEach(product => {
-                const card = document.createElement('article');
-                card.className = 'card';
-                card.setAttribute('data-price', product.priceNum);
-                card.setAttribute('data-view', product.view);
-                card.innerHTML = `
-          <div class="media" data-images="${product.images.join(',')}">
-            <div class="media-fallback">${product.title.split(' ')[0]}</div>
-          </div>
-          <div class="content">
-            <div class="title">${product.title}</div>
-            <div class="price">${product.price}</div>
-            <div class="meta">${product.meta}</div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="${product.view}" aria-label="View ${product.title}">View</a>
-          </div>
-        `;
-                collectionGrid.appendChild(card);
-            });
-
-            // Initialize cards and sort
-            initCatalogCards();
-            const sortSel = document.getElementById('sort-price');
-            if (sortSel){
-                sortSel.addEventListener('change', () => sortGridByPrice(collectionGrid, sortSel.value));
-                sortGridByPrice(collectionGrid, sortSel.value);
-            }
-        }
-
-        loadCollectionProducts();
-    })();
-</script>
 </body>
 </html>
