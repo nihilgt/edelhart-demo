@@ -180,6 +180,8 @@
   </section>
 
   <script>
+    window.__BASE_URL_OVERRIDE = `${location.origin}${location.pathname.replace(/\/[^\/]*$/, '/')}`;
+
     (() => {
       const images = [
         "img/products/sss-gold/sss-gold-1.jpeg",

@@ -1,3 +1,35 @@
+(function fixAllStaticPaths() {
+  const BASE = "/edelhart-demo";
+
+  // Fix all <img>
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("img").forEach(img => {
+      if (!img.src.startsWith('http')) {
+        const path = img.getAttribute("src");
+        if (!path) return;
+        img.src = BASE + "/" + path.replace(/^\//, "");
+      }
+    });
+
+    // Fix all <link rel="stylesheet">
+    document.querySelectorAll("link[rel='stylesheet']").forEach(link => {
+      const href = link.getAttribute("href");
+      if (!href) return;
+      if (!href.startsWith("http")) {
+        link.href = BASE + "/" + href.replace(/^\//, "");
+      }
+    });
+
+    // Fix all JS <script src="...">
+    document.querySelectorAll("script[src]").forEach(script => {
+      const src = script.getAttribute("src");
+      if (!src) return;
+      if (!src.startsWith("http")) {
+        script.src = BASE + "/" + src.replace(/^\//, "");
+      }
+    });
+  });
+})();
 (function () {
   // Detect base URL (works when site is served from a subfolder, e.g. /project/)
   const SCRIPT_URL = (() => {
