@@ -10,9 +10,21 @@
     }
   })();
   const BASE_URL = (() => {
+    if (window.__BASE_URL_OVERRIDE) return window.__BASE_URL_OVERRIDE;
+
     const path = SCRIPT_URL.pathname;
     const m = path.match(/^(.*?\/)js\/app\.js/i);
     const basePath = m ? m[1] : '/';
+
+    // GitHub Pages safeguard: if the site is under /<repo>/, use that.
+    const segments = (location.pathname || '').split('/').filter(Boolean);
+    if (segments.length > 0) {
+      const repoRoot = `/${segments[0]}/`;
+      if (!basePath.startsWith(repoRoot)) {
+        return new URL(repoRoot, `${SCRIPT_URL.origin}/`).href;
+      }
+    }
+
     return new URL(basePath, `${SCRIPT_URL.origin}/`).href;
   })();
 
