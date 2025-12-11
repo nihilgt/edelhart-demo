@@ -1,5 +1,5 @@
 (function fixAllStaticPaths() {
-  const BASE = "/edelhart-demo";
+  const BASE = "https://nihilgt.github.io/edelhart-demo";
 
   // Fix all <img>
   document.addEventListener("DOMContentLoaded", () => {
