@@ -1684,8 +1684,8 @@ footer{ border-top:1px solid rgba(255,255,255,0.1); background: color-mix(in hsl
   font-size: 13px;
   font-weight: 600;
   border: 2px solid #fff;
-  background: #fff;
-  color: #000;
+  background: #1f2023;
+  color: #ffffff;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -1694,7 +1694,7 @@ footer{ border-top:1px solid rgba(255,255,255,0.1); background: color-mix(in hsl
 }
 .cart-footer .cart-checkout:hover,
 .cart-footer .cart-copy:hover {
-  background: rgba(255,255,255,0.94);
+  background: rgb(185, 129, 57);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.35);
 }
@@ -1715,9 +1715,8 @@ footer{ border-top:1px solid rgba(255,255,255,0.1); background: color-mix(in hsl
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.16);
   border-radius: 999px;
+  margin-top: 24px;
   padding: 6px 10px;
 }
 .cart-item-qty .qty-btn{
@@ -1940,3 +1939,4 @@ footer{ border-top:1px solid rgba(255,255,255,0.1); background: color-mix(in hsl
 @media (max-width: 1100px) { .flipbook-scene { --page-w: 420px; --page-h: 580px; --book-scale: 0.76; } }
 @media (max-width: 900px)  { .flipbook-scene { --page-w: 340px; --page-h: 480px; --book-scale: 0.72; } }
 @media (max-width: 640px)  { .flipbook-scene { --book-scale: 0.62; } }
+

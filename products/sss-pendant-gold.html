@@ -4,20 +4,18 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SSS pendant — gold · EDELHART</title>
-  <meta name="description" content="SSS pendant in gold — limited stock. Signature design for the collection." />
+  <meta name="description" content="SSS pendant — gold." />
   <link rel="icon" type="image/png" href="../img/favicon.png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/styles.css" />
 </head>
-<body>
+<body data-product-slug="sss-gold">
 <header id="site-header">
   <div class="wrap nav">
     <a href="../index.html#home" class="brand" aria-label="EDELHART Home">
       <img src="../img/logo.png" alt="EDELHART Logo" class="navbar-logo">
       <span class="brand-word">EDELHART</span>
     </a>
+
     <nav class="menu" aria-label="Main">
       <button class="menu-btn" aria-label="Open menu" aria-expanded="false">
         <span class="menu-icon" aria-hidden="true"></span>
@@ -25,7 +23,7 @@
 
       <div class="links">
         <div class="dropdown">
-          <button class="drop-btn" aria-haspopup="true" aria-expanded="false">
+          <button class="drop-btn" data-spy="#collections" aria-haspopup="true" aria-expanded="false">
             Collections
             <svg class="caret" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
               <path fill="currentColor" d="M7 10l5 5 5-5z"/>
@@ -55,120 +53,69 @@
           <option value="EUR">EUR</option>
         </select>
       </div>
-
     </nav>
   </div>
 </header>
 
-<main class="product-page" aria-label="Product page">
+<main class="product-page" aria-label="Product page" data-product-slug="sss-gold">
   <div class="wrap">
     <nav class="breadcrumbs" aria-label="Breadcrumb">
-      <a href="../index.html#collections">Collections</a>
-      <a href="../collections/sss.html">SSS</a>
+      <a href="../index.html#products">All Products</a>
       <span aria-current="page">SSS pendant — gold</span>
     </nav>
 
     <a class="page-back" href="../index.html#products" aria-label="Back to catalog">Back to catalog</a>
 
     <div class="product">
-      <!-- LEFT: Gallery -->
+      <!-- LEFT: gallery. images will be populated by app.js from products-data -->
       <div>
-        <div
-                class="product-gallery"
-                data-images="../img/products/sss-gold/sss-gold-1.jpeg,../img/products/sss-gold/sss-gold-2.jpeg,../img/products/sss-gold/sss-gold-3.jpeg,../img/products/sss-gold/sss-gold-4.jpeg,../img/products/sss-gold/sss-gold-5.jpeg,../img/products/sss-gold/sss-gold-6.jpeg,../img/products/sss-gold/sss-gold-7.jpeg,../img/products/sss-gold/sss-gold-8.jpeg,../img/products/sss-gold/sss-gold-9.jpeg,../img/products/sss-gold/sss-gold-10.jpeg,../img/products/sss-gold/sss-gold-11.jpeg"
-        >
+        <div class="product-gallery" data-images="">
           <div class="slides"></div>
-          <button class="slider-btn slider-prev" aria-label="Previous image">&#10094;</button>
-          <button class="slider-btn slider-next" aria-label="Next image">&#10095;</button>
-          <div class="thumbs"></div>
+          <button class="slider-btn slider-prev" aria-label="Previous">‹</button>
+          <button class="slider-btn slider-next" aria-label="Next">›</button>
+          <div class="thumbs" aria-hidden="true"></div>
         </div>
-        <!-- Thumbnail strip below gallery -->
-        <div class="thumb-strip">
+
+        <div class="thumb-strip" aria-hidden="true">
           <div class="thumb-row"></div>
         </div>
       </div>
 
-      <!-- RIGHT: Checkout -->
+      <!-- RIGHT: checkout — all product options (finish / metal / stone / size / qty / bespoke) are injected from products-data.js by app.js -->
       <aside class="checkout">
-        <div class="title">SSS pendant — gold</div>
-        <div class="price">$125</div>
+        <div class="title" aria-live="polite">Product</div>
+        <div class="price" data-price-vnd="0" aria-live="polite">Price on request</div>
 
-        <form data-product="SSS pendant">
-          <div>
-            <label for="metal">Metal</label>
-            <select id="metal" name="metal">
-              <option>14K Gold</option>
-              <option>E-Silver</option>
-              <option>Black Rhodium</option>
-            </select>
-          </div>
+        <form data-product="" aria-label="Order form">
+          <!-- IMPORTANT: leave these containers empty — app.js will render controls from EDELHART_PRODUCTS_CENTRAL -->
+          <div class="available-placeholder" aria-live="polite"></div>
 
-          <div>
-            <label for="stone">Stone</label>
-            <select id="stone" name="stone">
-              <option>OG (original design)</option>
-              <option>Diamond</option>
-              <option>Other gemstone</option>
-            </select>
-          </div>
-
-          <div>
-            <label for="qty">Quantity</label>
-            <select id="qty" name="qty">
-              <option>1</option>
-              <option>2</option>
-              <option>3</option>
-            </select>
-          </div>
-
+          <!-- Add-on bespoke UI will also be injected into the same form by app.js -->
           <div class="actions">
+            <!-- Add-to-cart should work with injected inputs. Use a neutral button that app.js hooks -->
             <button type="button" class="btn add-to-cart">Add to cart</button>
-            <a href="https://wa.me/84944445084?text=Hello%20EDELHART%2C%20I%27m%20interested%20in%20the%20SSS%20pendant%20%E2%80%94%20gold."
-               class="btn primary" target="_blank" rel="noopener noreferrer" aria-label="Order via WhatsApp" title="Order via WhatsApp">
-              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
-                <path d="M12 2a10 10 0 00-8 16.1L3 22l3.9-1A10 10 0 1012 2zm5.2 14.2c-.2.6-1.2 1.1-1.7 1.1-.5 0-1 .2-3.3-1.1-2.8-1.6-4.5-4.6-4.6-4.8-.2-.3-1.1-1.5-1.1-2.8 0-1.2.6-1.8.9-2 .3-.2.8-.3 1-.3h.7c.2 0 .5 0 .7.6.3.7 1 2.4 1 2.5s.1.4 0 .6c-.1.2-.2.3-.4.5-.2.2-.4.5-.6.6-.2.2-.4.4-.2.7.2.3.9 1.5 2.1 2.4 1.5 1.1 2.7 1.5 3.1 1.7.3.1.6.1.8 0 .2-.1 1.3-.6 1.5-.8.2-.1.4-.2.7-.1.2.1 1.1.5 1.3.6.2.1.3.1.4.2.1 0 .1.6-.1 1.1z"/>
-              </svg>
-              WhatsApp
-            </a>
-            <button type="button" class="btn outline copy-order" data-platform="Instagram" aria-label="Copy order details for Instagram" title="Copy order details for Instagram">
-              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
-                <path d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm5 5a5 5 0 100 10 5 5 0 000-10zm6-1a1 1 0 100 2 1 1 0 000-2zm-6 3a3 3 0 110 6 3 3 0 010-6z"/>
-              </svg>
-              Copy cart & Inquire on Instagram
-            </button>
-            <button type="button" class="btn outline copy-order" data-platform="Facebook" aria-label="Copy order details for Facebook" title="Copy order details for Facebook">
-              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
-                <path d="M22 12a10 10 0 10-11.6 9.9v-7h-2.3V12h2.3V9.7c0-2.3 1.4-3.6 3.5-3.6 1 0 2 .2 2 .2v2.2H15c-1.1 0-1.5.7-1.5 1.4V12h2.6l-.4 2.9h-2.2v7A10 10 0 0022 12z"/>
-              </svg>
-              Copy cart & Inquire on Facebook
-            </button>
-            <a href="https://maps.google.com/?q=483/11+Le+Van+Sy+Street,+Ward+Nhieu+Loc,+Ho+Chi+Minh+City,+Vietnam"
-               class="btn outline" target="_blank" rel="noopener noreferrer" aria-label="Find us on Google Maps" title="Find us on Google Maps">
-              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
-                <path d="M12 2a7 7 0 00-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 00-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"/>
-              </svg>
-              Location
-            </a>
+
+            <!-- WhatsApp order link: app.js's form submit handler and buildOrderMessageFromForm will be used -->
+            <a class="btn primary order-whatsapp" href="#" target="_blank" rel="noopener" aria-label="Order via WhatsApp">Order via WhatsApp</a>
+
+            <button type="button" class="btn outline copy-order" data-platform="Instagram">Copy & Instagram</button>
+            <button type="button" class="btn outline copy-order" data-platform="Facebook">Copy & Facebook</button>
           </div>
         </form>
 
-        <p class="meta">Should you desire a rendition of this design in alternative materials or hues, or seek a bespoke creation tailored exclusively for you, crafted with the finest metals and adorned with exquisite stones, please contact us directly.</p>
+        <p class="meta">Options (finish, metal, stone, size, quantity) are loaded from the site data.</p>
       </aside>
     </div>
 
-    <!-- CRITICAL: Wrapper prevents overlap -->
     <div class="product-page-content">
-      <!-- Product Description -->
       <div class="product-description">
         <h3>About This Piece</h3>
-        <p>
-          The SSS pendant embodies our signature aesthetic — refined minimalism with a statement edge.
-          Crafted in gold — limited stock. Signature design for the collection.
-          Each pendant is hand-finished to ensure exceptional quality and lasting beauty.
+        <p class="desc-text">
+          <!-- description text will be replaced by app.js from products-data; keep a fallback -->
+          The SSS pendant embodies our signature aesthetic — refined minimalism with a statement edge. Crafted in gold — limited stock.
         </p>
       </div>
 
-      <!-- Catalogue -->
       <section aria-label="Catalogue">
         <div class="section-head">
           <h2>Catalogue</h2>
@@ -177,7 +124,7 @@
 
         <div class="collage-wrapper">
           <div class="collage-surround">
-            <img src="../img/models/5.jpeg" alt="Model portrait with ring" loading="lazy" decoding="async" class="collage-img">
+            <img src="../img/models/5.jpeg" alt="Model portrait" loading="lazy" decoding="async" class="collage-img">
             <img src="../img/models/6.jpeg" alt="Hands with multiple rings" loading="lazy" decoding="async" class="collage-img">
             <img src="../img/models/7.jpeg" alt="Pendant layered styling" loading="lazy" decoding="async" class="collage-img">
             <img src="../img/models/8.jpeg" alt="Necklace in motion" loading="lazy" decoding="async" class="collage-img">
@@ -187,16 +134,16 @@
 
           <div class="featured-strip collage-main">
             <div class="featured-track">
-              <div class="feat-slide"><img src="../img/models/model-ring-sss.jpeg" alt="Model wearing ring, close-up" decoding="async"></div>
-              <div class="feat-slide"><img src="../img/models/2.jpeg" alt="Model with ring detail, side light" decoding="async"></div>
-              <div class="feat-slide"><img src="../img/models/3.jpeg" alt="Necklace on model, collarbone" decoding="async"></div>
-              <div class="feat-slide"><img src="../img/models/4.jpeg" alt="Earring on model, profile" decoding="async"></div>
+              <div class="feat-slide"><img src="../img/models/model-ring-sss.jpeg" alt="Model close-up" decoding="async"></div>
+              <div class="feat-slide"><img src="../img/models/2.jpeg" alt="Model with ring" decoding="async"></div>
+              <div class="feat-slide"><img src="../img/models/3.jpeg" alt="Necklace on model" decoding="async"></div>
+              <div class="feat-slide"><img src="../img/models/4.jpeg" alt="Earring on model" decoding="async"></div>
             </div>
 
             <button class="slider-btn slider-prev" type="button" aria-label="Previous image">‹</button>
             <button class="slider-btn slider-next" type="button" aria-label="Next image">›</button>
 
-            <div class="dots">
+            <div class="dots" aria-hidden="true">
               <div class="dot active" data-index="0"></div>
               <div class="dot" data-index="1"></div>
               <div class="dot" data-index="2"></div>
@@ -208,23 +155,18 @@
         </div>
       </section>
 
-      <!-- You may also like -->
       <section aria-label="You may also like">
         <div class="section-head">
           <h2>You may also like</h2>
           <p>Pair it with complementary pieces.</p>
         </div>
         <div class="related-strip" id="dynamic-related">
-          <div class="related-track" data-auto="true">
-            <!-- Dynamically populated by JS -->
-          </div>
+          <div class="related-track" data-auto="true"></div>
           <div class="swipe-indicator" aria-hidden="true"><div class="thumb"></div></div>
         </div>
       </section>
     </div>
   </div>
-
-  <!-- Lightbox root injected by JS when opened -->
 </main>
 
 <footer>
@@ -234,7 +176,7 @@
   </div>
 </footer>
 
-<!-- Cart drawer -->
+<!-- cart drawer (shared) -->
 <div class="cart-drawer" aria-hidden="true">
   <div class="cart-overlay"></div>
   <aside class="cart-panel" role="dialog" aria-modal="true" aria-label="Cart">
@@ -249,21 +191,20 @@
     <footer class="cart-footer">
       <div class="cart-summary">
         <span>Total</span>
-        <span class="cart-total">$0</span>
+        <span class="cart-total" data-price-vnd="0">₫0</span>
       </div>
-      <a class="btn primary cart-checkout" href="https://wa.me/84944445084" target="_blank" rel="noopener">
-        Send order via WhatsApp
-      </a>
+      <a class="btn primary cart-checkout" href="https://wa.me/84944445084" target="_blank" rel="noopener">Send order via WhatsApp</a>
       <button class="btn outline cart-copy" data-platform="Instagram" type="button">Copy cart & Inquire on Instagram</button>
       <button class="btn outline cart-copy" data-platform="Facebook" type="button">Copy cart & Inquire on Facebook</button>
     </footer>
   </aside>
 </div>
 
-<!-- Back to top -->
 <button id="back-to-top" aria-label="Back to top">↑</button>
 
+<!-- data + managers + app script -->
 <script src="../js/products-data.js" defer></script>
+<script src="../js/currency-manager.js" defer></script>
 <script src="../js/app.js" defer></script>
 </body>
 </html>

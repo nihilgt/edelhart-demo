@@ -1,35 +1,3 @@
-(function fixAllStaticPaths() {
-  const BASE = "https://nihilgt.github.io/edelhart-demo";
-
-  // Fix all <img>
-  document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll("img").forEach(img => {
-      if (!img.src.startsWith('http')) {
-        const path = img.getAttribute("src");
-        if (!path) return;
-        img.src = BASE + "/" + path.replace(/^\//, "");
-      }
-    });
-
-    // Fix all <link rel="stylesheet">
-    document.querySelectorAll("link[rel='stylesheet']").forEach(link => {
-      const href = link.getAttribute("href");
-      if (!href) return;
-      if (!href.startsWith("http")) {
-        link.href = BASE + "/" + href.replace(/^\//, "");
-      }
-    });
-
-    // Fix all JS <script src="...">
-    document.querySelectorAll("script[src]").forEach(script => {
-      const src = script.getAttribute("src");
-      if (!src) return;
-      if (!src.startsWith("http")) {
-        script.src = BASE + "/" + src.replace(/^\//, "");
-      }
-    });
-  });
-})();
 (function () {
   // Detect base URL (works when site is served from a subfolder, e.g. /project/)
   const SCRIPT_URL = (() => {
@@ -42,21 +10,9 @@
     }
   })();
   const BASE_URL = (() => {
-    if (window.__BASE_URL_OVERRIDE) return window.__BASE_URL_OVERRIDE;
-
     const path = SCRIPT_URL.pathname;
     const m = path.match(/^(.*?\/)js\/app\.js/i);
     const basePath = m ? m[1] : '/';
-
-    // GitHub Pages safeguard: if the site is under /<repo>/, use that.
-    const segments = (location.pathname || '').split('/').filter(Boolean);
-    if (segments.length > 0) {
-      const repoRoot = `/${segments[0]}/`;
-      if (!basePath.startsWith(repoRoot)) {
-        return new URL(repoRoot, `${SCRIPT_URL.origin}/`).href;
-      }
-    }
-
     return new URL(basePath, `${SCRIPT_URL.origin}/`).href;
   })();
 
@@ -77,6 +33,8 @@
   const PRODUCTS = Array.isArray(window.EDELHART_PRODUCTS_CENTRAL)
       ? window.EDELHART_PRODUCTS_CENTRAL
       : [];
+  const COLLECTIONS = window.EDELHART_COLLECTIONS || {};
+
   const COLLECTION_PAGE_MAP = {
     SSS: './collections/sss.html',
     ECHO: './collections/ECHO.html',
@@ -439,8 +397,9 @@
   function buildOrderMessageFromForm(form) {
     const data = new FormData(form);
     const product = form.getAttribute('data-product') || document.title.replace(/ · .*$/, '');
-    const size = data.get('size') || 'N/A';
-    const metal = data.get('metal') || 'N/A';
+    const size = data.get('size') || 'Consultation';
+    const metal = data.get('metal') || data.get('material') || 'N/A';
+    const finish = data.get('finish') || 'N/A';
     const qty = data.get('qty') || 1;
     const style = data.get('style') || '';
     const stone = data.get('stone') || '';
@@ -451,6 +410,7 @@
       `- Metal: ${metal}`,
       stone ? `- Stone: ${stone}` : '',
       style ? `- Style: ${style}` : '',
+      `- Finish: ${finish}`,
       `- Size: ${size}`,
       `- Quantity: ${qty}`,
       `Could you please confirm availability and provide next steps?`,
@@ -487,6 +447,7 @@
         if (item.bespoke) parts.push(`BESPOKE`);
         if (item.metal) parts.push(`Metal: ${item.metal}`);
         if (item.stone) parts.push(`Stone: ${item.stone}`);
+        if (item.finish) parts.push(`Finish: ${item.finish}`);
         if (item.size) parts.push(`Size: ${item.size}`);
         if (item.notes) parts.push(`Notes: ${item.notes}`);
         if (priceVND) parts.push(`Line total: ${priceVND} VND`);
@@ -527,21 +488,27 @@
     PRODUCTS.forEach(p => {
       const imgs = (p.images || []).join(',');
       const view = viewFromSlug(p.slug);
+      const priceBase = p.sale && p.sale.enabled && p.finalPriceVND ? p.finalPriceVND : (p.priceVND || 0);
+      const priceHtml = (p.sale && p.sale.enabled && p.finalPriceVND)
+          ? `<s>₫${p.priceVND || 0}</s> ₫${p.finalPriceVND}`
+          : (p.priceVND ? `₫${p.priceVND}` : 'Price on request');
+
       const card = document.createElement('article');
       card.className = 'card';
       card.setAttribute('data-view', view);
-      card.setAttribute('data-price', p.priceVND || 0);
+      card.setAttribute('data-price', priceBase);
+      card.setAttribute('data-sold-out', p.soldOut ? 'true' : 'false');
       card.innerHTML = `
         <div class="media" data-images="${imgs}">
           <div class="media-fallback">${(p.name || '').split(' ')[0]}</div>
         </div>
         <div class="content">
           <div class="title">${p.name}</div>
-          <div class="price" data-price-vnd="${p.priceVND || 0}">₫${p.priceVND || 0}</div>
+          <div class="price" data-price-vnd="${priceBase}">${priceHtml}</div>
           <div class="meta">${p.description || ''}</div>
         </div>
         <div class="actions">
-          <a class="btn primary" href="${view}" aria-label="View ${p.name}">View</a>
+          <a class="btn primary" href="${view}" aria-label="View ${p.name}" ${p.soldOut ? 'aria-disabled="true"' : ''}>${p.soldOut ? 'Sold out' : 'View'}</a>
         </div>
       `;
       grid.appendChild(card);
@@ -592,7 +559,7 @@
     if (!PRODUCTS.length) return;
     const collections = {};
     PRODUCTS.forEach(p => {
-      const group = p.groupId;
+      const group = p.collection || p.groupId;
       if (!collections[group]) collections[group] = { name: group, images: [] };
       collections[group].images.push(...(p.images || []));
     });
@@ -634,31 +601,246 @@
     if (!collection) return;
 
     const prods = PRODUCTS.filter(
-        p => (p.groupId || '').toLowerCase() === collection
+        p => (p.collection || '').toLowerCase() === collection
     );
 
     grid.innerHTML = '';
     prods.forEach(p => {
       const imgs = (p.images || []).join(',');
       const view = viewFromSlug(p.slug);
+      const priceBase = p.sale && p.sale.enabled && p.finalPriceVND ? p.finalPriceVND : (p.priceVND || 0);
+      const priceHtml = (p.sale && p.sale.enabled && p.finalPriceVND)
+          ? `<s>₫${p.priceVND || 0}</s> ₫${p.finalPriceVND}`
+          : (p.priceVND ? `₫${p.priceVND}` : 'Price on request');
+
       const card = document.createElement('article');
       card.className = 'card';
       card.setAttribute('data-view', view);
-      card.setAttribute('data-price', p.priceVND || 0);
+      card.setAttribute('data-price', priceBase);
+      card.setAttribute('data-sold-out', p.soldOut ? 'true' : 'false');
       card.innerHTML = `
         <div class="media" data-images="${imgs}">
           <div class="media-fallback">${(p.name || '').split(' ')[0]}</div>
         </div>
         <div class="content">
           <div class="title">${p.name}</div>
-          <div class="price" data-price-vnd="${p.priceVND || 0}">${p.priceVND ? `₫${p.priceVND}` : 'Price on request'}</div>
-          <div class="meta">${p.materialVariant || p.material || ''}</div>
+          <div class="price" data-price-vnd="${priceBase}">${priceHtml}</div>
+          <div class="meta">${p.availableDesign ? (p.availableDesign.finishes || []).join(', ') : ''}</div>
         </div>
         <div class="actions">
-          <a class="btn primary" href="${view}" aria-label="View ${p.name}">View</a>
+          <a class="btn primary" href="${view}" aria-label="View ${p.name}" ${p.soldOut ? 'aria-disabled="true"' : ''}>${p.soldOut ? 'Sold out' : 'View'}</a>
         </div>
       `;
       grid.appendChild(card);
+    });
+  }
+
+  // RENDER AVAILABLE DESIGN UI (updated)
+  function renderAvailableDesignUI(product, container) {
+    if (!product || !container) return;
+    const avail = product.availableDesign || {};
+    // If there's no availableDesign we still want a minimal UI to allow bespoke/cart
+    // Create block styled like bespoke section to keep consistent appearance
+    let block = container.querySelector('.available-block');
+    if (!block) {
+      block = document.createElement('div');
+      block.className = 'bespoke-block available-block';
+      // Insert near top of form (before actions)
+      const actions = container.querySelector('.actions');
+      if (actions) container.insertBefore(block, actions);
+      else container.appendChild(block);
+    }
+
+    // Helper to create labelled row
+    function fieldRow(labelText, fieldEl) {
+      const wrap = document.createElement('div');
+      wrap.className = 'bespoke-field';
+      if (labelText) {
+        const label = document.createElement('label');
+        label.textContent = labelText;
+        wrap.appendChild(label);
+      }
+      wrap.appendChild(fieldEl);
+      return wrap;
+    }
+
+    // Variant selector (if variants exist)
+    const variantLinks = Array.isArray(product.variantLinks) ? product.variantLinks : [];
+    let variantSelect = null;
+    if (variantLinks.length) {
+      variantSelect = document.createElement('select');
+      variantSelect.name = 'variant';
+      variantSelect.id = 'variant';
+      variantSelect.innerHTML = `<option value="">Choose variant</option>`;
+      // Include a current option for clarity
+      variantLinks.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v.slug || '';
+        opt.textContent = v.label || v.slug || v;
+        variantSelect.appendChild(opt);
+      });
+    }
+
+    // Finishes (dropdown per request)
+    const finishes = Array.isArray(avail.finishes) && avail.finishes.length ? avail.finishes.slice() : [];
+    const finishSel = document.createElement('select');
+    finishSel.name = 'finish';
+    finishSel.id = 'finish';
+    if (!finishes.length) finishes.push('Default');
+    finishes.forEach(f => {
+      const o = document.createElement('option');
+      o.value = f;
+      o.textContent = f;
+      finishSel.appendChild(o);
+    });
+
+    // Stones
+    const stones = Array.isArray(avail.stones) && avail.stones.length ? avail.stones.slice() : [];
+    const stoneSel = document.createElement('select');
+    stoneSel.name = 'stone';
+    stoneSel.id = 'stone';
+    if (stones.length) {
+      stoneSel.innerHTML = stones.map(s => `<option value="${s}">${s}</option>`).join('');
+    } else {
+      stoneSel.innerHTML = `<option value="">N/A</option>`;
+    }
+
+    // Materials
+    const materials = Array.isArray(avail.materials) && avail.materials.length ? avail.materials.slice() : [];
+    const materialSel = document.createElement('select');
+    materialSel.name = 'material';
+    materialSel.id = 'material';
+    if (materials.length) {
+      materialSel.innerHTML = materials.map(m => `<option value="${m}">${m}</option>`).join('');
+    } else {
+      materialSel.innerHTML = `<option value="">N/A</option>`;
+    }
+
+    // Style / chooseMenu
+    const styles = Array.isArray(avail.chooseMenu) && avail.chooseMenu.length ? avail.chooseMenu.slice() : [];
+    const styleSel = document.createElement('select');
+    styleSel.name = 'style';
+    styleSel.id = 'style';
+    if (styles.length) {
+      styleSel.innerHTML = styles.map(s => `<option value="${s}">${s}</option>`).join('');
+    } else {
+      styleSel.innerHTML = `<option value="">Default</option>`;
+    }
+
+    // Size: can be a select if array, otherwise textual (hidden input)
+    let sizeField;
+    if (Array.isArray(avail.size) && avail.size.length) {
+      const sizeSel = document.createElement('select');
+      sizeSel.name = 'size';
+      sizeSel.id = 'size';
+      sizeSel.innerHTML = avail.size.map(s => `<option value="${s}">${s}</option>`).join('');
+      sizeField = sizeSel;
+    } else {
+      // show descriptive text and keep hidden input
+      const txt = document.createElement('div');
+      txt.className = 'bespoke-size-note';
+      txt.textContent = (avail.size && typeof avail.size === 'string') ? `Size: ${avail.size}` : 'Size: Consultation';
+      const hidden = document.createElement('input');
+      hidden.type = 'hidden';
+      hidden.name = 'size';
+      hidden.value = (avail.size && typeof avail.size === 'string') ? avail.size : 'Consultation';
+      const containerDiv = document.createElement('div');
+      containerDiv.appendChild(txt);
+      containerDiv.appendChild(hidden);
+      sizeField = containerDiv;
+    }
+
+    // Quantity: number input, unlimited (min 1)
+    const qtyInput = document.createElement('input');
+    qtyInput.type = 'number';
+    qtyInput.name = 'qty';
+    qtyInput.id = 'qty';
+    qtyInput.value = '1';
+    qtyInput.min = '1';
+    qtyInput.step = '1';
+    qtyInput.className = 'qty-input';
+
+    // Clear and append new content
+    block.innerHTML = '';
+    const h = document.createElement('h4');
+    h.textContent = 'Available designs';
+    block.appendChild(h);
+
+    // Variant row if exists
+    if (variantSelect) {
+      block.appendChild(fieldRow('Variant', variantSelect));
+      variantSelect.addEventListener('change', (e) => {
+        const slug = e.target.value;
+        if (!slug) return;
+        // navigate to variant page
+        const href = viewFromSlug(slug);
+        if (href && href !== '#') {
+          // write handoff images if available
+          const vprod = PRODUCTS.find(pp => pp.slug === slug);
+          if (vprod && Array.isArray(vprod.images) && vprod.images.length) {
+            writeHandoff(slug, toAbsList(vprod.images));
+          }
+          window.location.href = href;
+        }
+      });
+    }
+
+    // Finish, Stone, Material, Style, Size, Quantity
+    block.appendChild(fieldRow('Finish', finishSel));
+    block.appendChild(fieldRow('Stone', stoneSel));
+    block.appendChild(fieldRow('Material', materialSel));
+    block.appendChild(fieldRow('Style', styleSel));
+    // Size label
+    const sizeLabel = document.createElement('div');
+    sizeLabel.className = 'available-field';
+    const sizeLabelTitle = document.createElement('div');
+    sizeLabelTitle.className = 'label';
+    sizeLabelTitle.textContent = 'Size';
+    sizeLabel.appendChild(sizeLabelTitle);
+    sizeLabel.appendChild(sizeField);
+    block.appendChild(sizeLabel);
+
+    block.appendChild(fieldRow('Quantity', qtyInput));
+
+    // Ensure form has hidden finish/material/stone inputs synchronized (some code expects them)
+    function ensureHidden(name, value) {
+      let h = container.querySelector(`input[name="${name}"]`);
+      if (!h) {
+        h = document.createElement('input');
+        h.type = 'hidden';
+        h.name = name;
+        container.appendChild(h);
+      }
+      h.value = value || '';
+      return h;
+    }
+    ensureHidden('finish', finishSel.value);
+    ensureHidden('material', materialSel.value);
+    ensureHidden('stone', stoneSel.value);
+    ensureHidden('style', styleSel.value);
+    ensureHidden('qty', qtyInput.value);
+    if (!container.querySelector('input[name="size"]')) {
+      const sEl = sizeField.querySelector('input[name="size"]');
+      if (sEl) container.appendChild(sEl.cloneNode());
+    }
+
+    // Keep selects in sync with hidden inputs for downstream code
+    finishSel.addEventListener('change', () => ensureHidden('finish', finishSel.value));
+    materialSel.addEventListener('change', () => ensureHidden('material', materialSel.value));
+    stoneSel.addEventListener('change', () => ensureHidden('stone', stoneSel.value));
+    styleSel.addEventListener('change', () => ensureHidden('style', styleSel.value));
+    qtyInput.addEventListener('change', () => ensureHidden('qty', qtyInput.value));
+
+    // If finish selection should influence variant navigation (e.g. variantLinks keyed by label),
+    // provide subtle helper: when finish changes, if a variant has matching label, navigate suggestion
+    finishSel.addEventListener('change', () => {
+      const match = variantLinks.find(v => (v.label || '').toLowerCase() === (finishSel.value || '').toLowerCase());
+      if (match && match.slug) {
+        // do nothing automatic, but set data-attribute so user can switch easily:
+        finishSel.dataset.variantSuggested = match.slug;
+      } else {
+        delete finishSel.dataset.variantSuggested;
+      }
     });
   }
 
@@ -680,14 +862,36 @@
 
     const priceEl = document.querySelector('.checkout .price');
     if (priceEl) {
-      priceEl.setAttribute('data-price-vnd', product.priceVND || 0);
-      priceEl.textContent = product.priceVND ? `₫${product.priceVND}` : 'Price on request';
+      const baseVND = product.sale && product.sale.enabled && product.finalPriceVND
+          ? product.finalPriceVND
+          : (product.priceVND || 0);
+      priceEl.setAttribute('data-price-vnd', baseVND);
+      if (product.sale && product.sale.enabled && product.finalPriceVND) {
+        priceEl.innerHTML = `<s>₫${product.priceVND || 0}</s> ₫${product.finalPriceVND}`;
+      } else {
+        priceEl.textContent = baseVND ? `₫${baseVND}` : 'Price on request';
+      }
+      priceEl.dataset.originalPriceVnd = product.priceVND || 0;
     }
 
     const formEl = document.querySelector('.checkout form');
     if (formEl && !formEl.getAttribute('data-product')) {
       formEl.setAttribute('data-product', product.name || product.slug || '');
     }
+
+    if (formEl && product.soldOut) {
+      formEl.querySelectorAll('button, select, input').forEach(el => { el.disabled = true; });
+      const sold = document.createElement('div');
+      sold.className = 'soldout-label';
+      sold.textContent = 'Sold out';
+      formEl.prepend(sold);
+    }
+
+    // Render available (from data) into form
+    renderAvailableDesignUI(product, formEl);
+
+    const descContainer = document.querySelector('.product-description p');
+    if (descContainer && product.description) descContainer.textContent = product.description;
 
     const breadcrumbCurrent = document.querySelector('.breadcrumbs span[aria-current="page"]');
     if (breadcrumbCurrent) breadcrumbCurrent.textContent = product.name || breadcrumbCurrent.textContent;
@@ -918,23 +1122,26 @@
     cards.forEach(p => {
       const viewUrl = viewFromSlug(p.slug);
       const title = p.name || 'Product';
-      const price = p.priceVND ? `₫${p.priceVND}` : 'Price on request';
+      const price = p.sale && p.sale.enabled && p.finalPriceVND
+          ? `<s>₫${p.priceVND || 0}</s> ₫${p.finalPriceVND}`
+          : (p.priceVND ? `₫${p.priceVND}` : 'Price on request');
       const imagesRaw = (p.images || []).join(',');
 
       const cardEl = document.createElement('article');
       cardEl.className = 'card';
       cardEl.setAttribute('data-view', viewUrl);
-      cardEl.setAttribute('data-price', p.priceVND || 0);
+      cardEl.setAttribute('data-price', p.finalPriceVND || p.priceVND || 0);
+      cardEl.setAttribute('data-sold-out', p.soldOut ? 'true' : 'false');
       cardEl.innerHTML = `
         <div class="media" data-images="${imagesRaw}">
           <div class="media-fallback">${title}</div>
         </div>
         <div class="content">
           <div class="title">${title}</div>
-          <div class="price" data-price-vnd="${p.priceVND || 0}">${price}</div>
+          <div class="price" data-price-vnd="${p.finalPriceVND || p.priceVND || 0}">${price}</div>
         </div>
         <div class="actions">
-          <a class="btn primary" href="${viewUrl}" aria-label="View ${title}">View</a>
+          <a class="btn primary" href="${viewUrl}" aria-label="View ${title}" ${p.soldOut ? 'aria-disabled="true"' : ''}>${p.soldOut ? 'Sold out' : 'View'}</a>
         </div>
       `;
       track.appendChild(cardEl);
@@ -1383,16 +1590,14 @@
     if (!track) return;
 
     const currentSlug = slugFromPath(location.pathname);
+    const cfg = (window.EDELHART_CONFIG && window.EDELHART_CONFIG.related) || {};
+    const pinned = (cfg.pinnedBySlug && cfg.pinnedBySlug[currentSlug]) || [];
+    const pool = Array.isArray(cfg.pool) ? cfg.pool : [];
 
-    async function fetchAllProducts() {
-      const all = Array.isArray(PRODUCTS) ? PRODUCTS : [];
-      return all.filter(p => (p.slug || '').toLowerCase() !== currentSlug.toLowerCase());
-    }
-
-    let allProducts = await fetchAllProducts();
-    let selected = allProducts.length >= 4
-        ? allProducts.sort(() => 0.5 - Math.random()).slice(0, 4)
-        : allProducts;
+    const ordered = [...new Set([...pinned, ...pool])].filter(slug => slug !== currentSlug);
+    const selected = ordered.slice(0, 8)
+        .map(slug => PRODUCTS.find(p => p.slug === slug))
+        .filter(Boolean);
 
     track.innerHTML = '';
 
@@ -1404,6 +1609,10 @@
       card.setAttribute('data-view', href);
 
       const imagesCsv = (product.images || []).join(',');
+      const priceBase = product.sale && product.sale.enabled && product.finalPriceVND ? product.finalPriceVND : (product.priceVND || 0);
+      const priceHtml = (product.sale && product.sale.enabled && product.finalPriceVND)
+          ? `<s>₫${product.priceVND || 0}</s> ₫${product.finalPriceVND}`
+          : (product.priceVND ? `₫${product.priceVND}` : 'Price on request');
 
       card.innerHTML = `
         <div class="related-media" data-images="${imagesCsv}">
@@ -1411,7 +1620,7 @@
         </div>
         <div class="related-info">
           <div class="title">${product.name}</div>
-          <div class="price" data-price-vnd="${product.priceVND || 0}">${product.priceVND ? `₫${product.priceVND}` : 'Price on request'}</div>
+          <div class="price" data-price-vnd="${priceBase}">${priceHtml}</div>
         </div>
       `;
       track.appendChild(card);
@@ -1806,12 +2015,16 @@
     const product = findProduct(slugAttr, slugFallback);
     if (!product) return; // nothing to hydrate
 
-    const vnd = product.price_vnd ?? product.priceVND ?? product.price?.vnd ?? product.price;
+    const vnd = product.finalPriceVND ?? product.priceVND ?? product.price?.vnd ?? product.price;
 
     const priceEls = document.querySelectorAll('.checkout .price, .cart-total');
     priceEls.forEach(el => {
       if (vnd != null) el.dataset.priceVnd = vnd;
-      el.textContent = vnd ? formatPriceIntl(vnd, 'VND') : 'Price on request';
+      if (product.sale && product.sale.enabled && product.finalPriceVND) {
+        el.innerHTML = `<s>${formatPriceIntl(product.priceVND, 'VND')}</s> ${formatPriceIntl(product.finalPriceVND, 'VND')}`;
+      } else {
+        el.textContent = vnd ? formatPriceIntl(vnd, 'VND') : 'Price on request';
+      }
     });
   }
   document.addEventListener('DOMContentLoaded', hydrateProductPrice);
@@ -1889,6 +2102,10 @@
     if (!form || form.__hasBespoke) return;
     form.__hasBespoke = true;
 
+    const product = PRODUCTS.find(p => p.slug === productSlug);
+    const bespoke = product?.bespokeDesign || {};
+    const bespokeFinishes = Array.isArray(bespoke.finishes) ? bespoke.finishes : ["Silver", "Gold", "Black rhodium"];
+
     const block = document.createElement('div');
     block.className = 'bespoke-block';
     block.innerHTML = `
@@ -1898,6 +2115,7 @@
         <label for="bespoke-metal">Metal</label>
         <select id="bespoke-metal" name="bespoke-metal" required>
           <option value="">Select metal</option>
+          <option>E silver</option>
           <option>10K Gold</option>
           <option>14K Gold</option>
           <option>18K Gold</option>
@@ -1909,6 +2127,12 @@
           <option value="">Select stone</option>
           <option>Gemstones</option>
           <option>Diamond</option>
+        </select>
+      </div>
+      <div class="bespoke-field">
+        <label for="bespoke-finish">Finish</label>
+        <select id="bespoke-finish" name="bespoke-finish" required>
+          ${bespokeFinishes.map(f => `<option>${f}</option>`).join('')}
         </select>
       </div>
       <div class="bespoke-field">
@@ -1928,11 +2152,12 @@
 
     const metalSel = block.querySelector('#bespoke-metal');
     const stoneSel = block.querySelector('#bespoke-stone');
+    const finishSel = block.querySelector('#bespoke-finish');
     const notesEl = block.querySelector('#bespoke-notes');
     const requestBtn = block.querySelector('.bespoke-request');
     const contactBtn = block.querySelector('.bespoke-contact');
 
-    const ensureSelections = () => metalSel.value && stoneSel.value;
+    const ensureSelections = () => metalSel.value && stoneSel.value && finishSel.value;
 
     const openCart = () => {
       const drawer = document.querySelector('.cart-drawer');
@@ -1945,7 +2170,7 @@
 
     function addBespokeToCart() {
       if (!ensureSelections()) {
-        alert('Please select metal and stone for your bespoke request.');
+        alert('Please select metal, stone, and finish for your bespoke request.');
         return;
       }
       const cart = readCart();
@@ -1955,6 +2180,7 @@
         productSlug: productSlug || slugFromPath(location.pathname),
         metal: metalSel.value,
         stone: stoneSel.value,
+        finish: finishSel.value,
         size: 'By consultation',
         notes: (notesEl.value || '').trim(),
         qty: 1,
@@ -1972,7 +2198,7 @@
 
     contactBtn.addEventListener('click', e => {
       e.preventDefault();
-      const msg = `Hello EDELHART, I'd like a bespoke version of ${form.getAttribute('data-product') || 'this piece'}.\nMetal: ${metalSel.value || 'N/A'}\nStone: ${stoneSel.value || 'N/A'}\nSize: by consultation\nNotes: ${(notesEl.value || '').trim() || 'N/A'}`;
+      const msg = `Hello EDELHART, I'd like a bespoke version of ${form.getAttribute('data-product') || 'this piece'}.\nMetal: ${metalSel.value || 'N/A'}\nStone: ${stoneSel.value || 'N/A'}\nFinish: ${finishSel.value || 'N/A'}\nSize: by consultation\nNotes: ${(notesEl.value || '').trim() || 'N/A'}`;
       const url = `https://wa.me/84944445084?text=${encodeURIComponent(msg)}`;
       window.open(url, '_blank', 'noopener');
     });
@@ -2016,9 +2242,11 @@
       const newItem = {
         bespoke: false,
         p: form.getAttribute('data-product') || document.title.replace(/ · .*$/, ''),
-        metal: data.get('metal') || '',
+        productSlug: productSlug,
+        metal: data.get('metal') || data.get('material') || '',
         stone: data.get('stone') || '',
-        size: data.get('size') || '',
+        finish: data.get('finish') || '',
+        size: data.get('size') || 'Consultation',
         qty: Number(data.get('qty') || 1) || 1,
         priceVND: priceNum,
         at: Date.now(),
@@ -2031,6 +2259,7 @@
               item.p === newItem.p &&
               item.metal === newItem.metal &&
               item.stone === newItem.stone &&
+              item.finish === newItem.finish &&
               item.size === newItem.size
       );
       if (existingIndex >= 0) cart[existingIndex].qty += newItem.qty;
@@ -2133,14 +2362,15 @@
         li.className = 'cart-item';
         li.innerHTML = `
           <div>
+          <button type="button" class="cart-item-remove" >✕</button>
             <div class="cart-item-title">${item.p || 'Item'} ${item.bespoke ? '<span class="badge-bespoke">BESPOKE</span>' : ''}</div>
             <div class="cart-item-meta">
               ${(item.metal ? `Metal: ${item.metal}` : '')}
               ${(item.stone ? ` · Stone: ${item.stone}` : '')}
+              ${(item.finish ? ` · Finish: ${item.finish}` : '')}
               ${(item.size ? ` · Size: ${item.size}` : '')}
               ${(item.notes ? ` · Notes: ${item.notes}` : '')}
             </div>
-            <button type="button" class="cart-item-remove">Remove</button>
           </div>
           <div>
             <div class="cart-item-price">${priceVND ? formatPriceWithCurrency(lineTotalVND) : 'Price on request'}</div>
@@ -2282,8 +2512,8 @@
       color: '#f6f7f9',
       padding: '18px 20px',
       borderRadius: '18px',
-      border: '1px solid rgba(255, 255, 255, 0.18)',
-      boxShadow: '0 18px 50px rgba(0, 0, 0, 0.75)',
+      border: '1px solid rgba(255,255,255,0.18)',
+      boxShadow: '0 18px 50px rgba(0,0,0,0.75)',
       fontSize: '14px',
       lineHeight: '1.6',
       textAlign: 'center',
@@ -2338,12 +2568,13 @@
       const button = e.target;
       const platform = button.dataset.platform;
       const productTitle = document.querySelector('.checkout .title')?.textContent || 'Product';
-      const metal = document.getElementById('metal')?.value || 'N/A';
+      const metal = document.getElementById('metal')?.value || document.querySelector('input[name="material"]')?.value || 'N/A';
       const stone = document.getElementById('stone')?.value || 'N/A';
-      const size = document.getElementById('size')?.value || 'N/A';
+      const finish = document.querySelector('input[name="finish"]')?.value || document.getElementById('finish')?.value || 'N/A';
+      const size = document.getElementById('size')?.value || 'Consultation';
       const qty = document.getElementById('qty')?.value || '1';
 
-      const orderText = `Hello EDELHART, I'm interested in ${productTitle}. Metal: ${metal}, Stone: ${stone}, Size: ${size}, Quantity: ${qty}. Please provide details and next steps. Shared from ${platform}.`;
+      const orderText = `Hello EDELHART, I'm interested in ${productTitle}. Metal: ${metal}, Stone: ${stone}, Finish: ${finish}, Size: ${size}, Quantity: ${qty}. Please provide details and next steps. Shared from ${platform}.`;
 
       navigator.clipboard.writeText(orderText).then(() => {
         const originalHTML = button.innerHTML;
