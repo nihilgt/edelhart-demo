@@ -1939,4 +1939,3 @@ footer{ border-top:1px solid rgba(255,255,255,0.1); background: color-mix(in hsl
 @media (max-width: 1100px) { .flipbook-scene { --page-w: 420px; --page-h: 580px; --book-scale: 0.76; } }
 @media (max-width: 900px)  { .flipbook-scene { --page-w: 340px; --page-h: 480px; --book-scale: 0.72; } }
 @media (max-width: 640px)  { .flipbook-scene { --book-scale: 0.62; } }
-

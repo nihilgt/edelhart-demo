@@ -1,5 +1,5 @@
 (function () {
-  // Detect base URL (works when site is served from a subfolder, e.g. /project/)
+  // Detect base URL (works when site is served from a subfolder, e.g. /project/ or GitHub Pages)
   const SCRIPT_URL = (() => {
     try {
       return new URL(document.currentScript?.src || location.href);
@@ -9,7 +9,12 @@
       try { return new URL(last.src); } catch { return new URL(location.href); }
     }
   })();
+
+  // Allow an explicit override (e.g., set window.__BASE_URL_OVERRIDE in HTML before this script)
   const BASE_URL = (() => {
+    if (window.__BASE_URL_OVERRIDE) {
+      try { return new URL(window.__BASE_URL_OVERRIDE, `${SCRIPT_URL.origin}/`).href; } catch { /* fallthrough */ }
+    }
     const path = SCRIPT_URL.pathname;
     const m = path.match(/^(.*?\/)js\/app\.js/i);
     const basePath = m ? m[1] : '/';
@@ -43,6 +48,40 @@
 
   const getScrollTop = () =>
       window.pageYOffset || document.documentElement.scrollTop || 0;
+
+  /* ---------- Path helpers ---------- */
+  function slugFromPath(p) {
+    if (!p) return '';
+    const segs = p.split('/').filter(Boolean);
+    const last = segs[segs.length - 1] || '';
+    return last.replace(/\.html?$/i, '');
+  }
+  function normalizeSlug(str = '') {
+    return str
+        .toString()
+        .trim()
+        .toLowerCase()
+        .replace(/['"]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+  }
+  function reverseLookupSlugByPage() {
+    const path = location.pathname.replace(/^\//, '');
+    const match = Object.entries(PRODUCT_PAGE_MAP).find(([slug, pagePath]) => {
+      const normPage = (pagePath || '').replace(/^\.?\//, '').toLowerCase();
+      return path.toLowerCase().endsWith(normPage);
+    });
+    return match ? match[0] : '';
+  }
+  function resolveProductSlug() {
+    const mainSlug = document.querySelector('main.product-page')?.dataset.productSlug;
+    const bodySlug = document.body?.dataset?.productSlug;
+    const attrSlug = mainSlug || bodySlug || '';
+    if (attrSlug) return attrSlug;
+    const reverse = reverseLookupSlugByPage();
+    if (reverse) return reverse;
+    return slugFromPath(location.pathname);
+  }
 
   function viewFromSlug(slug) {
     if (!slug) return '#';
@@ -112,6 +151,7 @@
   window.addEventListener('scroll', onWindowScroll, scrollOptions);
   onWindowScroll();
 
+  /* Nav spy & smooth scroll (unchanged) */
   (function () {
     const links = Array.from(
         document.querySelectorAll('.menu .links a[data-spy], .menu .links .drop-btn[data-spy]')
@@ -190,6 +230,7 @@
     updateActive();
   })();
 
+  /* Mobile nav (unchanged) */
   (function () {
     const nav = document.querySelector('.menu');
     const btn = document.querySelector('.menu-btn');
@@ -231,6 +272,7 @@
     });
   })();
 
+  /* In‑page smooth scroll */
   document.addEventListener('click', function (e) {
     const link = e.target.closest('a[href^="#"]:not(.menu .links a)');
     if (!link) return;
@@ -246,6 +288,7 @@
     window.scrollTo({ top, behavior: 'smooth' });
   });
 
+  /* Footer year */
   const yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
@@ -310,7 +353,7 @@
     window.addEventListener('resize', debounce(onResize, 100));
   }
 
-  /* Slide clock (unchanged) */
+  /* Slide clock */
   const SlideClock = (() => {
     const interval = 7000;
     const listeners = new Set();
@@ -338,6 +381,7 @@
     return { start, stop, subscribe, unsubscribe, interval };
   })();
 
+  /* Local storage keys */
   const CACHE_KEY = 'edelhart:images:v5';
   const HANDOFF_KEY = 'edelhart:handoff:v2';
   const CART_KEY = 'edelhart:cart:v3'; // bumped for bespoke items
@@ -365,17 +409,12 @@
       if (!src) return src;
       try {
         if (/^https?:\/\//i.test(src)) return src;
-        return new URL(src, base).href;
+        const safe = encodeURI(src);
+        return new URL(safe, base).href;
       } catch {
         try { return new URL(src, base).href; } catch { return src; }
       }
     });
-  }
-  function slugFromPath(p) {
-    if (!p) return '';
-    const segs = p.split('/').filter(Boolean);
-    const last = segs[segs.length - 1] || '';
-    return last.replace(/\.html?$/i, '');
   }
   function listFromCSV(csv) {
     return (csv || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -387,6 +426,7 @@
     return isNaN(num) ? 0 : num;
   }
 
+  /* Cart helpers */
   function readCart() {
     try { return JSON.parse(localStorage.getItem(CART_KEY) || '[]'); } catch { return []; }
   }
@@ -480,6 +520,7 @@
     thumb.style.width = 100 / totalSlides + '%';
   }
 
+  /* ---------- Catalog population ---------- */
   function populateAllProducts() {
     const grid = document.getElementById('all-catalog');
     if (!grid || !PRODUCTS.length) return;
@@ -488,15 +529,15 @@
     PRODUCTS.forEach(p => {
       const imgs = (p.images || []).join(',');
       const view = viewFromSlug(p.slug);
-      const priceBase = p.sale && p.sale.enabled && p.finalPriceVND ? p.finalPriceVND : (p.priceVND || 0);
+      const base = p.sale && p.sale.enabled && p.finalPriceVND ? p.finalPriceVND : (p.priceVND || 0);
       const priceHtml = (p.sale && p.sale.enabled && p.finalPriceVND)
           ? `<s>₫${p.priceVND || 0}</s> ₫${p.finalPriceVND}`
-          : (p.priceVND ? `₫${p.priceVND}` : 'Price on request');
+          : (base ? `₫${base}` : 'Price on request');
 
       const card = document.createElement('article');
       card.className = 'card';
       card.setAttribute('data-view', view);
-      card.setAttribute('data-price', priceBase);
+      card.setAttribute('data-price', base);
       card.setAttribute('data-sold-out', p.soldOut ? 'true' : 'false');
       card.innerHTML = `
         <div class="media" data-images="${imgs}">
@@ -504,7 +545,7 @@
         </div>
         <div class="content">
           <div class="title">${p.name}</div>
-          <div class="price" data-price-vnd="${priceBase}">${priceHtml}</div>
+          <div class="price" data-price-vnd="${base}">${priceHtml}</div>
           <div class="meta">${p.description || ''}</div>
         </div>
         <div class="actions">
@@ -635,23 +676,19 @@
     });
   }
 
-  // RENDER AVAILABLE DESIGN UI (updated)
+  /* RENDER AVAILABLE DESIGN UI (unchanged, but safe) */
   function renderAvailableDesignUI(product, container) {
     if (!product || !container) return;
     const avail = product.availableDesign || {};
-    // If there's no availableDesign we still want a minimal UI to allow bespoke/cart
-    // Create block styled like bespoke section to keep consistent appearance
     let block = container.querySelector('.available-block');
     if (!block) {
       block = document.createElement('div');
       block.className = 'bespoke-block available-block';
-      // Insert near top of form (before actions)
       const actions = container.querySelector('.actions');
       if (actions) container.insertBefore(block, actions);
       else container.appendChild(block);
     }
 
-    // Helper to create labelled row
     function fieldRow(labelText, fieldEl) {
       const wrap = document.createElement('div');
       wrap.className = 'bespoke-field';
@@ -664,7 +701,6 @@
       return wrap;
     }
 
-    // Variant selector (if variants exist)
     const variantLinks = Array.isArray(product.variantLinks) ? product.variantLinks : [];
     let variantSelect = null;
     if (variantLinks.length) {
@@ -672,7 +708,6 @@
       variantSelect.name = 'variant';
       variantSelect.id = 'variant';
       variantSelect.innerHTML = `<option value="">Choose variant</option>`;
-      // Include a current option for clarity
       variantLinks.forEach(v => {
         const opt = document.createElement('option');
         opt.value = v.slug || '';
@@ -681,7 +716,6 @@
       });
     }
 
-    // Finishes (dropdown per request)
     const finishes = Array.isArray(avail.finishes) && avail.finishes.length ? avail.finishes.slice() : [];
     const finishSel = document.createElement('select');
     finishSel.name = 'finish';
@@ -694,7 +728,6 @@
       finishSel.appendChild(o);
     });
 
-    // Stones
     const stones = Array.isArray(avail.stones) && avail.stones.length ? avail.stones.slice() : [];
     const stoneSel = document.createElement('select');
     stoneSel.name = 'stone';
@@ -705,7 +738,6 @@
       stoneSel.innerHTML = `<option value="">N/A</option>`;
     }
 
-    // Materials
     const materials = Array.isArray(avail.materials) && avail.materials.length ? avail.materials.slice() : [];
     const materialSel = document.createElement('select');
     materialSel.name = 'material';
@@ -716,7 +748,6 @@
       materialSel.innerHTML = `<option value="">N/A</option>`;
     }
 
-    // Style / chooseMenu
     const styles = Array.isArray(avail.chooseMenu) && avail.chooseMenu.length ? avail.chooseMenu.slice() : [];
     const styleSel = document.createElement('select');
     styleSel.name = 'style';
@@ -727,7 +758,6 @@
       styleSel.innerHTML = `<option value="">Default</option>`;
     }
 
-    // Size: can be a select if array, otherwise textual (hidden input)
     let sizeField;
     if (Array.isArray(avail.size) && avail.size.length) {
       const sizeSel = document.createElement('select');
@@ -736,7 +766,6 @@
       sizeSel.innerHTML = avail.size.map(s => `<option value="${s}">${s}</option>`).join('');
       sizeField = sizeSel;
     } else {
-      // show descriptive text and keep hidden input
       const txt = document.createElement('div');
       txt.className = 'bespoke-size-note';
       txt.textContent = (avail.size && typeof avail.size === 'string') ? `Size: ${avail.size}` : 'Size: Consultation';
@@ -750,7 +779,6 @@
       sizeField = containerDiv;
     }
 
-    // Quantity: number input, unlimited (min 1)
     const qtyInput = document.createElement('input');
     qtyInput.type = 'number';
     qtyInput.name = 'qty';
@@ -760,22 +788,18 @@
     qtyInput.step = '1';
     qtyInput.className = 'qty-input';
 
-    // Clear and append new content
     block.innerHTML = '';
     const h = document.createElement('h4');
     h.textContent = 'Available designs';
     block.appendChild(h);
 
-    // Variant row if exists
     if (variantSelect) {
       block.appendChild(fieldRow('Variant', variantSelect));
       variantSelect.addEventListener('change', (e) => {
         const slug = e.target.value;
         if (!slug) return;
-        // navigate to variant page
         const href = viewFromSlug(slug);
         if (href && href !== '#') {
-          // write handoff images if available
           const vprod = PRODUCTS.find(pp => pp.slug === slug);
           if (vprod && Array.isArray(vprod.images) && vprod.images.length) {
             writeHandoff(slug, toAbsList(vprod.images));
@@ -785,12 +809,10 @@
       });
     }
 
-    // Finish, Stone, Material, Style, Size, Quantity
     block.appendChild(fieldRow('Finish', finishSel));
     block.appendChild(fieldRow('Stone', stoneSel));
     block.appendChild(fieldRow('Material', materialSel));
     block.appendChild(fieldRow('Style', styleSel));
-    // Size label
     const sizeLabel = document.createElement('div');
     sizeLabel.className = 'available-field';
     const sizeLabelTitle = document.createElement('div');
@@ -799,10 +821,8 @@
     sizeLabel.appendChild(sizeLabelTitle);
     sizeLabel.appendChild(sizeField);
     block.appendChild(sizeLabel);
-
     block.appendChild(fieldRow('Quantity', qtyInput));
 
-    // Ensure form has hidden finish/material/stone inputs synchronized (some code expects them)
     function ensureHidden(name, value) {
       let h = container.querySelector(`input[name="${name}"]`);
       if (!h) {
@@ -820,23 +840,19 @@
     ensureHidden('style', styleSel.value);
     ensureHidden('qty', qtyInput.value);
     if (!container.querySelector('input[name="size"]')) {
-      const sEl = sizeField.querySelector('input[name="size"]');
+      const sEl = sizeField.querySelector?.('input[name="size"]');
       if (sEl) container.appendChild(sEl.cloneNode());
     }
 
-    // Keep selects in sync with hidden inputs for downstream code
     finishSel.addEventListener('change', () => ensureHidden('finish', finishSel.value));
     materialSel.addEventListener('change', () => ensureHidden('material', materialSel.value));
     stoneSel.addEventListener('change', () => ensureHidden('stone', stoneSel.value));
     styleSel.addEventListener('change', () => ensureHidden('style', styleSel.value));
     qtyInput.addEventListener('change', () => ensureHidden('qty', qtyInput.value));
 
-    // If finish selection should influence variant navigation (e.g. variantLinks keyed by label),
-    // provide subtle helper: when finish changes, if a variant has matching label, navigate suggestion
     finishSel.addEventListener('change', () => {
       const match = variantLinks.find(v => (v.label || '').toLowerCase() === (finishSel.value || '').toLowerCase());
       if (match && match.slug) {
-        // do nothing automatic, but set data-attribute so user can switch easily:
         finishSel.dataset.variantSuggested = match.slug;
       } else {
         delete finishSel.dataset.variantSuggested;
@@ -844,18 +860,49 @@
     });
   }
 
+  /* ---------- Product application / hydration ---------- */
+  function formatPriceIntl(value, currency = 'VND') {
+    if (value === 0 || value === '0') return 'Price on request';
+    if (!value) return 'Price on request';
+    try {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(value);
+    } catch {
+      return value;
+    }
+  }
+
+  function showMissingProductFallback() {
+    const titleEl = document.querySelector('.checkout .title');
+    const priceEl = document.querySelector('.checkout .price');
+    const formEl = document.querySelector('.checkout form');
+    if (titleEl) titleEl.textContent = 'Product coming soon';
+    if (priceEl) {
+      priceEl.textContent = 'Price on request';
+      priceEl.removeAttribute('data-price-vnd');
+    }
+    if (formEl) {
+      formEl.querySelectorAll('button, select, input').forEach(el => { el.disabled = true; });
+      const note = document.createElement('div');
+      note.className = 'soldout-label';
+      note.textContent = 'Details will be available soon.';
+      formEl.prepend(note);
+    }
+  }
+
   function applyProductDataToPage() {
     const page = document.querySelector('main.product-page, body');
     if (!page) return;
-    const slugAttr =
-        page.getAttribute('data-product-slug') ||
-        document.body.getAttribute('data-product-slug') ||
-        slugFromPath(location.pathname);
 
+    const slugAttr = resolveProductSlug();
     const product = PRODUCTS.find(
-        p => (p.slug || '').toLowerCase() === (slugAttr || '').toLowerCase()
+        p => normalizeSlug(p.slug || p.name) === normalizeSlug(slugAttr)
     );
-    if (!product) return;
+
+    if (!product) {
+      showMissingProductFallback();
+      if (window.CurrencyManager?.refresh) window.CurrencyManager.refresh();
+      return;
+    }
 
     const titleEl = document.querySelector('.checkout .title');
     if (titleEl) titleEl.textContent = product.name || titleEl.textContent;
@@ -887,7 +934,6 @@
       formEl.prepend(sold);
     }
 
-    // Render available (from data) into form
     renderAvailableDesignUI(product, formEl);
 
     const descContainer = document.querySelector('.product-description p');
@@ -901,447 +947,7 @@
     }
   }
 
-  function initCatalogCards() {
-    const cards = document.querySelectorAll(
-        '.catalog .card, .collection-card, .slider-strip[data-slider="recommended"] .card'
-    );
-    if (!cards.length) { SlideClock.start(); return; }
-
-    const prefersReduced =
-        window.matchMedia &&
-        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    const io =
-        'IntersectionObserver' in window
-            ? new IntersectionObserver(
-                entries => {
-                  entries.forEach(entry => {
-                    const media = entry.target;
-                    const api = media.__api;
-                    if (!api) return;
-                    api.inView =
-                        entry.isIntersecting && entry.intersectionRatio >= 0.5;
-                    api.updateSubscription();
-                  });
-                },
-                { threshold: [0, 0.25, 0.5, 0.75, 1] }
-            )
-            : null;
-
-    const imagesMap = {};
-
-    cards.forEach(card => {
-      const media = card.querySelector('.media, .collection-media');
-      const viewUrl = card.getAttribute('data-view') || '#';
-      const title =
-          card.querySelector('.title')?.textContent ||
-          card.querySelector('.collection-name')?.textContent ||
-          'product';
-      const slug = slugFromPath(viewUrl);
-
-      const listRaw = media ? listFromCSV(media.getAttribute('data-images')) : [];
-      const listAbs = toAbsList(listRaw);
-      if (slug && listAbs.length) imagesMap[slug] = { images: listAbs };
-
-      if (!card.classList.contains('collection-card')) {
-        card.style.cursor = 'pointer';
-        card.addEventListener('click', e => {
-          const t = e.target;
-          if (t.closest('.slider-btn') || t.closest('.dot') || t.closest('.btn') || t.closest('a')) return;
-          if (slug && listAbs.length) writeHandoff(slug, listAbs);
-          if (viewUrl && viewUrl !== '#') window.location.href = viewUrl;
-        });
-        card.addEventListener('keydown', e => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            if (slug && listAbs.length) writeHandoff(slug, listAbs);
-            if (viewUrl && viewUrl !== '#') window.location.href = viewUrl;
-          }
-        });
-        card.tabIndex = 0;
-        card.setAttribute('role', 'link');
-        card.setAttribute('aria-label', `Open ${title}`);
-      }
-
-      if (!media || !listAbs.length) return;
-
-      if (!card.classList.contains('collection-card')) {
-        card.querySelectorAll('a[href]').forEach(a => {
-          a.addEventListener('click', () => {
-            if (slug && listAbs.length) writeHandoff(slug, listAbs);
-          }, { capture: true });
-        });
-      }
-
-      const slidesWrap = document.createElement('div');
-      slidesWrap.className = 'slides';
-      listAbs.forEach(src => {
-        const slide = document.createElement('div');
-        slide.className = 'slide';
-        const img = document.createElement('img');
-        img.src = src;
-        img.alt = title;
-        img.decoding = 'async';
-        img.loading = card.closest('.slider-strip[data-slider="recommended"]') ? 'lazy' : 'eager';
-        slide.appendChild(img);
-        slidesWrap.appendChild(slide);
-      });
-      media.innerHTML = '';
-      media.appendChild(slidesWrap);
-
-      const dots = document.createElement('div');
-      dots.className = 'dots';
-      listAbs.forEach((_, i) => {
-        const d = document.createElement('div');
-        d.className = 'dot' + (i === 0 ? ' active' : '');
-        d.dataset.index = String(i);
-        dots.appendChild(d);
-      });
-      media.appendChild(dots);
-
-      const prev = document.createElement('button');
-      prev.className = 'slider-btn slider-prev';
-      prev.type = 'button';
-      prev.setAttribute('aria-label', 'Previous image');
-      prev.innerHTML = '&#10094;';
-      const next = document.createElement('button');
-      next.className = 'slider-btn slider-next';
-      next.type = 'button';
-      next.setAttribute('aria-label', 'Next image');
-      next.innerHTML = '&#10095;';
-      media.appendChild(prev);
-      media.appendChild(next);
-
-      let idx = 0;
-      const total = listAbs.length;
-      function render() {
-        slidesWrap.style.transform = `translateX(${idx * -100}%)`;
-        Array.from(dots.children).forEach((el, i) => el.classList.toggle('active', i === idx));
-      }
-      function go(n) { idx = (n + total) % total; render(); }
-
-      const stopNav = e => { e.preventDefault(); e.stopPropagation(); };
-      prev.addEventListener('click', e => { stopNav(e); go(idx - 1); media.classList.add('show-controls'); });
-      next.addEventListener('click', e => { stopNav(e); go(idx + 1); media.classList.add('show-controls'); });
-      dots.addEventListener('click', e => {
-        const t = e.target;
-        if (!(t instanceof HTMLElement)) return;
-        if (t.classList.contains('dot')) {
-          stopNav(e);
-          go(Number(t.dataset.index || 0));
-          media.classList.add('show-controls');
-        }
-      });
-
-      const api = {
-        paused: false,
-        inView: true,
-        subscribed: false,
-        pauseTimeout: null,
-        subscribe() { if (!this.subscribed) { SlideClock.subscribe(tick); this.subscribed = true; } },
-        unsubscribe() { if (this.subscribed) { SlideClock.unsubscribe(tick); this.subscribed = false; } },
-        updateSubscription() {
-          if (prefersReduced || total <= 1) { this.unsubscribe(); return; }
-          if (!this.paused && this.inView) this.subscribe();
-          else this.unsubscribe();
-        },
-      };
-      const tick = () => { if (total > 1) go(idx + 1); };
-      media.__api = api;
-
-      if (!card.classList.contains('collection-card')) {
-        let startX = 0, dist = 0, dragging = false;
-        function onStart(e) {
-          dragging = true;
-          startX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-          dist = 0;
-          clearTimeout(api.pauseTimeout);
-          api.paused = true;
-          api.updateSubscription();
-          media.classList.add('show-controls');
-        }
-        function onMove(e) {
-          if (!dragging) return;
-          const x = 'touches' in e ? e.touches[0].clientX : e.clientX;
-          dist = x - startX;
-        }
-        function onEnd(e) {
-          if (!dragging) return;
-          dragging = false;
-          if (Math.abs(dist) > 40) {
-            if (dist < 0) go(idx + 1);
-            else go(idx - 1);
-          }
-          if (e) e.stopPropagation();
-          api.paused = true;
-          api.pauseTimeout = setTimeout(() => {
-            api.paused = false;
-            api.updateSubscription();
-          }, 10000);
-        }
-        card.addEventListener('mousedown', onStart);
-        window.addEventListener('mousemove', onMove);
-        window.addEventListener('mouseup', onEnd);
-        card.addEventListener('touchstart', onStart, scrollOptions);
-        window.addEventListener('touchmove', onMove, scrollOptions);
-        window.addEventListener('touchend', onEnd);
-      }
-
-      media.classList.remove('show-controls');
-
-      card.addEventListener('mouseenter', () => { api.paused = true; api.updateSubscription(); });
-      card.addEventListener('mouseleave', () => { api.paused = false; api.updateSubscription(); });
-
-      if (io) io.observe(media);
-      render();
-    });
-
-    if (Object.keys(imagesMap).length) {
-      const current = readImageCache()?.items || null;
-      const merged = { ...(current || {}), ...imagesMap };
-      writeImageCache(merged);
-    }
-    SlideClock.start();
-  }
-
-  function initRecommended() {
-    const track = document.querySelector('.slider-strip[data-slider="recommended"] .slider-track');
-    if (!track) return;
-
-    track.innerHTML = '';
-
-    const cfg = (window.EDELHART_CONFIG && window.EDELHART_CONFIG.recommended) || {};
-    const pinned = Array.isArray(cfg.pinned) ? cfg.pinned : [];
-    const pool = Array.isArray(cfg.pool) ? cfg.pool : [];
-
-    const slugs = [...new Set([...pinned, ...pool])];
-    const cards = slugs
-        .map(slug => PRODUCTS.find(p => p.slug === slug))
-        .filter(Boolean);
-
-    cards.forEach(p => {
-      const viewUrl = viewFromSlug(p.slug);
-      const title = p.name || 'Product';
-      const price = p.sale && p.sale.enabled && p.finalPriceVND
-          ? `<s>₫${p.priceVND || 0}</s> ₫${p.finalPriceVND}`
-          : (p.priceVND ? `₫${p.priceVND}` : 'Price on request');
-      const imagesRaw = (p.images || []).join(',');
-
-      const cardEl = document.createElement('article');
-      cardEl.className = 'card';
-      cardEl.setAttribute('data-view', viewUrl);
-      cardEl.setAttribute('data-price', p.finalPriceVND || p.priceVND || 0);
-      cardEl.setAttribute('data-sold-out', p.soldOut ? 'true' : 'false');
-      cardEl.innerHTML = `
-        <div class="media" data-images="${imagesRaw}">
-          <div class="media-fallback">${title}</div>
-        </div>
-        <div class="content">
-          <div class="title">${title}</div>
-          <div class="price" data-price-vnd="${p.finalPriceVND || p.priceVND || 0}">${price}</div>
-        </div>
-        <div class="actions">
-          <a class="btn primary" href="${viewUrl}" aria-label="View ${title}" ${p.soldOut ? 'aria-disabled="true"' : ''}>${p.soldOut ? 'Sold out' : 'View'}</a>
-        </div>
-      `;
-      track.appendChild(cardEl);
-    });
-  }
-
-  function initAutoStrips() {
-    const containers = document.querySelectorAll(
-        '.related-strip, .collection-strip, .slider-strip[data-slider="recommended"]'
-    );
-
-    containers.forEach(container => {
-      const isCollectionStrip = container.classList.contains('collection-strip');
-      container.style.position = container.style.position || 'relative';
-      const track = container.querySelector(
-          '.related-track, .collection-track, .slider-track'
-      );
-      if (!track) return;
-      const slides = track.children;
-      if (!slides.length) return;
-      let idx = 0;
-
-      let prev = isCollectionStrip
-          ? container.querySelector('.col-prev')
-          : container.querySelector('.slider-arrow-prev');
-      let next = isCollectionStrip
-          ? container.querySelector('.col-next')
-          : container.querySelector('.slider-arrow-next');
-
-      if (!prev || !next) {
-        prev = document.createElement('button');
-        prev.className = isCollectionStrip ? 'col-btn col-prev' : 'slider-arrow slider-arrow-prev';
-        prev.setAttribute('aria-label', 'Previous');
-        prev.textContent = '‹';
-
-        next = document.createElement('button');
-        next.className = isCollectionStrip ? 'col-btn col-next' : 'slider-arrow slider-arrow-next';
-        next.setAttribute('aria-label', 'Next');
-        next.textContent = '›';
-
-        container.appendChild(prev);
-        container.appendChild(next);
-      }
-
-      let indicator = container.querySelector('.swipe-indicator');
-      if (!indicator) {
-        indicator = document.createElement('div');
-        indicator.className = 'swipe-indicator';
-        indicator.innerHTML = '<div class="thumb"></div>';
-        container.appendChild(indicator);
-      }
-
-      function cardWidth() {
-        const first = slides[0];
-        if (!first) return track.getBoundingClientRect().width || 0;
-        const style = getComputedStyle(track);
-        const gap = parseFloat(style.columnGap || style.gap || '12') || 12;
-        return (first.getBoundingClientRect().width || track.getBoundingClientRect().width) + gap;
-      }
-
-      function hasOverflow() { return slides.length > 1; }
-
-      function goCollection(n) {
-        idx = (n + slides.length) % slides.length;
-        track.style.transform = `translateX(${idx * -100}%)`;
-        updateTransformIndicator(track, indicator, slides.length, idx);
-        container.classList.add('show-controls');
-      }
-
-      function goStrip(n) {
-        if (!hasOverflow()) return;
-        idx = (n + slides.length) % slides.length;
-        const w = cardWidth();
-        track.style.transform = `translateX(${idx * -w}px)`;
-        updateTransformIndicator(track, indicator, slides.length, idx);
-        container.classList.add('show-controls');
-      }
-
-      const go = isCollectionStrip ? goCollection : goStrip;
-
-      prev.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); go(idx - 1); });
-      next.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); go(idx + 1); });
-
-      if (isCollectionStrip) {
-        let inView = true;
-        const io =
-            'IntersectionObserver' in window
-                ? new IntersectionObserver(
-                    entries => {
-                      entries.forEach(
-                          entry =>
-                              (inView =
-                                  entry.isIntersecting &&
-                                  entry.intersectionRatio >= 0.4)
-                      );
-                    },
-                    { threshold: [0, 0.4, 1] }
-                )
-                : null;
-        if (io) io.observe(container);
-
-        const tick = () => { if (inView && slides.length > 1) goCollection(idx + 1); };
-
-        window.addEventListener('resize', debounce(() => {
-          track.style.transform = 'translateX(0%)';
-          idx = 0;
-          requestAnimationFrame(() => {
-            updateTransformIndicator(track, indicator, slides.length, idx);
-            updateClockSubscription();
-          });
-        }, 100));
-
-        requestAnimationFrame(() => {
-          updateTransformIndicator(track, indicator, slides.length, idx);
-          updateClockSubscription();
-        });
-
-        function updateClockSubscription() {
-          SlideClock.unsubscribe(tick);
-          if (inView && slides.length > 1) SlideClock.subscribe(tick);
-        }
-
-        return;
-      }
-
-      let inView = true;
-      const io =
-          'IntersectionObserver' in window
-              ? new IntersectionObserver(
-                  entries => {
-                    entries.forEach(
-                        entry =>
-                            (inView =
-                                entry.isIntersecting &&
-                                entry.intersectionRatio >= 0.4)
-                    );
-                  },
-                  { threshold: [0, 0.4, 1] }
-              )
-              : null;
-      if (io) io.observe(container);
-
-      const tick = () => { if (hasOverflow() && inView) goStrip(idx + 1); };
-
-      function updateClockSubscription() {
-        SlideClock.unsubscribe(tick);
-        if (hasOverflow() && inView) SlideClock.subscribe(tick);
-      }
-
-      let startX = 0;
-      let dist = 0;
-      let dragging = false;
-
-      function onStart(e) {
-        dragging = true;
-        startX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-        dist = 0;
-        container.classList.add('show-controls');
-        SlideClock.unsubscribe(tick);
-      }
-
-      function onMove(e) {
-        if (!dragging) return;
-        const x = 'touches' in e ? e.touches[0].clientX : e.clientX;
-        dist = x - startX;
-      }
-
-      function onEnd() {
-        if (!dragging) return;
-        dragging = false;
-        if (Math.abs(dist) > 12) {
-          if (dist < 0) goStrip(idx + 1);
-          else goStrip(idx - 1);
-        }
-        updateClockSubscription();
-      }
-
-      track.addEventListener('mousedown', onStart);
-      window.addEventListener('mousemove', onMove);
-      window.addEventListener('mouseup', onEnd);
-      track.addEventListener('touchstart', onStart, scrollOptions);
-      window.addEventListener('touchmove', onMove, scrollOptions);
-      window.addEventListener('touchend', onEnd);
-
-      window.addEventListener('resize', debounce(() => {
-        track.style.transform = 'translateX(0px)';
-        idx = 0;
-        requestAnimationFrame(() => {
-          updateTransformIndicator(track, indicator, slides.length, idx);
-          updateClockSubscription();
-        });
-      }, 100));
-
-      requestAnimationFrame(() => {
-        updateTransformIndicator(track, indicator, slides.length, idx);
-        updateClockSubscription();
-      });
-    });
-  }
-
+  /* ---------- Gallery ---------- */
   async function initProductGallery() {
     const gallery = document.querySelector('.product-gallery');
     if (!gallery) return;
@@ -1351,13 +957,13 @@
     const prev = gallery.querySelector('.slider-prev');
     const next = gallery.querySelector('.slider-next');
 
-    const thisSlug = slugFromPath(location.pathname);
+    const thisSlug = resolveProductSlug();
     let images = [];
 
     try {
       if (PRODUCTS.length) {
         const productFromData = PRODUCTS.find(
-            p => (p.slug || '').toLowerCase() === thisSlug.toLowerCase()
+            p => normalizeSlug(p.slug || p.name) === normalizeSlug(thisSlug)
         );
         if (productFromData && Array.isArray(productFromData.images)) {
           images = toAbsList(productFromData.images);
@@ -1372,13 +978,24 @@
 
     if (!images.length) {
       const handoff = readHandoff();
-      if (handoff && (handoff.slug || '').toLowerCase() === thisSlug.toLowerCase() && Array.isArray(handoff.images)) {
+      if (handoff && normalizeSlug(handoff.slug) === normalizeSlug(thisSlug) && Array.isArray(handoff.images)) {
         images = toAbsList(handoff.images);
         clearHandoff();
       }
     }
 
-    if (!images.length) return;
+    function setEmptyGallery() {
+      gallery.classList.add('empty');
+      slidesWrap.innerHTML = `<div class="slide"><div class="media-fallback" style="display:grid;place-items:center;color:#aaa;padding:30px;">Images coming soon</div></div>`;
+      if (dots) dots.innerHTML = '';
+      if (prev) prev.style.display = 'none';
+      if (next) next.style.display = 'none';
+    }
+
+    if (!images.length) {
+      setEmptyGallery();
+      return;
+    }
 
     function buildFromImages(listAbs) {
       slidesWrap.innerHTML = '';
@@ -1582,6 +1199,7 @@
     return {};
   }
 
+  /* ---------- Dynamic related ---------- */
   async function initDynamicRelated() {
     const relatedStrip = document.getElementById('dynamic-related');
     if (!relatedStrip) return;
@@ -1589,14 +1207,14 @@
     const track = relatedStrip.querySelector('.related-track');
     if (!track) return;
 
-    const currentSlug = slugFromPath(location.pathname);
+    const currentSlug = resolveProductSlug();
     const cfg = (window.EDELHART_CONFIG && window.EDELHART_CONFIG.related) || {};
     const pinned = (cfg.pinnedBySlug && cfg.pinnedBySlug[currentSlug]) || [];
     const pool = Array.isArray(cfg.pool) ? cfg.pool : [];
 
-    const ordered = [...new Set([...pinned, ...pool])].filter(slug => slug !== currentSlug);
+    const ordered = [...new Set([...pinned, ...pool])].filter(slug => normalizeSlug(slug) !== normalizeSlug(currentSlug));
     const selected = ordered.slice(0, 8)
-        .map(slug => PRODUCTS.find(p => p.slug === slug))
+        .map(slug => PRODUCTS.find(p => normalizeSlug(p.slug) === normalizeSlug(slug)))
         .filter(Boolean);
 
     track.innerHTML = '';
@@ -1746,6 +1364,7 @@
     });
   }
 
+  /* Related inner sliders (unchanged) */
   function initRelatedInnerSliders() {
     const cards = document.querySelectorAll('#dynamic-related .related-card');
     if (!cards.length) return;
@@ -1859,6 +1478,7 @@
     });
   }
 
+  /* Featured slideshow (unchanged) */
   function initFeaturedSlideshow() {
     const strip = document.querySelector('.featured-strip.collage-main');
     if (!strip) return;
@@ -1968,16 +1588,6 @@
   }
 
   /* ------------ PRICE HYDRATION ------------- */
-  function normalizeSlug(str = '') {
-    return str
-        .toString()
-        .trim()
-        .toLowerCase()
-        .replace(/['"]/g, '')
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '');
-  }
-
   function findProduct(slugGuess, titleGuess) {
     const candidates = PRODUCTS || [];
     const slugNorm = normalizeSlug(slugGuess || '');
@@ -1990,30 +1600,17 @@
     );
   }
 
-  function formatPriceIntl(value, currency = 'VND') {
-    if (value === 0 || value === '0') return 'Price on request';
-    if (!value) return 'Price on request';
-    try {
-      return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(value);
-    } catch {
-      return value;
-    }
-  }
-
   function hydrateProductPrice() {
     const page = document.querySelector('body, main.product-page');
     if (!page) return;
 
-    const slugAttr =
-        page.getAttribute('data-product-slug') ||
-        document.body.getAttribute('data-product-slug');
-
+    const slugAttr = resolveProductSlug();
     const form = document.querySelector('.checkout form[data-product]');
     const titleEl = document.querySelector('.checkout .title');
     const slugFallback = form?.getAttribute('data-product') || titleEl?.textContent || '';
 
     const product = findProduct(slugAttr, slugFallback);
-    if (!product) return; // nothing to hydrate
+    if (!product) return;
 
     const vnd = product.finalPriceVND ?? product.priceVND ?? product.price?.vnd ?? product.price;
 
@@ -2029,6 +1626,32 @@
   }
   document.addEventListener('DOMContentLoaded', hydrateProductPrice);
   /* --------- END PRICE HYDRATION ----------- */
+
+  /* ---------- Asset rebasing for GitHub Pages ---------- */
+  function rebaseStaticMedia() {
+    // Images
+    const rebasedImgs = document.querySelectorAll('img[src^="../img/"], img[src^="./img/"], img[src^="img/"]');
+    rebasedImgs.forEach(img => {
+      const src = img.getAttribute('src');
+      if (!src) return;
+      try { img.src = new URL(src, BASE_URL).href; } catch { }
+    });
+
+    // Stylesheets / icons
+    const links = document.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"], link[rel="stylesheet"]');
+    links.forEach(link => {
+      const href = link.getAttribute('href');
+      if (!href || /^https?:\/\//i.test(href)) return;
+      try { link.href = new URL(href, BASE_URL).href; } catch { }
+    });
+
+    // Data attributes on galleries
+    document.querySelectorAll('[data-images]').forEach(el => {
+      const raw = el.getAttribute('data-images') || '';
+      if (!raw) return;
+      el.setAttribute('data-images', toAbsList(listFromCSV(raw)).join(','));
+    });
+  }
 
   function eagerizeCriticalImages() {
     const critical = document.querySelectorAll(
@@ -2074,22 +1697,6 @@
     }
   }
 
-  function rebaseStaticMedia() {
-    const rebasedImgs = document.querySelectorAll('img[src^="../img/"], img[src^="./img/"], img[src^="img/"]');
-    rebasedImgs.forEach(img => {
-      const src = img.getAttribute('src');
-      if (!src) return;
-      try { img.src = new URL(src, BASE_URL).href; } catch { }
-    });
-
-    const links = document.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"], link[rel="stylesheet"]');
-    links.forEach(link => {
-      const href = link.getAttribute('href');
-      if (!href || /^https?:\/\//i.test(href)) return;
-      try { link.href = new URL(href, BASE_URL).href; } catch { }
-    });
-  }
-
   /* ---------- Cart helpers ---------- */
   const getCurrentCurrency = () => window.CurrencyManager?.getCurrent?.() || 'VND';
   const formatPriceWithCurrency = (vndAmount) => {
@@ -2097,12 +1704,12 @@
     return window.CurrencyManager.formatPrice(vndAmount, getCurrentCurrency());
   };
 
-  /* -------- BESPOKE MODULE ---------- */
+  /* ---------- Bespoke module (unchanged) ---------- */
   function injectBespokeUI(form, productSlug, priceVND) {
     if (!form || form.__hasBespoke) return;
     form.__hasBespoke = true;
 
-    const product = PRODUCTS.find(p => p.slug === productSlug);
+    const product = PRODUCTS.find(p => normalizeSlug(p.slug) === normalizeSlug(productSlug));
     const bespoke = product?.bespokeDesign || {};
     const bespokeFinishes = Array.isArray(bespoke.finishes) ? bespoke.finishes : ["Silver", "Gold", "Black rhodium"];
 
@@ -2190,7 +1797,7 @@
       };
       cart.push(newItem);
       writeCart(cart);
-      renderCart(); // defined later
+      renderCart();
       openCart();
     }
 
@@ -2211,7 +1818,7 @@
 
     const priceEl = document.querySelector('.checkout .price');
     const priceVND = Number(priceEl?.dataset.priceVnd || priceEl?.getAttribute('data-price-vnd') || 0) || 0;
-    const productSlug = document.querySelector('main.product-page')?.dataset.productSlug || slugFromPath(location.pathname);
+    const productSlug = resolveProductSlug();
 
     injectBespokeUI(form, productSlug, priceVND);
 
@@ -2625,6 +2232,450 @@
     prewarmAllProductImages();
   }
 
+  /* ---------- Recommended (unchanged) ---------- */
+  function initRecommended() {
+    const track = document.querySelector('.slider-strip[data-slider="recommended"] .slider-track');
+    if (!track) return;
+
+    track.innerHTML = '';
+
+    const cfg = (window.EDELHART_CONFIG && window.EDELHART_CONFIG.recommended) || {};
+    const pinned = Array.isArray(cfg.pinned) ? cfg.pinned : [];
+    const pool = Array.isArray(cfg.pool) ? cfg.pool : [];
+
+    const slugs = [...new Set([...pinned, ...pool])];
+    const cards = slugs
+        .map(slug => PRODUCTS.find(p => p.slug === slug))
+        .filter(Boolean);
+
+    cards.forEach(p => {
+      const viewUrl = viewFromSlug(p.slug);
+      const title = p.name || 'Product';
+      const price = p.sale && p.sale.enabled && p.finalPriceVND
+          ? `<s>₫${p.priceVND || 0}</s> ₫${p.finalPriceVND}`
+          : (p.priceVND ? `₫${p.priceVND}` : 'Price on request');
+      const imagesRaw = (p.images || []).join(',');
+
+      const cardEl = document.createElement('article');
+      cardEl.className = 'card';
+      cardEl.setAttribute('data-view', viewUrl);
+      cardEl.setAttribute('data-price', p.finalPriceVND || p.priceVND || 0);
+      cardEl.setAttribute('data-sold-out', p.soldOut ? 'true' : 'false');
+      cardEl.innerHTML = `
+        <div class="media" data-images="${imagesRaw}">
+          <div class="media-fallback">${title}</div>
+        </div>
+        <div class="content">
+          <div class="title">${title}</div>
+          <div class="price" data-price-vnd="${p.finalPriceVND || p.priceVND || 0}">${price}</div>
+        </div>
+        <div class="actions">
+          <a class="btn primary" href="${viewUrl}" aria-label="View ${title}" ${p.soldOut ? 'aria-disabled="true"' : ''}>${p.soldOut ? 'Sold out' : 'View'}</a>
+        </div>
+      `;
+      track.appendChild(cardEl);
+    });
+  }
+
+  /* ---------- Card sliders / auto strips (unchanged except BASE_URL use) ---------- */
+  function initCatalogCards() {
+    const cards = document.querySelectorAll(
+        '.catalog .card, .collection-card, .slider-strip[data-slider="recommended"] .card'
+    );
+    if (!cards.length) { SlideClock.start(); return; }
+
+    const prefersReduced =
+        window.matchMedia &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const io =
+        'IntersectionObserver' in window
+            ? new IntersectionObserver(
+                entries => {
+                  entries.forEach(entry => {
+                    const media = entry.target;
+                    const api = media.__api;
+                    if (!api) return;
+                    api.inView =
+                        entry.isIntersecting && entry.intersectionRatio >= 0.5;
+                    api.updateSubscription();
+                  });
+                },
+                { threshold: [0, 0.25, 0.5, 0.75, 1] }
+            )
+            : null;
+
+    const imagesMap = {};
+
+    cards.forEach(card => {
+      const media = card.querySelector('.media, .collection-media');
+      const viewUrl = card.getAttribute('data-view') || '#';
+      const title =
+          card.querySelector('.title')?.textContent ||
+          card.querySelector('.collection-name')?.textContent ||
+          'product';
+      const slug = slugFromPath(viewUrl);
+
+      const listRaw = media ? listFromCSV(media.getAttribute('data-images')) : [];
+      const listAbs = toAbsList(listRaw);
+      if (slug && listAbs.length) imagesMap[slug] = { images: listAbs };
+
+      if (!card.classList.contains('collection-card')) {
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', e => {
+          const t = e.target;
+          if (t.closest('.slider-btn') || t.closest('.dot') || t.closest('.btn') || t.closest('a')) return;
+          if (slug && listAbs.length) writeHandoff(slug, listAbs);
+          if (viewUrl && viewUrl !== '#') window.location.href = viewUrl;
+        });
+        card.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            if (slug && listAbs.length) writeHandoff(slug, listAbs);
+            if (viewUrl && viewUrl !== '#') window.location.href = viewUrl;
+          }
+        });
+        card.tabIndex = 0;
+        card.setAttribute('role', 'link');
+        card.setAttribute('aria-label', `Open ${title}`);
+      }
+
+      if (!media || !listAbs.length) return;
+
+      if (!card.classList.contains('collection-card')) {
+        card.querySelectorAll('a[href]').forEach(a => {
+          a.addEventListener('click', () => {
+            if (slug && listAbs.length) writeHandoff(slug, listAbs);
+          }, { capture: true });
+        });
+      }
+
+      const slidesWrap = document.createElement('div');
+      slidesWrap.className = 'slides';
+      listAbs.forEach(src => {
+        const slide = document.createElement('div');
+        slide.className = 'slide';
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = title;
+        img.decoding = 'async';
+        img.loading = card.closest('.slider-strip[data-slider="recommended"]') ? 'lazy' : 'eager';
+        slide.appendChild(img);
+        slidesWrap.appendChild(slide);
+      });
+      media.innerHTML = '';
+      media.appendChild(slidesWrap);
+
+      const dots = document.createElement('div');
+      dots.className = 'dots';
+      listAbs.forEach((_, i) => {
+        const d = document.createElement('div');
+        d.className = 'dot' + (i === 0 ? ' active' : '');
+        d.dataset.index = String(i);
+        dots.appendChild(d);
+      });
+      media.appendChild(dots);
+
+      const prev = document.createElement('button');
+      prev.className = 'slider-btn slider-prev';
+      prev.type = 'button';
+      prev.setAttribute('aria-label', 'Previous image');
+      prev.innerHTML = '&#10094;';
+      const next = document.createElement('button');
+      next.className = 'slider-btn slider-next';
+      next.type = 'button';
+      next.setAttribute('aria-label', 'Next image');
+      next.innerHTML = '&#10095;';
+      media.appendChild(prev);
+      media.appendChild(next);
+
+      let idx = 0;
+      const total = listAbs.length;
+      function render() {
+        slidesWrap.style.transform = `translateX(${idx * -100}%)`;
+        Array.from(dots.children).forEach((el, i) => el.classList.toggle('active', i === idx));
+      }
+      function go(n) { idx = (n + total) % total; render(); }
+
+      const stopNav = e => { e.preventDefault(); e.stopPropagation(); };
+      prev.addEventListener('click', e => { stopNav(e); go(idx - 1); media.classList.add('show-controls'); });
+      next.addEventListener('click', e => { stopNav(e); go(idx + 1); media.classList.add('show-controls'); });
+      dots.addEventListener('click', e => {
+        const t = e.target;
+        if (!(t instanceof HTMLElement)) return;
+        if (t.classList.contains('dot')) {
+          stopNav(e);
+          go(Number(t.dataset.index || 0));
+          media.classList.add('show-controls');
+        }
+      });
+
+      const api = {
+        paused: false,
+        inView: true,
+        subscribed: false,
+        pauseTimeout: null,
+        subscribe() { if (!this.subscribed) { SlideClock.subscribe(tick); this.subscribed = true; } },
+        unsubscribe() { if (this.subscribed) { SlideClock.unsubscribe(tick); this.subscribed = false; } },
+        updateSubscription() {
+          if (prefersReduced || total <= 1) { this.unsubscribe(); return; }
+          if (!this.paused && this.inView) this.subscribe();
+          else this.unsubscribe();
+        },
+      };
+      const tick = () => { if (total > 1) go(idx + 1); };
+      media.__api = api;
+
+      if (!card.classList.contains('collection-card')) {
+        let startX = 0, dist = 0, dragging = false;
+        function onStart(e) {
+          dragging = true;
+          startX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+          dist = 0;
+          clearTimeout(api.pauseTimeout);
+          api.paused = true;
+          api.updateSubscription();
+          media.classList.add('show-controls');
+        }
+        function onMove(e) {
+          if (!dragging) return;
+          const x = 'touches' in e ? e.touches[0].clientX : e.clientX;
+          dist = x - startX;
+        }
+        function onEnd(e) {
+          if (!dragging) return;
+          dragging = false;
+          if (Math.abs(dist) > 40) {
+            if (dist < 0) go(idx + 1);
+            else go(idx - 1);
+          }
+          if (e) e.stopPropagation();
+          api.paused = true;
+          api.pauseTimeout = setTimeout(() => {
+            api.paused = false;
+            api.updateSubscription();
+          }, 10000);
+        }
+        card.addEventListener('mousedown', onStart);
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onEnd);
+        card.addEventListener('touchstart', onStart, scrollOptions);
+        window.addEventListener('touchmove', onMove, scrollOptions);
+        window.addEventListener('touchend', onEnd);
+      }
+
+      media.classList.remove('show-controls');
+
+      card.addEventListener('mouseenter', () => { api.paused = true; api.updateSubscription(); });
+      card.addEventListener('mouseleave', () => { api.paused = false; api.updateSubscription(); });
+
+      if (io) io.observe(media);
+      render();
+    });
+
+    if (Object.keys(imagesMap).length) {
+      const current = readImageCache()?.items || null;
+      const merged = { ...(current || {}), ...imagesMap };
+      writeImageCache(merged);
+    }
+    SlideClock.start();
+  }
+
+  function initAutoStrips() {
+    const containers = document.querySelectorAll(
+        '.related-strip, .collection-strip, .slider-strip[data-slider="recommended"]'
+    );
+
+    containers.forEach(container => {
+      const isCollectionStrip = container.classList.contains('collection-strip');
+      container.style.position = container.style.position || 'relative';
+      const track = container.querySelector(
+          '.related-track, .collection-track, .slider-track'
+      );
+      if (!track) return;
+      const slides = track.children;
+      if (!slides.length) return;
+      let idx = 0;
+
+      let prev = isCollectionStrip
+          ? container.querySelector('.col-prev')
+          : container.querySelector('.slider-arrow-prev');
+      let next = isCollectionStrip
+          ? container.querySelector('.col-next')
+          : container.querySelector('.slider-arrow-next');
+
+      if (!prev || !next) {
+        prev = document.createElement('button');
+        prev.className = isCollectionStrip ? 'col-btn col-prev' : 'slider-arrow slider-arrow-prev';
+        prev.setAttribute('aria-label', 'Previous');
+        prev.textContent = '‹';
+
+        next = document.createElement('button');
+        next.className = isCollectionStrip ? 'col-btn col-next' : 'slider-arrow slider-arrow-next';
+        next.setAttribute('aria-label', 'Next');
+        next.textContent = '›';
+
+        container.appendChild(prev);
+        container.appendChild(next);
+      }
+
+      let indicator = container.querySelector('.swipe-indicator');
+      if (!indicator) {
+        indicator = document.createElement('div');
+        indicator.className = 'swipe-indicator';
+        indicator.innerHTML = '<div class="thumb"></div>';
+        container.appendChild(indicator);
+      }
+
+      function cardWidth() {
+        const first = slides[0];
+        if (!first) return track.getBoundingClientRect().width || 0;
+        const style = getComputedStyle(track);
+        const gap = parseFloat(style.columnGap || style.gap || '12') || 12;
+        return (first.getBoundingClientRect().width || track.getBoundingClientRect().width) + gap;
+      }
+
+      function hasOverflow() { return slides.length > 1; }
+
+      function goCollection(n) {
+        idx = (n + slides.length) % slides.length;
+        track.style.transform = `translateX(${idx * -100}%)`;
+        updateTransformIndicator(track, indicator, slides.length, idx);
+        container.classList.add('show-controls');
+      }
+
+      function goStrip(n) {
+        if (!hasOverflow()) return;
+        idx = (n + slides.length) % slides.length;
+        const w = cardWidth();
+        track.style.transform = `translateX(${idx * -w}px)`;
+        updateTransformIndicator(track, indicator, slides.length, idx);
+        container.classList.add('show-controls');
+      }
+
+      const go = isCollectionStrip ? goCollection : goStrip;
+
+      prev.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); go(idx - 1); });
+      next.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); go(idx + 1); });
+
+      if (isCollectionStrip) {
+        let inView = true;
+        const io =
+            'IntersectionObserver' in window
+                ? new IntersectionObserver(
+                    entries => {
+                      entries.forEach(
+                          entry =>
+                              (inView =
+                                  entry.isIntersecting &&
+                                  entry.intersectionRatio >= 0.4)
+                      );
+                    },
+                    { threshold: [0, 0.4, 1] }
+                )
+                : null;
+        if (io) io.observe(container);
+
+        const tick = () => { if (inView && slides.length > 1) goCollection(idx + 1); };
+
+        window.addEventListener('resize', debounce(() => {
+          track.style.transform = 'translateX(0%)';
+          idx = 0;
+          requestAnimationFrame(() => {
+            updateTransformIndicator(track, indicator, slides.length, idx);
+            updateClockSubscription();
+          });
+        }, 100));
+
+        requestAnimationFrame(() => {
+          updateTransformIndicator(track, indicator, slides.length, idx);
+          updateClockSubscription();
+        });
+
+        function updateClockSubscription() {
+          SlideClock.unsubscribe(tick);
+          if (inView && slides.length > 1) SlideClock.subscribe(tick);
+        }
+
+        return;
+      }
+
+      let inView = true;
+      const io =
+          'IntersectionObserver' in window
+              ? new IntersectionObserver(
+                  entries => {
+                    entries.forEach(
+                        entry =>
+                            (inView =
+                                entry.isIntersecting &&
+                                entry.intersectionRatio >= 0.4)
+                    );
+                  },
+                  { threshold: [0, 0.4, 1] }
+              )
+              : null;
+      if (io) io.observe(container);
+
+      const tick = () => { if (hasOverflow() && inView) goStrip(idx + 1); };
+
+      function updateClockSubscription() {
+        SlideClock.unsubscribe(tick);
+        if (hasOverflow() && inView) SlideClock.subscribe(tick);
+      }
+
+      let startX = 0;
+      let dist = 0;
+      let dragging = false;
+
+      function onStart(e) {
+        dragging = true;
+        startX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+        dist = 0;
+        container.classList.add('show-controls');
+        SlideClock.unsubscribe(tick);
+      }
+
+      function onMove(e) {
+        if (!dragging) return;
+        const x = 'touches' in e ? e.touches[0].clientX : e.clientX;
+        dist = x - startX;
+      }
+
+      function onEnd() {
+        if (!dragging) return;
+        dragging = false;
+        if (Math.abs(dist) > 12) {
+          if (dist < 0) goStrip(idx + 1);
+          else goStrip(idx - 1);
+        }
+        updateClockSubscription();
+      }
+
+      track.addEventListener('mousedown', onStart);
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onEnd);
+      track.addEventListener('touchstart', onStart, scrollOptions);
+      window.addEventListener('touchmove', onMove, scrollOptions);
+      window.addEventListener('touchend', onEnd);
+
+      window.addEventListener('resize', debounce(() => {
+        track.style.transform = 'translateX(0px)';
+        idx = 0;
+        requestAnimationFrame(() => {
+          updateTransformIndicator(track, indicator, slides.length, idx);
+          updateClockSubscription();
+        });
+      }, 100));
+
+      requestAnimationFrame(() => {
+        updateTransformIndicator(track, indicator, slides.length, idx);
+        updateClockSubscription();
+      });
+    });
+  }
+
+  /* ---------- Ready entry ---------- */
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', onReady);
     window.addEventListener('load', onReady);

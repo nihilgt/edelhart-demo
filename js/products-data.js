@@ -9,13 +9,13 @@ window.EDELHART_COLLECTIONS = {
 window.EDELHART_PRODUCTS_CENTRAL = [
     {
         slug: "sss-gold",
-        name: "SSS pendant — gold",
+        name: "SSS pendant",
         collection: "SSS",
         priceVND: 1996000,
         finalPriceVND: 1996000,
         sale: null,
         images: Array.from({ length: 11 }, (_, i) => `img/products/sss-gold/sss-gold-${i + 1}.jpeg`),
-        description: "The SSS pendant embodies our signature aesthetic — refined minimalism with a statement edge. Crafted in gold — limited stock. Signature design for the collection.",
+        description: "Shaped in the moment a sea turtle reaches upward toward the chain, the pendant captures a sense of weightlessness—an almost desperate call for help. The blue stone on its shell is crafted with the Encaged Stone technique, allowing it to move freely and mirror the shifting sparkle of sunlight over the ocean.\n",
         availableDesign: {
             materials: ["E silver"],
             stones: ["Swiss Topaz", "Sky Topaz"],
