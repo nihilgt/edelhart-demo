@@ -151,7 +151,7 @@
   window.addEventListener('scroll', onWindowScroll, scrollOptions);
   onWindowScroll();
 
-  /* Nav spy & smooth scroll (unchanged) */
+  /* Nav spy & smooth scroll */
   (function () {
     const links = Array.from(
         document.querySelectorAll('.menu .links a[data-spy], .menu .links .drop-btn[data-spy]')
@@ -230,7 +230,7 @@
     updateActive();
   })();
 
-  /* Mobile nav (unchanged) */
+  /* Mobile nav */
   (function () {
     const nav = document.querySelector('.menu');
     const btn = document.querySelector('.menu-btn');
@@ -290,7 +290,7 @@
   const yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  /* ---------------- HERO PARALLAX (unchanged) ---------------- */
+  /* ---------------- HERO PARALLAX ---------------- */
   if (hero && heroImg) {
     let ticking = false;
     const prefersReduced =
@@ -351,7 +351,7 @@
     window.addEventListener('resize', debounce(onResize, 100));
   }
 
-  /* Slide clock (unchanged) */
+  /* Slide clock */
   const SlideClock = (() => {
     const interval = 7000;
     const listeners = new Set();
@@ -381,7 +381,7 @@
 
   const CACHE_KEY = 'edelhart:images:v5';
   const HANDOFF_KEY = 'edelhart:handoff:v2';
-  const CART_KEY = 'edelhart:cart:v3'; // bumped for bespoke items
+  const CART_KEY = 'edelhart:cart:v3';
 
   function readImageCache() {
     try { return JSON.parse(localStorage.getItem(CACHE_KEY) || ''); } catch { return null; }
@@ -670,23 +670,20 @@
     });
   }
 
-  // RENDER AVAILABLE DESIGN UI (updated)
+  // RENDER AVAILABLE DESIGN UI (updated for combined Finish/Variant)
   function renderAvailableDesignUI(product, container) {
     if (!product || !container) return;
     const avail = product.availableDesign || {};
-    // If there's no availableDesign we still want a minimal UI to allow bespoke/cart
-    // Create block styled like bespoke section to keep consistent appearance
+
     let block = container.querySelector('.available-block');
     if (!block) {
       block = document.createElement('div');
       block.className = 'bespoke-block available-block';
-      // Insert near top of form (before actions)
       const actions = container.querySelector('.actions');
       if (actions) container.insertBefore(block, actions);
       else container.appendChild(block);
     }
 
-    // Helper to create labelled row
     function fieldRow(labelText, fieldEl) {
       const wrap = document.createElement('div');
       wrap.className = 'bespoke-field';
@@ -699,34 +696,48 @@
       return wrap;
     }
 
-    // Variant selector (if variants exist)
-    const variantLinks = Array.isArray(product.variantLinks) ? product.variantLinks : [];
-    let variantSelect = null;
-    if (variantLinks.length) {
-      variantSelect = document.createElement('select');
-      variantSelect.name = 'variant';
-      variantSelect.id = 'variant';
-      variantSelect.innerHTML = `<option value="">Choose variant</option>`;
-      // Include a current option for clarity
-      variantLinks.forEach(v => {
-        const opt = document.createElement('option');
-        opt.value = v.slug || '';
-        opt.textContent = v.label || v.slug || v;
-        variantSelect.appendChild(opt);
-      });
-    }
-
-    // Finishes (dropdown per request)
+    // Finishes selector with variant detection
     const finishes = Array.isArray(avail.finishes) && avail.finishes.length ? avail.finishes.slice() : [];
     const finishSel = document.createElement('select');
     finishSel.name = 'finish';
     finishSel.id = 'finish';
+
     if (!finishes.length) finishes.push('Default');
+
+    // Check variantLinks to map finishes
+    const variantLinks = Array.isArray(product.variantLinks) ? product.variantLinks : [];
+
     finishes.forEach(f => {
       const o = document.createElement('option');
       o.value = f;
       o.textContent = f;
+
+      // If this finish name matches a variant label, set data attr
+      const variant = variantLinks.find(v => v.label === f);
+      if (variant && variant.slug) {
+        o.setAttribute('data-variant-slug', variant.slug);
+      }
       finishSel.appendChild(o);
+    });
+
+    // Handle navigation when variant finish is selected
+    finishSel.addEventListener('change', () => {
+      const selectedOption = finishSel.options[finishSel.selectedIndex];
+      const slug = selectedOption.getAttribute('data-variant-slug');
+
+      ensureHidden('finish', finishSel.value);
+
+      if (slug) {
+        const href = viewFromSlug(slug);
+        if (href && href !== '#') {
+          // write handoff images if available so transition looks smooth
+          const vprod = PRODUCTS.find(pp => pp.slug === slug);
+          if (vprod && Array.isArray(vprod.images) && vprod.images.length) {
+            writeHandoff(slug, toAbsList(vprod.images));
+          }
+          window.location.href = href;
+        }
+      }
     });
 
     // Stones
@@ -762,7 +773,7 @@
       styleSel.innerHTML = `<option value="">Default</option>`;
     }
 
-    // Size: can be a select if array, otherwise textual (hidden input)
+    // Size
     let sizeField;
     if (Array.isArray(avail.size) && avail.size.length) {
       const sizeSel = document.createElement('select');
@@ -771,7 +782,6 @@
       sizeSel.innerHTML = avail.size.map(s => `<option value="${s}">${s}</option>`).join('');
       sizeField = sizeSel;
     } else {
-      // show descriptive text and keep hidden input
       const txt = document.createElement('div');
       txt.className = 'bespoke-size-note';
       txt.textContent = (avail.size && typeof avail.size === 'string') ? `Size: ${avail.size}` : 'Size: Consultation';
@@ -785,7 +795,7 @@
       sizeField = containerDiv;
     }
 
-    // Quantity: number input, unlimited (min 1)
+    // Quantity
     const qtyInput = document.createElement('input');
     qtyInput.type = 'number';
     qtyInput.name = 'qty';
@@ -795,37 +805,16 @@
     qtyInput.step = '1';
     qtyInput.className = 'qty-input';
 
-    // Clear and append new content
     block.innerHTML = '';
     const h = document.createElement('h4');
     h.textContent = 'Available designs';
     block.appendChild(h);
 
-    // Variant row if exists
-    if (variantSelect) {
-      block.appendChild(fieldRow('Variant', variantSelect));
-      variantSelect.addEventListener('change', (e) => {
-        const slug = e.target.value;
-        if (!slug) return;
-        // navigate to variant page
-        const href = viewFromSlug(slug);
-        if (href && href !== '#') {
-          // write handoff images if available
-          const vprod = PRODUCTS.find(pp => pp.slug === slug);
-          if (vprod && Array.isArray(vprod.images) && vprod.images.length) {
-            writeHandoff(slug, toAbsList(vprod.images));
-          }
-          window.location.href = href;
-        }
-      });
-    }
-
-    // Finish, Stone, Material, Style, Size, Quantity
     block.appendChild(fieldRow('Finish', finishSel));
     block.appendChild(fieldRow('Stone', stoneSel));
     block.appendChild(fieldRow('Material', materialSel));
     block.appendChild(fieldRow('Style', styleSel));
-    // Size label
+
     const sizeLabel = document.createElement('div');
     sizeLabel.className = 'available-field';
     const sizeLabelTitle = document.createElement('div');
@@ -837,7 +826,6 @@
 
     block.appendChild(fieldRow('Quantity', qtyInput));
 
-    // Ensure form has hidden finish/material/stone inputs synchronized (some code expects them)
     function ensureHidden(name, value) {
       let h = container.querySelector(`input[name="${name}"]`);
       if (!h) {
@@ -849,34 +837,23 @@
       h.value = value || '';
       return h;
     }
+
     ensureHidden('finish', finishSel.value);
     ensureHidden('material', materialSel.value);
     ensureHidden('stone', stoneSel.value);
     ensureHidden('style', styleSel.value);
     ensureHidden('qty', qtyInput.value);
+
     if (!container.querySelector('input[name="size"]')) {
       const sEl = sizeField.querySelector('input[name="size"]');
       if (sEl) container.appendChild(sEl.cloneNode());
     }
 
-    // Keep selects in sync with hidden inputs for downstream code
     finishSel.addEventListener('change', () => ensureHidden('finish', finishSel.value));
     materialSel.addEventListener('change', () => ensureHidden('material', materialSel.value));
     stoneSel.addEventListener('change', () => ensureHidden('stone', stoneSel.value));
     styleSel.addEventListener('change', () => ensureHidden('style', styleSel.value));
     qtyInput.addEventListener('change', () => ensureHidden('qty', qtyInput.value));
-
-    // If finish selection should influence variant navigation (e.g. variantLinks keyed by label),
-    // provide subtle helper: when finish changes, if a variant has matching label, navigate suggestion
-    finishSel.addEventListener('change', () => {
-      const match = variantLinks.find(v => (v.label || '').toLowerCase() === (finishSel.value || '').toLowerCase());
-      if (match && match.slug) {
-        // do nothing automatic, but set data-attribute so user can switch easily:
-        finishSel.dataset.variantSuggested = match.slug;
-      } else {
-        delete finishSel.dataset.variantSuggested;
-      }
-    });
   }
 
   function applyProductDataToPage() {
@@ -891,7 +868,6 @@
         p => (p.slug || '').toLowerCase() === (slugAttr || '').toLowerCase()
     );
     if (!product) {
-      // Graceful fallback
       const titleEl = document.querySelector('.checkout .title');
       if (titleEl) titleEl.textContent = 'Product not found';
       const priceEl = document.querySelector('.checkout .price');
@@ -899,8 +875,6 @@
         priceEl.setAttribute('data-price-vnd', 0);
         priceEl.textContent = 'Price on request';
       }
-      const descContainer = document.querySelector('.product-description p');
-      if (descContainer) descContainer.textContent = 'This product could not be loaded. Please check the URL or contact support.';
       return;
     }
 
@@ -934,7 +908,6 @@
       formEl.prepend(sold);
     }
 
-    // Render available (from data) into form
     renderAvailableDesignUI(product, formEl);
 
     const descContainer = document.querySelector('.product-description p');
@@ -2062,7 +2035,7 @@
         document.body.getAttribute('data-product-slug');
 
     const product = findProduct(slugAttr, '');
-    if (!product) return; // nothing to hydrate
+    if (!product) return;
 
     const vnd = product.finalPriceVND ?? product.priceVND ?? product.price?.vnd ?? product.price;
 
@@ -2239,7 +2212,7 @@
       };
       cart.push(newItem);
       writeCart(cart);
-      renderCart(); // defined later
+      renderCart();
       openCart();
     }
 
