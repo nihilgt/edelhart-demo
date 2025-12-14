@@ -2097,18 +2097,39 @@
   }
 
   function rebaseStaticMedia() {
+    // Select images with relative paths
     const rebasedImgs = document.querySelectorAll('img[src^="../img/"], img[src^="./img/"], img[src^="img/"]');
+
     rebasedImgs.forEach(img => {
-      const src = img.getAttribute('src');
+      let src = img.getAttribute('src');
       if (!src) return;
-      try { img.src = new URL(src, BASE_URL).href; } catch { }
+
+      // Strip leading ./ or ../ characters
+      src = src.replace(/^(\.\.\/|\.\/)+/, '');
+
+      try {
+        img.src = new URL(src, BASE_URL).href;
+      } catch (e) {
+        // Ignore errors
+      }
     });
 
+    // Select links (stylesheets, icons)
     const links = document.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"], link[rel="stylesheet"]');
+
     links.forEach(link => {
-      const href = link.getAttribute('href');
+      let href = link.getAttribute('href');
+      // Skip if empty or already absolute (http://...)
       if (!href || /^https?:\/\//i.test(href)) return;
-      try { link.href = new URL(href, BASE_URL).href; } catch { }
+
+      // Strip leading ./ or ../ characters
+      href = href.replace(/^(\.\.\/|\.\/)+/, '');
+
+      try {
+        link.href = new URL(href, BASE_URL).href;
+      } catch (e) {
+        // Ignore errors
+      }
     });
   }
 
