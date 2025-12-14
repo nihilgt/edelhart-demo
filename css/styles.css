@@ -1775,7 +1775,92 @@ footer{ border-top:1px solid rgba(255,255,255,0.1); background: color-mix(in hsl
   font-weight: 700;
   color: var(--text);
 }
+.cart-item {
+  position: relative;
+  /* Add padding-right to prevent text overlap with the absolute 'x' button */
+  padding: clamp(6px, 2vw, 8px) 36px clamp(8px, 2.5vw, 10px) 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  margin-top: 4px;
+}
 
+.cart-item-remove {
+  position: absolute;
+  top: 12px;
+  right: 0;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  padding: 0;
+  cursor: pointer;
+  z-index: 5;
+  transition: color 0.2s ease;
+}
+.cart-item-remove:hover {
+  color: #fff;
+  transform: scale(1.1);
+}
+
+/* Right column layout: align everything to the right */
+.cart-item > div:last-child {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-start;
+  /* Remove gaps here if margin logic handles it better, or keep small gap */
+  gap: 0;
+}
+
+/* Quantity stepper styles */
+.cart-item-qty {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.05);
+  margin-top: 0;
+  padding: 4px 10px;
+}
+.cart-item-qty .qty-btn {
+  width: 24px;
+  height: 24px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cart-item-qty .qty-btn:hover {
+  color: var(--gold);
+}
+.cart-item-qty .qty-value {
+  min-width: 20px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* Price styles */
+.cart-item-price {
+  text-align: right;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--gold);
+  margin-top: 8px; /* Spacing between qty and price */
+}
 /* Copy order buttons */
 .copy-order,
 .cart-copy {

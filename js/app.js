@@ -2404,8 +2404,8 @@
         const li = document.createElement('li');
         li.className = 'cart-item';
         li.innerHTML = `
+          <button type="button" class="cart-item-remove" aria-label="Remove item">✕</button>
           <div>
-          <button type="button" class="cart-item-remove" >✕</button>
             <div class="cart-item-title">${item.p || 'Item'} ${item.bespoke ? '<span class="badge-bespoke">BESPOKE</span>' : ''}</div>
             <div class="cart-item-meta">
               ${(item.metal ? `Metal: ${item.metal}` : '')}
@@ -2416,12 +2416,12 @@
             </div>
           </div>
           <div>
-            <div class="cart-item-price">${priceVND ? formatPriceWithCurrency(lineTotalVND) : 'Price on request'}</div>
             <div class="cart-item-qty" role="group" aria-label="Quantity">
               <button type="button" class="qty-btn qty-dec" aria-label="Decrease quantity">−</button>
               <span class="qty-value" aria-live="polite">${qty}</span>
               <button type="button" class="qty-btn qty-inc" aria-label="Increase quantity">+</button>
             </div>
+            <div class="cart-item-price">${priceVND ? formatPriceWithCurrency(lineTotalVND) : 'Price on request'}</div>
           </div>
         `;
 
