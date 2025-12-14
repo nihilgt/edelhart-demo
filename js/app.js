@@ -65,31 +65,31 @@
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-+|-+$/g, '');
   }
-  function reverseLookupSlugByPage() {
-    const path = location.pathname.replace(/^\//, '');
-    const match = Object.entries(PRODUCT_PAGE_MAP).find(([slug, pagePath]) => {
-      const normPage = (pagePath || '').replace(/^\.?\//, '').toLowerCase();
-      return path.toLowerCase().endsWith(normPage);
-    });
-    return match ? match[0] : '';
-  }
-  function resolveProductSlug() {
-    const mainSlug = document.querySelector('main.product-page')?.dataset.productSlug;
-    const bodySlug = document.body?.dataset?.productSlug;
-    const attrSlug = mainSlug || bodySlug || '';
-    if (attrSlug) return attrSlug;
-    const reverse = reverseLookupSlugByPage();
-    if (reverse) return reverse;
-    return slugFromPath(location.pathname);
+  function findProduct(slugGuess, titleGuess) {
+    const candidates = PRODUCTS || [];
+    const slugNorm = normalizeSlug(slugGuess || '');
+    const titleNorm = normalizeSlug(titleGuess || '');
+
+    return (
+        candidates.find(p => normalizeSlug(p.slug || p.name) === slugNorm) ||
+        candidates.find(p => normalizeSlug(p.slug || p.name) === titleNorm) ||
+        null
+    );
   }
 
-  function viewFromSlug(slug) {
-    if (!slug) return '#';
-    const target = PRODUCT_PAGE_MAP[slug] || `products/${slug}.html`;
+  /* ---------- Currency helpers ---------- */
+  const getCurrentCurrency = () => window.CurrencyManager?.getCurrent?.() || 'VND';
+  const formatPriceWithCurrency = (vndAmount) => {
+    if (!window.CurrencyManager) return formatPriceIntl(vndAmount, 'VND');
+    return window.CurrencyManager.formatPrice(vndAmount, getCurrentCurrency());
+  };
+  function formatPriceIntl(value, currency = 'VND') {
+    if (value === 0 || value === '0') return 'Price on request';
+    if (!value) return 'Price on request';
     try {
-      return new URL(target, BASE_URL).href;
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(value);
     } catch {
-      return target;
+      return value;
     }
   }
 
@@ -151,7 +151,6 @@
   window.addEventListener('scroll', onWindowScroll, scrollOptions);
   onWindowScroll();
 
-  /* Nav spy & smooth scroll (unchanged) */
   (function () {
     const links = Array.from(
         document.querySelectorAll('.menu .links a[data-spy], .menu .links .drop-btn[data-spy]')
@@ -230,7 +229,6 @@
     updateActive();
   })();
 
-  /* Mobile nav (unchanged) */
   (function () {
     const nav = document.querySelector('.menu');
     const btn = document.querySelector('.menu-btn');
@@ -551,7 +549,7 @@
   }
 
   function populateCollectionStrip() {
-    const track = document.querySelector('.collection-track');
+    const track = document.querySelector('.collection-strip .collection-track');
     if (!track) return;
 
     track.innerHTML = '';
@@ -885,22 +883,15 @@
     const slugAttr =
         page.getAttribute('data-product-slug') ||
         document.body.getAttribute('data-product-slug') ||
-        resolveProductSlug();
+        slugFromPath(location.pathname);
 
-    const product = PRODUCTS.find(
-        p => (p.slug || '').toLowerCase() === (slugAttr || '').toLowerCase()
-    );
+    const product = findProduct(slugAttr, document.title.replace(/ · .*$/, ''));
     if (!product) {
       // Graceful fallback
       const titleEl = document.querySelector('.checkout .title');
       if (titleEl) titleEl.textContent = 'Product not found';
-      const priceEl = document.querySelector('.checkout .price');
-      if (priceEl) {
-        priceEl.setAttribute('data-price-vnd', 0);
-        priceEl.textContent = 'Price on request';
-      }
-      const descContainer = document.querySelector('.product-description p');
-      if (descContainer) descContainer.textContent = 'This product could not be loaded. Please check the URL or contact support.';
+      const descEl = document.querySelector('.product-description p');
+      if (descEl) descEl.textContent = 'This product could not be loaded. Please check back later.';
       return;
     }
 
@@ -1398,26 +1389,25 @@
     const prev = gallery.querySelector('.slider-prev');
     const next = gallery.querySelector('.slider-next');
 
-    const thisSlug = resolveProductSlug();
+    const thisSlug = slugFromPath(location.pathname);
     let images = [];
 
-    // Try to get from product data first
-    if (PRODUCTS.length) {
-      const productFromData = PRODUCTS.find(
-          p => (p.slug || '').toLowerCase() === thisSlug.toLowerCase()
-      );
-      if (productFromData && Array.isArray(productFromData.images)) {
-        images = toAbsList(productFromData.images);
+    try {
+      if (PRODUCTS.length) {
+        const productFromData = PRODUCTS.find(
+            p => (p.slug || '').toLowerCase() === thisSlug.toLowerCase()
+        );
+        if (productFromData && Array.isArray(productFromData.images)) {
+          images = toAbsList(productFromData.images);
+        }
       }
-    }
+    } catch { }
 
-    // Fallback to inline data-images
     if (!images.length) {
       const inlineRaw = listFromCSV(gallery.getAttribute('data-images') || '');
       images = toAbsList(inlineRaw);
     }
 
-    // Fallback to handoff
     if (!images.length) {
       const handoff = readHandoff();
       if (handoff && (handoff.slug || '').toLowerCase() === thisSlug.toLowerCase() && Array.isArray(handoff.images)) {
@@ -1426,12 +1416,7 @@
       }
     }
 
-    // If still no images, show fallback
-    if (!images.length) {
-      const fallback = gallery.querySelector('.media-fallback');
-      if (fallback) fallback.style.display = 'flex';
-      return;
-    }
+    if (!images.length) return;
 
     function buildFromImages(listAbs) {
       slidesWrap.innerHTML = '';
@@ -1642,7 +1627,7 @@
     const track = relatedStrip.querySelector('.related-track');
     if (!track) return;
 
-    const currentSlug = resolveProductSlug();
+    const currentSlug = slugFromPath(location.pathname);
     const cfg = (window.EDELHART_CONFIG && window.EDELHART_CONFIG.related) || {};
     const pinned = (cfg.pinnedBySlug && cfg.pinnedBySlug[currentSlug]) || [];
     const pool = Array.isArray(cfg.pool) ? cfg.pool : [];
@@ -2021,47 +2006,16 @@
   }
 
   /* ---------- PRICE HYDRATION ------------- */
-  function normalizeSlug(str = '') {
-    return str
-        .toString()
-        .trim()
-        .toLowerCase()
-        .replace(/['"]/g, '')
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '');
-  }
-
-  function findProduct(slugGuess, titleGuess) {
-    const candidates = PRODUCTS || [];
-    const slugNorm = normalizeSlug(slugGuess || '');
-    const titleNorm = normalizeSlug(titleGuess || '');
-
-    return (
-        candidates.find(p => normalizeSlug(p.slug || p.name) === slugNorm) ||
-        candidates.find(p => normalizeSlug(p.slug || p.name) === titleNorm) ||
-        null
-    );
-  }
-
-  function formatPriceIntl(value, currency = 'VND') {
-    if (value === 0 || value === '0') return 'Price on request';
-    if (!value) return 'Price on request';
-    try {
-      return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(value);
-    } catch {
-      return value;
-    }
-  }
-
   function hydrateProductPrice() {
     const page = document.querySelector('body, main.product-page');
     if (!page) return;
 
     const slugAttr =
         page.getAttribute('data-product-slug') ||
-        document.body.getAttribute('data-product-slug');
+        document.body.getAttribute('data-product-slug') ||
+        slugFromPath(location.pathname);
 
-    const product = findProduct(slugAttr, '');
+    const product = findProduct(slugAttr, document.title.replace(/ · .*$/, ''));
     if (!product) return; // nothing to hydrate
 
     const vnd = product.finalPriceVND ?? product.priceVND ?? product.price?.vnd ?? product.price;
@@ -2140,11 +2094,82 @@
   }
 
   /* ---------- Cart helpers ---------- */
-  const getCurrentCurrency = () => window.CurrencyManager?.getCurrent?.() || 'VND';
-  const formatPriceWithCurrency = (vndAmount) => {
-    if (!window.CurrencyManager) return formatPriceIntl(vndAmount, 'VND');
-    return window.CurrencyManager.formatPrice(vndAmount, getCurrentCurrency());
-  };
+  function buildOrderMessageFromForm(form) {
+    const data = new FormData(form);
+    const product = form.getAttribute('data-product') || document.title.replace(/ · .*$/, '');
+    const size = data.get('size') || 'Consultation';
+    const metal = data.get('metal') || data.get('material') || 'N/A';
+    const finish = data.get('finish') || 'N/A';
+    const qty = data.get('qty') || 1;
+    const style = data.get('style') || '';
+    const stone = data.get('stone') || '';
+
+    const lines = [
+      `I'm interested in ordering this beautiful piece:`,
+      `- Product: ${product}`,
+      `- Metal: ${metal}`,
+      stone ? `- Stone: ${stone}` : '',
+      style ? `- Style: ${style}` : '',
+      `- Finish: ${finish}`,
+      `- Size: ${size}`,
+      `- Quantity: ${qty}`,
+      `Could you please confirm availability and provide next steps?`,
+    ].filter(Boolean);
+
+    const plain = `Hello EDELHART,\n\n${lines.join('\n')}\n\nThank you.`;
+    return { plain, encoded: encodeURIComponent(plain) };
+  }
+
+  function buildOrderMessageFromCart(cart) {
+    if (!Array.isArray(cart) || !cart.length) {
+      const plainEmpty =
+          `Hello EDELHART,\n\n` +
+          `My cart is currently empty, but I'm interested in your pieces.\n` +
+          `Could you please share more information about availability and pricing?\n\n` +
+          `Thank you.`;
+      return { plainEmpty, encoded: encodeURIComponent(plainEmpty) };
+    }
+
+    let grandTotalVND = 0;
+
+    const lines = [
+      `Hello EDELHART,\n`,
+      `I would love to order the following pieces from your collection:`,
+      '',
+      ...cart.map(item => {
+        const qty = item.qty || 1;
+        const priceVND = Number(item.priceVND || 0);
+        const lineTotal = priceVND * qty;
+        if (priceVND) grandTotalVND += lineTotal;
+
+        const parts = [];
+        parts.push(`- ${qty} × ${item.p || 'Item'}`);
+        if (item.bespoke) parts.push(`BESPOKE`);
+        if (item.metal) parts.push(`Metal: ${item.metal}`);
+        if (item.stone) parts.push(`Stone: ${item.stone}`);
+        if (item.finish) parts.push(`Finish: ${item.finish}`);
+        if (item.size) parts.push(`Size: ${item.size}`);
+        if (item.notes) parts.push(`Notes: ${item.notes}`);
+        if (priceVND) parts.push(`Line total: ${priceVND} VND`);
+
+        return parts.join(' · ');
+      }),
+    ];
+
+    if (grandTotalVND > 0) {
+      lines.push('', `Estimated cart total: ${grandTotalVND} VND`);
+    }
+
+    lines.push(
+        '',
+        `Could you please confirm availability, lead time, and next steps for payment?`,
+        '',
+        `Thank you.`
+    );
+
+    const plain = lines.join('\n');
+    return { plain, encoded: encodeURIComponent(plain) };
+  }
 
   /* -------- BESPOKE MODULE ---------- */
   function injectBespokeUI(form, productSlug, priceVND) {
@@ -2165,9 +2190,9 @@
         <select id="bespoke-metal" name="bespoke-metal" required>
           <option value="">Select metal</option>
           <option>E silver</option>
-          <option>10K gold</option>
-          <option>14K gold</option>
-          <option>18K gold</option>
+          <option>10K Gold</option>
+          <option>14K Gold</option>
+          <option>18K Gold</option>
         </select>
       </div>
       <div class="bespoke-field">
@@ -2260,7 +2285,7 @@
 
     const priceEl = document.querySelector('.checkout .price');
     const priceVND = Number(priceEl?.dataset.priceVnd || priceEl?.getAttribute('data-price-vnd') || 0) || 0;
-    const productSlug = document.querySelector('main.product-page')?.dataset.productSlug || resolveProductSlug();
+    const productSlug = document.querySelector('main.product-page')?.dataset.productSlug || slugFromPath(location.pathname);
 
     injectBespokeUI(form, productSlug, priceVND);
 
@@ -2557,8 +2582,8 @@
       color: '#f6f7f9',
       padding: '18px 20px',
       borderRadius: '18px',
-      border: '1px solid rgba(255, 255, 255, 0.18)',
-      boxShadow: '0 18px 50px rgba(0, 0, 0, 0.75)',
+      border: '1px solid rgba(255,255,255,0.18)',
+      boxShadow: '0 18px 50px rgba(0,0,0,0.75)',
       fontSize: '14px',
       lineHeight: '1.6',
       textAlign: 'center',
@@ -2608,7 +2633,7 @@
     });
   }
 
-  document.addEventListener('click', function (e) {
+  document.addEventListener('click', e => {
     if (e.target.classList.contains('copy-order')) {
       const button = e.target;
       const platform = button.dataset.platform;
