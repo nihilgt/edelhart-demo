@@ -28,7 +28,7 @@ a { color: inherit; text-decoration: none; }
 /* ===== Theme ===== */
 :root{
   --bg:#0e0f11; --panel:#141516; --panel-2:#191a1c;
-  --text:#f6f7f9; --muted: #b98139; --muted-2:#a4aab4;
+  --text:#f6f7f9; --muted: #ffffff; --muted-2:#a4aab4;
   --gold: #b98139; --accent:var(--gold); --accent-ink: #b98139;
 
   --radius:18px; --shadow:0 10px 30px rgba(0,0,0,.35);
@@ -1819,10 +1819,11 @@ footer{ border-top:1px solid rgba(255,255,255,0.1); background: color-mix(in hsl
   font-weight: 700;
   color: var(--text);
 }
+/* ... existing code ... */
 .cart-item {
   position: relative;
-  /* Add padding-right to prevent text overlap with the absolute 'x' button */
-  padding: clamp(6px, 2vw, 8px) 36px clamp(8px, 2.5vw, 10px) 0;
+  /* Adjusted padding: reduced right padding since button is absolute top-right */
+  padding: clamp(6px, 2vw, 8px) 12px clamp(8px, 2.5vw, 10px) 0;
   border-bottom: 1px solid rgba(255,255,255,0.06);
   display: grid;
   grid-template-columns: 1fr auto;
@@ -1832,10 +1833,10 @@ footer{ border-top:1px solid rgba(255,255,255,0.1); background: color-mix(in hsl
 
 .cart-item-remove {
   position: absolute;
-  top: 12px;
+  top: 4px;
   right: 0;
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   background: transparent;
   border: none;
   color: var(--muted);
@@ -1853,21 +1854,21 @@ footer{ border-top:1px solid rgba(255,255,255,0.1); background: color-mix(in hsl
   transform: scale(1.1);
 }
 
-/* Right column layout: align everything to the right */
+/* Right column layout: align everything to the center */
 .cart-item > div:last-child {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  justify-content: flex-start;
-  /* Remove gaps here if margin logic handles it better, or keep small gap */
-  gap: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding-top: 16px; /* Space to clear the absolute X button */
 }
 
 /* Quantity stepper styles */
 .cart-item-qty {
   display: inline-flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   gap: 10px;
   border-radius: 999px;
   background: rgba(255,255,255,0.05);
@@ -1899,12 +1900,15 @@ footer{ border-top:1px solid rgba(255,255,255,0.1); background: color-mix(in hsl
 
 /* Price styles */
 .cart-item-price {
-  text-align: right;
+  text-align: center;
   font-weight: 700;
   font-size: 14px;
   color: var(--gold);
-  margin-top: 8px; /* Spacing between qty and price */
+  margin-top: 0;
 }
+
+
+
 /* Copy order buttons */
 .copy-order,
 .cart-copy {
