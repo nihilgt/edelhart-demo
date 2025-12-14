@@ -1201,11 +1201,13 @@ footer{ border-top:1px solid rgba(255,255,255,0.1); background: color-mix(in hsl
 }
 .page-back::before { content: "←"; }
 
-/* Product grid */
+/* ===== Product grid ===== */
 .product {
   display: grid;
   gap: 40px;
-  grid-template-columns: 1fr;
+  /* Fix: Ensure grid doesn't overflow on small screens */
+  grid-template-columns: 100%;
+  width: 100%;
 }
 @media (min-width: 900px) {
   .product {
@@ -1228,6 +1230,7 @@ footer{ border-top:1px solid rgba(255,255,255,0.1); background: color-mix(in hsl
   gap: 12px;
   /* Fix for small screen sizing issue */
   width: 100%;
+  min-width: 0; /* Important for grid/flex child overflow */
 }
 
 /* Gallery */
@@ -1238,6 +1241,8 @@ footer{ border-top:1px solid rgba(255,255,255,0.1); background: color-mix(in hsl
   background: #000;
   border: 1px solid rgba(255, 255, 255, 0.08);
   width: 100%;
+  /* Fix: Force width to respect container */
+  max-width: 100%;
   aspect-ratio: var(--mediaRatio);
   /* Fix for mobile performance */
   contain: content;
@@ -1313,6 +1318,7 @@ footer{ border-top:1px solid rgba(255,255,255,0.1); background: color-mix(in hsl
   position: relative;
   /* Responsive width handling */
   width: 100%;
+  max-width: 100%;
 }
 @media (min-width: 900px) { .thumb-strip { width: 480px; } }
 @media (min-width: 1200px) { .thumb-strip { width: 520px; } }
