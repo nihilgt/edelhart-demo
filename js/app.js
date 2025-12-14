@@ -879,67 +879,59 @@
     });
   }
 
-  function formatPriceIntl(value, currency = 'VND') {
-    if (value === 0 || value === '0') return 'Price on request';
-    if (!value) return 'Price on request';
-    try {
-      return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(value);
-    } catch {
-      return value;
-    }
-  }
-
   function applyProductDataToPage() {
     const page = document.querySelector('main.product-page, body');
     if (!page) return;
-    const slugAttr = resolveProductSlug();
+    const slugAttr =
+        page.getAttribute('data-product-slug') ||
+        document.body.getAttribute('data-product-slug') ||
+        resolveProductSlug();
+
     const product = PRODUCTS.find(
-        p => normalizeSlug(p.slug || p.name) === normalizeSlug(slugAttr || '')
+        p => (p.slug || '').toLowerCase() === (slugAttr || '').toLowerCase()
     );
-
-    const titleEl = document.querySelector('.checkout .title');
-    const priceEl = document.querySelector('.checkout .price');
-    const formEl = document.querySelector('.checkout form');
-
     if (!product) {
+      // Graceful fallback
+      const titleEl = document.querySelector('.checkout .title');
       if (titleEl) titleEl.textContent = 'Product not found';
-      if (priceEl) { priceEl.textContent = 'Price on request'; priceEl.removeAttribute('data-price-vnd'); }
-      if (formEl) {
-        formEl.querySelectorAll('button, select, input').forEach(el => { el.disabled = true; });
-        const warn = document.createElement('div');
-        warn.className = 'soldout-label';
-        warn.textContent = 'This product could not be loaded. Please contact us.';
-        formEl.prepend(warn);
+      const priceEl = document.querySelector('.checkout .price');
+      if (priceEl) {
+        priceEl.setAttribute('data-price-vnd', 0);
+        priceEl.textContent = 'Price on request';
       }
+      const descContainer = document.querySelector('.product-description p');
+      if (descContainer) descContainer.textContent = 'This product could not be loaded. Please check the URL or contact support.';
       return;
     }
 
+    const titleEl = document.querySelector('.checkout .title');
     if (titleEl) titleEl.textContent = product.name || titleEl.textContent;
 
+    const priceEl = document.querySelector('.checkout .price');
     if (priceEl) {
       const baseVND = product.sale && product.sale.enabled && product.finalPriceVND
           ? product.finalPriceVND
           : (product.priceVND || 0);
-      priceEl.setAttribute('data-price-vnd', baseVND || 0);
-      priceEl.dataset.originalPriceVnd = product.priceVND || 0;
+      priceEl.setAttribute('data-price-vnd', baseVND);
       if (product.sale && product.sale.enabled && product.finalPriceVND) {
-        priceEl.innerHTML = `<s>${formatPriceIntl(product.priceVND, 'VND')}</s> ${formatPriceIntl(product.finalPriceVND, 'VND')}`;
+        priceEl.innerHTML = `<s>₫${product.priceVND || 0}</s> ₫${product.finalPriceVND}`;
       } else {
-        priceEl.textContent = baseVND ? formatPriceIntl(baseVND, 'VND') : 'Price on request';
+        priceEl.textContent = baseVND ? `₫${baseVND}` : 'Price on request';
       }
+      priceEl.dataset.originalPriceVnd = product.priceVND || 0;
     }
 
-    if (formEl) {
-      if (!formEl.getAttribute('data-product')) {
-        formEl.setAttribute('data-product', product.name || product.slug || '');
-      }
-      if (product.soldOut) {
-        formEl.querySelectorAll('button, select, input').forEach(el => { el.disabled = true; });
-        const sold = document.createElement('div');
-        sold.className = 'soldout-label';
-        sold.textContent = 'Sold out';
-        formEl.prepend(sold);
-      }
+    const formEl = document.querySelector('.checkout form');
+    if (formEl && !formEl.getAttribute('data-product')) {
+      formEl.setAttribute('data-product', product.name || product.slug || '');
+    }
+
+    if (formEl && product.soldOut) {
+      formEl.querySelectorAll('button, select, input').forEach(el => { el.disabled = true; });
+      const sold = document.createElement('div');
+      sold.className = 'soldout-label';
+      sold.textContent = 'Sold out';
+      formEl.prepend(sold);
     }
 
     // Render available (from data) into form
@@ -1406,25 +1398,26 @@
     const prev = gallery.querySelector('.slider-prev');
     const next = gallery.querySelector('.slider-next');
 
-    const thisSlug = slugFromPath(location.pathname);
+    const thisSlug = resolveProductSlug();
     let images = [];
 
-    try {
-      if (PRODUCTS.length) {
-        const productFromData = PRODUCTS.find(
-            p => (p.slug || '').toLowerCase() === thisSlug.toLowerCase()
-        );
-        if (productFromData && Array.isArray(productFromData.images)) {
-          images = toAbsList(productFromData.images);
-        }
+    // Try to get from product data first
+    if (PRODUCTS.length) {
+      const productFromData = PRODUCTS.find(
+          p => (p.slug || '').toLowerCase() === thisSlug.toLowerCase()
+      );
+      if (productFromData && Array.isArray(productFromData.images)) {
+        images = toAbsList(productFromData.images);
       }
-    } catch { }
+    }
 
+    // Fallback to inline data-images
     if (!images.length) {
       const inlineRaw = listFromCSV(gallery.getAttribute('data-images') || '');
       images = toAbsList(inlineRaw);
     }
 
+    // Fallback to handoff
     if (!images.length) {
       const handoff = readHandoff();
       if (handoff && (handoff.slug || '').toLowerCase() === thisSlug.toLowerCase() && Array.isArray(handoff.images)) {
@@ -1433,8 +1426,10 @@
       }
     }
 
+    // If still no images, show fallback
     if (!images.length) {
-      slidesWrap.innerHTML = '<div class="slide"><div class="media-fallback" style="display:grid;place-items:center;height:100%;color:#aaa;">Images coming soon</div></div>';
+      const fallback = gallery.querySelector('.media-fallback');
+      if (fallback) fallback.style.display = 'flex';
       return;
     }
 
@@ -1647,7 +1642,7 @@
     const track = relatedStrip.querySelector('.related-track');
     if (!track) return;
 
-    const currentSlug = slugFromPath(location.pathname);
+    const currentSlug = resolveProductSlug();
     const cfg = (window.EDELHART_CONFIG && window.EDELHART_CONFIG.related) || {};
     const pinned = (cfg.pinnedBySlug && cfg.pinnedBySlug[currentSlug]) || [];
     const pool = Array.isArray(cfg.pool) ? cfg.pool : [];
@@ -2025,19 +2020,48 @@
     widontCollectionNames();
   }
 
+  /* ---------- PRICE HYDRATION ------------- */
+  function normalizeSlug(str = '') {
+    return str
+        .toString()
+        .trim()
+        .toLowerCase()
+        .replace(/['"]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+  }
+
+  function findProduct(slugGuess, titleGuess) {
+    const candidates = PRODUCTS || [];
+    const slugNorm = normalizeSlug(slugGuess || '');
+    const titleNorm = normalizeSlug(titleGuess || '');
+
+    return (
+        candidates.find(p => normalizeSlug(p.slug || p.name) === slugNorm) ||
+        candidates.find(p => normalizeSlug(p.slug || p.name) === titleNorm) ||
+        null
+    );
+  }
+
+  function formatPriceIntl(value, currency = 'VND') {
+    if (value === 0 || value === '0') return 'Price on request';
+    if (!value) return 'Price on request';
+    try {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(value);
+    } catch {
+      return value;
+    }
+  }
+
   function hydrateProductPrice() {
     const page = document.querySelector('body, main.product-page');
     if (!page) return;
 
-    const slugAttr = resolveProductSlug();
+    const slugAttr =
+        page.getAttribute('data-product-slug') ||
+        document.body.getAttribute('data-product-slug');
 
-    const form = document.querySelector('.checkout form[data-product]');
-    const titleEl = document.querySelector('.checkout .title');
-    const slugFallback = form?.getAttribute('data-product') || titleEl?.textContent || '';
-
-    const product = PRODUCTS.find(
-        p => normalizeSlug(p.slug || p.name) === normalizeSlug(slugAttr || slugFallback)
-    );
+    const product = findProduct(slugAttr, '');
     if (!product) return; // nothing to hydrate
 
     const vnd = product.finalPriceVND ?? product.priceVND ?? product.price?.vnd ?? product.price;
@@ -2053,6 +2077,7 @@
     });
   }
   document.addEventListener('DOMContentLoaded', hydrateProductPrice);
+  /* --------- END PRICE HYDRATION ----------- */
 
   function eagerizeCriticalImages() {
     const critical = document.querySelectorAll(
@@ -2140,9 +2165,9 @@
         <select id="bespoke-metal" name="bespoke-metal" required>
           <option value="">Select metal</option>
           <option>E silver</option>
-          <option>10K Gold</option>
-          <option>14K Gold</option>
-          <option>18K Gold</option>
+          <option>10K gold</option>
+          <option>14K gold</option>
+          <option>18K gold</option>
         </select>
       </div>
       <div class="bespoke-field">
@@ -2235,7 +2260,7 @@
 
     const priceEl = document.querySelector('.checkout .price');
     const priceVND = Number(priceEl?.dataset.priceVnd || priceEl?.getAttribute('data-price-vnd') || 0) || 0;
-    const productSlug = resolveProductSlug();
+    const productSlug = document.querySelector('main.product-page')?.dataset.productSlug || resolveProductSlug();
 
     injectBespokeUI(form, productSlug, priceVND);
 
@@ -2338,7 +2363,7 @@
       igBtn.type = 'button';
       igBtn.className = 'btn outline cart-copy';
       igBtn.dataset.platform = 'Instagram';
-      igBtn.textContent = 'Copy for Instagram';
+      igBtn.textContent = 'Copy cart & Inquire on Instagram';
       footer.appendChild(igBtn);
     }
     if (!fbBtn) {
@@ -2346,7 +2371,7 @@
       fbBtn.type = 'button';
       fbBtn.className = 'btn outline cart-copy';
       fbBtn.dataset.platform = 'Facebook';
-      fbBtn.textContent = 'Copy for Facebook';
+      fbBtn.textContent = 'Copy cart & Inquire on Facebook';
       footer.appendChild(fbBtn);
     }
 
@@ -2432,10 +2457,6 @@
 
       totalEl.textContent = formatPriceWithCurrency(totalVND);
       updateCartCount();
-
-      const msg = buildOrderMessageFromCart(cart);
-      if (checkoutBtn)
-        checkoutBtn.href = `https://wa.me/84944445084?text=${msg.encoded}`;
 
       document.addEventListener('click', handleCartCopy);
     }
@@ -2536,8 +2557,8 @@
       color: '#f6f7f9',
       padding: '18px 20px',
       borderRadius: '18px',
-      border: '1px solid rgba(255,255,255,0.18)',
-      boxShadow: '0 18px 50px rgba(0,0,0,0.75)',
+      border: '1px solid rgba(255, 255, 255, 0.18)',
+      boxShadow: '0 18px 50px rgba(0, 0, 0, 0.75)',
       fontSize: '14px',
       lineHeight: '1.6',
       textAlign: 'center',
@@ -2587,7 +2608,7 @@
     });
   }
 
-  document.addEventListener('click', e => {
+  document.addEventListener('click', function (e) {
     if (e.target.classList.contains('copy-order')) {
       const button = e.target;
       const platform = button.dataset.platform;

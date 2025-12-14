@@ -181,7 +181,7 @@
   </section>
 
   <script>
-    window.__BASE_URL_OVERRIDE = `${location.origin}${location.pathname.replace(/\/[^\/]*$/, '/')}`;
+    window.__BASE_URL_OVERRIDE = new URL('./', location.href).href;
 
     (() => {
       const images = [

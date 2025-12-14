@@ -34,13 +34,13 @@ window.EDELHART_PRODUCTS_CENTRAL = [
     },
     {
         slug: "sss-silver",
-        name: "SSS pendant — silver",
+        name: "SSS pendant",
         collection: "SSS",
         priceVND: 1996000,
         finalPriceVND: 1996000,
         sale: null,
         images: Array.from({ length: 11 }, (_, i) => `img/products/sss-silver/sss-silver-${i + 1}.jpeg`),
-        description: "The SSS pendant embodies our signature aesthetic — refined minimalism with a statement edge. Crafted in sterling silver — signature design with clean lines. Everyday elegance.",
+        description: "Shaped in the moment a sea turtle reaches upward toward the chain, the pendant captures a sense of weightlessness—an almost desperate call for help. The blue stone on its shell is crafted with the Encaged Stone technique, allowing it to move freely and mirror the shifting sparkle of sunlight over the ocean.\n",
         availableDesign: {
             materials: ["E silver"],
             stones: ["London Topaz"],
@@ -59,13 +59,13 @@ window.EDELHART_PRODUCTS_CENTRAL = [
     },
     {
         slug: "squid",
-        name: "Squid",
+        name: "Squid pendant",
         collection: "SSS",
         priceVND: 2392000,
         finalPriceVND: 2392000,
         sale: null,
         images: Array.from({ length: 4 }, (_, i) => `img/products/squid/squid-${i + 1}.jpeg`),
-        description: "The Squid embodies our signature aesthetic — refined minimalism with a statement edge. Crafted with organic, fluid silhouette, this piece is unique for statement wear.",
+        description: "The design incorporates a meticulously engineered detachable structure, allowing the squid’s tentacles to sway with graceful, lifelike movement.",
         availableDesign: {
             materials: ["E silver"],
             stones: ["Diopside"],
@@ -88,7 +88,7 @@ window.EDELHART_PRODUCTS_CENTRAL = [
         finalPriceVND: 6146000,
         sale: null,
         images: Array.from({ length: 7 }, (_, i) => `img/products/LEGS-pendant/LEGS-pendant-${i + 1}.jpeg`),
-        description: "The LEGS pendant embodies our signature aesthetic — refined minimalism with a statement edge. Crafted as a sculptural silhouette with dynamic form, this piece is bold for layered necklaces.",
+        description: "Combining the refined designs of flush-setting and prong-setting, each gemstone is artfully set to recreate the sparkling illusion of sea foam, brought to life by the graceful movement of diving flippers beneath the water's surface. This design reimagines the beauty of scuba diving in the form of fine jewelry, created with the desire to accompany divers on their adventurous voyages into the mysterious depths of the sea.",
         availableDesign: {
             materials: ["E silver"],
             stones: ["White Topaz", "Blue Topaz"],
@@ -105,13 +105,13 @@ window.EDELHART_PRODUCTS_CENTRAL = [
     },
     {
         slug: "ee-female-ring-gold",
-        name: "EE female ring — gold",
+        name: "EE ring",
         collection: "SSS",
         priceVND: 2288000,
         finalPriceVND: 2288000,
         sale: null,
         images: Array.from({ length: 5 }, (_, i) => `img/products/EE-female-ring-gold/EE-female-ring-gold-${i + 1}.jpeg`),
-        description: "The EE female ring embodies our signature aesthetic — refined minimalism with a statement edge. Crafted in gold with elegant finish and the signature EE profile, this piece features comfortable taper for daily wear.",
+        description: "A stylised design inspired by the shell of a sea turtle, intentionally crafted so you can layer two to three pieces together with ease.",
         availableDesign: {
             materials: ["E silver", "gold finish"],
             stones: ["Swiss Topaz", "Sky Topaz"],
@@ -129,13 +129,13 @@ window.EDELHART_PRODUCTS_CENTRAL = [
     },
     {
         slug: "ee-female-ring-silver",
-        name: "EE female ring — silver",
+        name: "EE ring",
         collection: "SSS",
         priceVND: 2288000,
         finalPriceVND: 2288000,
         sale: null,
         images: Array.from({ length: 5 }, (_, i) => `img/products/EE-female-ring-silver/EE-female-ring-silver-${i + 1}.jpeg`),
-        description: "The EE female ring embodies our signature aesthetic — refined minimalism with a statement edge. Crafted in sterling silver with a luminous finish, this piece features balanced weight and clean form.",
+        description: "A stylised design inspired by the shell of a sea turtle, intentionally crafted so you can layer two to three pieces together with ease.",
         availableDesign: {
             materials: ["E silver"],
             stones: ["London Topaz"],
@@ -153,13 +153,13 @@ window.EDELHART_PRODUCTS_CENTRAL = [
     },
     {
         slug: "ee-female-ring-BR",
-        name: "EE female ring — black rhodium",
+        name: "EE ring",
         collection: "SSS",
         priceVND: 2288000, // per your table (2,288,000)
         finalPriceVND: 2288000,
         sale: null,
         images: Array.from({ length: 4 }, (_, i) => `img/products/EE-female-ring-BR/EE-female-ring-BR-${i + 1}.jpeg`),
-        description: "The EE female ring embodies our signature aesthetic — refined minimalism with a statement edge. Crafted in black rhodium with bold dark finish, this piece features signature design for everyday elegance.",
+        description: "A stylised design inspired by the shell of a sea turtle, intentionally crafted so you can layer two to three pieces together with ease.",
         availableDesign: {
             materials: ["E silver"],
             stones: ["White Topaz"],
@@ -176,13 +176,13 @@ window.EDELHART_PRODUCTS_CENTRAL = [
     },
     {
         slug: "ee-male-ring-silver",
-        name: "EE male ring — silver",
+        name: "EE male ring",
         collection: "SSS",
         priceVND: 3209000,
         finalPriceVND: 3209000,
         sale: null,
         images: Array.from({ length: 4 }, (_, i) => `img/products/EE-male-ring-silver/EE-male-ring-silver-${i + 1}.jpeg`),
-        description: "The EE male ring embodies our signature aesthetic — refined minimalism with a statement edge. Crafted in sterling silver with a luminous finish, this piece features balanced weight and clean form.",
+        description: "The timeless signet silhouette is reimagined with our signature sea-turtle shell motif.",
         availableDesign: {
             materials: ["E silver"],
             stones: [],
@@ -199,13 +199,13 @@ window.EDELHART_PRODUCTS_CENTRAL = [
     },
     {
         slug: "ee-male-ring-BR",
-        name: "EE male ring — black rhodium",
+        name: "EE male ring",
         collection: "SSS",
         priceVND: 3268000,
         finalPriceVND: 3268000,
         sale: null,
         images: Array.from({ length: 5 }, (_, i) => `img/products/EE-male-ring-BR/EE-male-ring-BR-${i + 1}.jpeg`),
-        description: "The EE male ring embodies our signature aesthetic — refined minimalism with a statement edge. Crafted in black rhodium with bold dark finish and high contrast edges, this piece features limited oxidation wear for character.",
+        description: "The timeless signet silhouette is reimagined with our signature sea-turtle shell motif. And if flawless perfection isn’t what you seek, our antique-inspired black rhodium finish is the perfect choice.",
         availableDesign: {
             materials: ["E silver"],
             stones: ["White Topaz"],
@@ -222,13 +222,13 @@ window.EDELHART_PRODUCTS_CENTRAL = [
     },
     {
         slug: "ee-male-ring-BR-trap",
-        name: "EE male ring — black rhodium (Stone trapping)",
+        name: "EE male ring",
         collection: "SSS",
         priceVND: 3085000,
         finalPriceVND: 3085000,
         sale: null,
         images: Array.from({ length: 5 }, (_, i) => `img/products/EE-male-ring-BR-trap/EE-male-ring-BR-trap-${i + 1}.jpeg`),
-        description: "The EE male ring embodies our signature aesthetic — refined minimalism with a statement edge. Crafted in black rhodium with stone trapping, this piece features bold design and versatile finish.",
+        description: "A ring that encapsulates the essence of the entire collection: a stylised sea-turtle shell motif, an encaged-stone technique that creates natural light movement, and an antique-inspired black rhodium finish.",
         availableDesign: {
             materials: ["E silver"],
             stones: ["White Topaz"],
@@ -245,13 +245,13 @@ window.EDELHART_PRODUCTS_CENTRAL = [
     },
     {
         slug: "ee-female-earring-br",
-        name: "EE female earring — black rhodium",
+        name: "EE earring",
         collection: "SSS",
         priceVND: 2784000,
         finalPriceVND: 2784000,
         sale: null,
         images: Array.from({ length: 2 }, (_, i) => `img/products/EE-female-earring-br/EE-female-earring-br-${i + 1}.jpeg`),
-        description: "The EE female earring embodies our signature aesthetic — refined minimalism with a statement edge. Crafted in black rhodium with bold dark finish, this piece features signature design for everyday elegance.",
+        description: "With the encaged-stone technique, the gem is allowed to move freely, capturing and reflecting light from as many angles as possible. From the depths of the ocean come cries for help we cannot hear.",
         availableDesign: {
             materials: ["E silver"],
             stones: ["White Topaz"],
@@ -268,13 +268,13 @@ window.EDELHART_PRODUCTS_CENTRAL = [
     },
     {
         slug: "earring-shell",
-        name: "Shell earring",
+        name: "The Soul Thief pendant",
         collection: "SSS",
         priceVND: 2518000,
         finalPriceVND: 2518000,
         sale: null,
         images: Array.from({ length: 2 }, (_, i) => `img/products/Earring-shell/Earring-shell-${i + 1}.jpeg`),
-        description: "Soul Thief — sea-inspired form with organic, fluid silhouette.",
+        description: "The shell and the little hermit to interlock or stand alone, allowing you to wear them as one pendant or as two separate pieces.",
         availableDesign: {
             materials: [],
             stones: [],
@@ -297,7 +297,7 @@ window.EDELHART_PRODUCTS_CENTRAL = [
         finalPriceVND: 5107000,
         sale: null,
         images: Array.from({ length: 5 }, (_, i) => `img/products/earring-blue-gem/earring-blue-gem-${i + 1}.jpeg`),
-        description: "The FOTO earring embodies our signature aesthetic — refined minimalism with a statement edge. Crafted with icy blue focal stone, this piece is unique for statement wear.",
+        description: "Each coral branch is hand-carved by the artisan, creating a natural, organic texture. Small blue and white topaz stones are delicately set along the branches, resembling light filtering through the ocean. The branches curve around the central blue stone as if trying to hold onto the deep sea itself.\n",
         availableDesign: {
             materials: ["E silver"],
             stones: ["London Topaz"],
@@ -320,7 +320,7 @@ window.EDELHART_PRODUCTS_CENTRAL = [
         finalPriceVND: 5645000,
         sale: null,
         images: Array.from({ length: 4 }, (_, i) => `img/products/ring-blue-gem/ring-blue-gem-${i + 1}.jpeg`),
-        description: "The FOTO ring embodies our signature aesthetic — refined minimalism with a statement edge. Crafted with sculpted band with blue gem, this piece is unique for statement wear.",
+        description: "Each coral branch is hand-carved by the artisan, creating a natural, organic texture. Small blue and white topaz stones are delicately set along the branches, resembling light filtering through the ocean. The branches curve around the central blue stone as if trying to hold onto the deep sea itself.\n",
         availableDesign: {
             materials: ["E silver"],
             stones: ["London Topaz"],
@@ -337,13 +337,13 @@ window.EDELHART_PRODUCTS_CENTRAL = [
     },
     {
         slug: "necklace-blue-gem",
-        name: "Blue gemstone necklace",
+        name: "FOTO necklace",
         collection: "SSS",
         priceVND: 15378000,
         finalPriceVND: 15378000,
         sale: null,
         images: Array.from({ length: 7 }, (_, i) => `img/products/necklace-blue-gem/necklace-blue-gem-${i + 1}.jpeg`),
-        description: "The Blue gemstone necklace — layer-friendly centerpiece with London Topaz.",
+        description: "Each coral branch is hand-carved by the artisan, creating a natural, organic texture. Small blue and white topaz stones are delicately set along the branches, resembling light filtering through the ocean. The branches curve around the central blue stone as if trying to hold onto the deep sea itself.\n",
         availableDesign: {
             materials: ["E silver"],
             stones: ["London Topaz"],
@@ -360,13 +360,13 @@ window.EDELHART_PRODUCTS_CENTRAL = [
     },
     {
         slug: "stingray-gold",
-        name: "Stingray — gold",
+        name: "The Magic Carpet necklace",
         collection: "SSS",
-        priceVND: 9612000,          // consultation until filled
+        priceVND: 9612000,
         finalPriceVND: 9612000,
         sale: null,
         images: Array.from({ length: 4 }, (_, i) => `img/products/stingray-gold/stingray-gold-${i + 1}.jpeg`),
-        description: "The Stingray — gold embodies our signature aesthetic — refined minimalism with a statement edge.",
+        description: "It is truly a magic carpet of the ocean, rendered in metal through the refined craftsmanship of our jewellers.",
         availableDesign: {
             materials: ["E silver"],
             stones: [],
@@ -389,7 +389,7 @@ window.EDELHART_PRODUCTS_CENTRAL = [
         finalPriceVND: 7426000,
         sale: null,
         images: Array.from({ length: 4 }, (_, i) => `img/products/ring-gold-multi-gems/ring-gold-multi-gems-${i + 1}.jpeg`),
-        description: "The Bluefall ring embodies our signature aesthetic — refined minimalism with a statement edge. Crafted with playful spectrum of stones.",
+        description: "Inspired by the gentle flow of a waterfall, Bluefall blends blue and white stones to create depth and a natural shimmer. The design combines flush-setting and prong-setting, allowing each stone to catch light from multiple angles. With its intentional mix of dense and open placements, the stones appear to cascade across the ring, forming a refined sense of movement.",
         availableDesign: {
             materials: ["E silver"],
             stones: ["White Topaz", "Blue Topaz"],
@@ -412,7 +412,7 @@ window.EDELHART_PRODUCTS_CENTRAL = [
         finalPriceVND: 6129000,
         sale: null,
         images: Array.from({ length: 2 }, (_, i) => `img/products/ring-chameleon/ring-chameleon-${i + 1}.jpeg`),
-        description: "The Chameleon ring embodies our signature aesthetic — refined minimalism with a statement edge. Crafted with changing, shifting contours.",
+        description: "Our signature “encaged stone” technique is carefully engineered so each stone remains visible while having the freedom to move and shimmer naturally. Every detail is refined to ensure the stone stays protected from scratches despite its continuous movement.",
         availableDesign: {
             materials: ["E silver"],
             stones: ["Sapphire", "Spinel"],
@@ -429,13 +429,13 @@ window.EDELHART_PRODUCTS_CENTRAL = [
     },
     {
         slug: "necklace-ants",
-        name: "Ants necklace",
+        name: "Whispering Artist necklace",
         collection: "WA",
         priceVND: 3909000,
         finalPriceVND: 3909000,
         sale: null,
         images: Array.from({ length: 6 }, (_, i) => `img/products/necklace-ants/necklace-ants-${i + 1}.jpeg`),
-        description: "The Ants necklace — rhythmic chain of tiny forms. Statement yet refined.",
+        description: "Inspired by the quiet dedication and passion of Edelhart’s goldsmiths — the ‘ants’ of our craft, tirelessly working not just for a living but to breathe life into the beauty we continually pursue.",
         availableDesign: {
             materials: ["E silver"],
             stones: ["Sapphire", "Spinel"],
