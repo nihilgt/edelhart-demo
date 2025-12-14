@@ -12,7 +12,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600&family=Signatura+Monoline+Script&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./css/styles.css">
-
+  <!-- FIX: Define base URL for app.js so it knows we are at root -->
+  <script>
+    window.__BASE_URL_OVERRIDE = new URL('./', location.href).href;
+  </script>
 </head>
 <body>
 <header id="site-header">
@@ -181,8 +184,7 @@
   </section>
 
   <script>
-    window.__BASE_URL_OVERRIDE = new URL('./', location.href).href;
-
+    /* Logic for flipbook */
     (() => {
       const images = [
         "img/products/sss-gold/sss-gold-1.jpeg",
