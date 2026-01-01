@@ -1,4 +1,11 @@
 (function () {
+  // ---- Data saver detection ----
+  const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  const DATA_SAVER =
+      (conn && (conn.saveData || /(^slow-2g|2g)$/i.test(conn.effectiveType || ''))) ||
+      false;
+  const AUTO_SLIDE_ALLOWED = !DATA_SAVER;
+
   // Detect base URL (works when site is served from a subfolder, e.g. /project/ or GitHub Pages)
   const SCRIPT_URL = (() => {
     try {
@@ -351,13 +358,14 @@
     window.addEventListener('resize', debounce(onResize, 100));
   }
 
-  /* Slide clock */
+  /* Slide clock (centralized timer) */
   const SlideClock = (() => {
     const interval = 7000;
     const listeners = new Set();
     let base = performance.now();
     let timer = 0;
     function scheduleNext() {
+      if (!AUTO_SLIDE_ALLOWED || listeners.size === 0) return;
       const now = performance.now();
       const elapsed = now - base;
       const remainder = interval - (elapsed % interval);
@@ -367,17 +375,40 @@
       listeners.forEach(fn => { try { fn(); } catch { } });
       scheduleNext();
     }
-    function start() { if (!timer) { base = performance.now(); scheduleNext(); } }
-    function stop() { if (timer) { clearTimeout(timer); timer = 0; } }
-    function subscribe(fn) { listeners.add(fn); }
-    function unsubscribe(fn) { listeners.delete(fn); }
+    function start() {
+      if (!AUTO_SLIDE_ALLOWED) return;
+      if (!timer && listeners.size) { base = performance.now(); scheduleNext(); }
+    }
+    function stop() {
+      if (timer) { clearTimeout(timer); timer = 0; }
+    }
+    function subscribe(fn) {
+      if (!AUTO_SLIDE_ALLOWED) return;
+      listeners.add(fn);
+      start();
+    }
+    function unsubscribe(fn) {
+      listeners.delete(fn);
+      if (!listeners.size) stop();
+    }
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) stop();
       else start();
     });
-    start();
     return { start, stop, subscribe, unsubscribe, interval };
   })();
+
+  /* Helper: enable hover/focus autoplay */
+  function enableHoverAutoplay(el, tickFn) {
+    if (!el || !tickFn || !AUTO_SLIDE_ALLOWED) return;
+    const play = () => SlideClock.subscribe(tickFn);
+    const stop = () => SlideClock.unsubscribe(tickFn);
+    el.addEventListener('mouseenter', play);
+    el.addEventListener('focusin', play);
+    el.addEventListener('mouseleave', stop);
+    el.addEventListener('focusout', stop);
+    stop(); // default paused
+  }
 
   const CACHE_KEY = 'edelhart:images:v5';
   const HANDOFF_KEY = 'edelhart:handoff:v2';
@@ -1002,7 +1033,7 @@
         img.src = src;
         img.alt = title;
         img.decoding = 'async';
-        img.loading = card.closest('.slider-strip[data-slider="recommended"]') ? 'lazy' : 'eager';
+        img.loading = 'lazy';
         slide.appendChild(img);
         slidesWrap.appendChild(slide);
       });
@@ -1054,8 +1085,8 @@
       });
 
       const api = {
-        paused: false,
-        inView: true,
+        paused: true,
+        inView: false,
         subscribed: false,
         pauseTimeout: null,
         subscribe() { if (!this.subscribed) { SlideClock.subscribe(tick); this.subscribed = true; } },
@@ -1109,11 +1140,15 @@
 
       media.classList.remove('show-controls');
 
-      card.addEventListener('mouseenter', () => { api.paused = true; api.updateSubscription(); });
-      card.addEventListener('mouseleave', () => { api.paused = false; api.updateSubscription(); });
+      card.addEventListener('mouseenter', () => { api.paused = false; api.updateSubscription(); });
+      card.addEventListener('mouseleave', () => { api.paused = true; api.updateSubscription(); });
 
       if (io) io.observe(media);
       render();
+
+      // Hover/focus gated autoplay
+      enableHoverAutoplay(media, () => { if (!api.paused && api.inView) render(go(idx + 1)); });
+      api.updateSubscription(); // will stay paused until hover
     });
 
     if (Object.keys(imagesMap).length) {
@@ -1281,9 +1316,11 @@
 
         function updateClockSubscription() {
           SlideClock.unsubscribe(tick);
+          if (!AUTO_SLIDE_ALLOWED) return;
           if (inView && slides.length > 1) SlideClock.subscribe(tick);
         }
 
+        enableHoverAutoplay(container, tick);
         return;
       }
 
@@ -1308,6 +1345,7 @@
 
       function updateClockSubscription() {
         SlideClock.unsubscribe(tick);
+        if (!AUTO_SLIDE_ALLOWED) return;
         if (hasOverflow() && inView) SlideClock.subscribe(tick);
       }
 
@@ -1359,6 +1397,8 @@
         updateTransformIndicator(track, indicator, slides.length, idx);
         updateClockSubscription();
       });
+
+      enableHoverAutoplay(container, tick);
     });
   }
 
@@ -1415,7 +1455,7 @@
         img.src = src;
         img.alt = `Product image ${i + 1}`;
         img.decoding = 'async';
-        img.loading = 'eager';
+        img.loading = 'lazy';
         slide.appendChild(img);
         slidesWrap.appendChild(slide);
       });
@@ -1543,7 +1583,7 @@
     if (prev) prev.addEventListener('click', () => { go(idx - 1); gallery.classList.add('show-controls'); });
     if (next) next.addEventListener('click', () => { go(idx + 1); gallery.classList.add('show-controls'); });
 
-    let startX = 0, dist = 0, dragging = false, paused = false, inView = true;
+    let startX = 0, dist = 0, dragging = false, paused = true, inView = false;
     function onStart(e) {
       dragging = true;
       startX = 'touches' in e ? e.touches[0].clientX : e.clientX;
@@ -1564,7 +1604,7 @@
         if (dist < 0) go(idx + 1);
         else go(idx - 1);
       }
-      paused = false;
+      paused = true;
       updateClockSub();
     }
     slidesWrap.addEventListener('mousedown', onStart);
@@ -1573,8 +1613,8 @@
     slidesWrap.addEventListener('touchstart', onStart, scrollOptions);
     window.addEventListener('touchmove', onMove, scrollOptions);
     window.addEventListener('touchend', onEnd);
-    gallery.addEventListener('mouseenter', () => { paused = true; updateClockSub(); });
-    gallery.addEventListener('mouseleave', () => { paused = false; updateClockSub(); });
+    gallery.addEventListener('mouseenter', () => { paused = false; updateClockSub(); });
+    gallery.addEventListener('mouseleave', () => { paused = true; updateClockSub(); });
 
     const io =
         'IntersectionObserver' in window
@@ -1596,9 +1636,11 @@
     const tick = () => { if (total > 1 && !paused && inView) go(idx + 1); };
     function updateClockSub() {
       SlideClock.unsubscribe(tick);
+      if (!AUTO_SLIDE_ALLOWED) return;
       if (!paused && inView && total > 1) SlideClock.subscribe(tick);
     }
 
+    enableHoverAutoplay(gallery, tick);
     buildFromImages(images);
   }
 
@@ -1746,6 +1788,7 @@
     const tick = () => { if (inView && hasOverflow()) go(idx + 1); };
     function update() {
       SlideClock.unsubscribe(tick);
+      if (!AUTO_SLIDE_ALLOWED) return;
       if (hasOverflow() && inView) SlideClock.subscribe(tick);
     }
     window.addEventListener('resize', debounce(() => {
@@ -1770,6 +1813,8 @@
       );
       update();
     });
+
+    enableHoverAutoplay(relatedStrip, tick);
   }
 
   function initRelatedInnerSliders() {
@@ -1973,7 +2018,7 @@
     if (io) io.observe(strip);
 
     const tick = () => { if (inView) go(idx + 1); };
-    SlideClock.subscribe(tick);
+    enableHoverAutoplay(strip, tick); // autoplay only on hover/focus
     render();
   }
 
@@ -2057,13 +2102,20 @@
         '#home img, .collection-card img, .media img, .featured-track img, .collage-surround img'
     );
     critical.forEach(img => {
-      if (img.loading === 'lazy') img.loading = 'eager';
-      img.decoding = 'async';
-      try { if (!img.fetchPriority) img.fetchPriority = 'high'; } catch { }
+      // For data saver we keep lazy; otherwise keep existing eager defaults
+      if (!DATA_SAVER) {
+        if (img.loading === 'lazy') img.loading = 'eager';
+        img.decoding = 'async';
+        try { if (!img.fetchPriority) img.fetchPriority = 'high'; } catch { }
+      } else {
+        img.loading = 'lazy';
+        try { img.fetchPriority = 'low'; } catch {}
+      }
     });
   }
 
   function warmFirstImages() {
+    if (DATA_SAVER) return;
     const urls = new Set();
     const addSrc = img => {
       if (!img) return;
@@ -2081,6 +2133,7 @@
   }
 
   function prewarmAllProductImages() {
+    if (DATA_SAVER) return;
     const seen = new Set();
     if (PRODUCTS.length) {
       PRODUCTS.forEach(p => {
