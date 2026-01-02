@@ -1,0 +1,40 @@
+/* Strict Desktop Layout */
+@media (min-width: 900px) {
+    .mode-toggle {
+        display: none !important;
+    }
+
+    body.mode-available .bespoke-section,
+    body.mode-bespoke .available-section {
+        display: block !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        visibility: visible !important;
+    }
+
+    .container {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        max-width: 1400px;
+        margin: 0 auto;
+        gap: 2rem;
+        padding: 2rem;
+    }
+
+    .available-section,
+    .bespoke-section {
+        flex: 1;
+        display: block !important;
+        position: relative !important;
+        transform: none !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    /* Ensure header spans full width if outside container, or adjust if inside */
+    header {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+}
